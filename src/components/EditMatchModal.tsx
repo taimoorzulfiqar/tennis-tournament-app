@@ -32,8 +32,8 @@ const EditMatchModal: React.FC<EditMatchModalProps> = ({ match, isOpen, onClose,
       tiebreak_at: 6
     },
     detailed_score: {
-      player1_sets: [] as (number | null)[],
-      player2_sets: [] as (number | null)[]
+      player1_sets: Array(3).fill(null) as (number | null)[],
+      player2_sets: Array(3).fill(null) as (number | null)[]
     }
   })
 
@@ -138,7 +138,10 @@ const EditMatchModal: React.FC<EditMatchModalProps> = ({ match, isOpen, onClose,
     setFormData(prev => ({
       ...prev,
       match_format: { ...prev.match_format, [field]: value },
-      detailed_score: { player1_sets: [], player2_sets: [] } // Reset scores when format changes
+      detailed_score: { 
+        player1_sets: Array(value).fill(null), 
+        player2_sets: Array(value).fill(null) 
+      } // Reset scores when format changes
     }))
   }
 
@@ -187,7 +190,16 @@ const EditMatchModal: React.FC<EditMatchModalProps> = ({ match, isOpen, onClose,
       player1_score: match.player1_score,
       player2_score: match.player2_score,
       status: match.status,
-      court: match.court
+      court: match.court,
+      match_format: {
+        sets: 3,
+        games_per_set: 6,
+        tiebreak_at: 6
+      },
+      detailed_score: {
+        player1_sets: Array(3).fill(null) as (number | null)[],
+        player2_sets: Array(3).fill(null) as (number | null)[]
+      }
     })
   }, [match])
 

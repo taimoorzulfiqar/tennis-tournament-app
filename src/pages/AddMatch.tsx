@@ -53,8 +53,8 @@ const AddMatch: React.FC = () => {
       tiebreak_at: 6
     },
     detailed_score: {
-      player1_sets: [],
-      player2_sets: []
+      player1_sets: Array(3).fill(null),
+      player2_sets: Array(3).fill(null)
     }
   })
 
@@ -164,7 +164,10 @@ const AddMatch: React.FC = () => {
     setMatch(prev => ({
       ...prev,
       match_format: { ...prev.match_format, [field]: value },
-      detailed_score: { player1_sets: [], player2_sets: [] } // Reset scores when format changes
+      detailed_score: { 
+        player1_sets: Array(value).fill(null), 
+        player2_sets: Array(value).fill(null) 
+      } // Reset scores when format changes
     }))
   }
 
