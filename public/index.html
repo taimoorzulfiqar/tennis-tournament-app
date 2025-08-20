@@ -144,24 +144,32 @@
         }
       }, 15000);
 
-      // Try to find and load the main script
-      function loadMainScript() {
-        const scripts = document.querySelectorAll('script[src*="entry"]');
-        if (scripts.length > 0) {
-          const mainScript = scripts[0];
-          if (mainScript.src && !mainScript.type) {
-            mainScript.type = 'module';
-            console.log('Set script type to module:', mainScript.src);
+      // Enhanced script loading with module type detection
+      function fixScriptTypes() {
+        const scripts = document.querySelectorAll('script[src]');
+        scripts.forEach(script => {
+          if (script.src && script.src.includes('entry') && !script.type) {
+            script.type = 'module';
+            console.log('Set script type to module:', script.src);
           }
-        }
+          // Also fix any script with import.meta in the URL
+          if (script.src && script.src.includes('import.meta') && !script.type) {
+            script.type = 'module';
+            console.log('Set import.meta script to module:', script.src);
+          }
+        });
       }
 
       // Run after DOM is loaded
       if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', loadMainScript);
+        document.addEventListener('DOMContentLoaded', fixScriptTypes);
       } else {
-        loadMainScript();
+        fixScriptTypes();
       }
+
+      // Also run after a delay to catch dynamically added scripts
+      setTimeout(fixScriptTypes, 1000);
+      setTimeout(fixScriptTypes, 3000);
     </script>
   </body>
 </html>
