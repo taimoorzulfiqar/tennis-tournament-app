@@ -36,6 +36,9 @@ const Leaderboard: React.FC = () => {
   const calculateLeaderboard = () => {
     if (!allMatches || !players) return []
 
+    console.log('Leaderboard Debug - All matches:', allMatches)
+    console.log('Leaderboard Debug - Players:', players)
+
     const playerStats: { [key: string]: { gamesWon: number, matchesPlayed: number } } = {}
 
     // Initialize player stats
@@ -43,9 +46,12 @@ const Leaderboard: React.FC = () => {
       playerStats[player.id] = { gamesWon: 0, matchesPlayed: 0 }
     })
 
-    // Calculate games won from completed matches
+    // Calculate games won from matches that have scores recorded
     allMatches.forEach(match => {
-      if (match.status === 'completed') {
+      console.log(`Leaderboard Debug - Match ${match.id}: status=${match.status}, player1_score=${match.player1_score}, player2_score=${match.player2_score}`)
+      
+      // Include matches that have scores recorded (not just completed ones)
+      if (match.player1_score > 0 || match.player2_score > 0) {
         // Add games won by each player
         if (playerStats[match.player1_id]) {
           playerStats[match.player1_id].gamesWon += match.player1_score
@@ -57,6 +63,8 @@ const Leaderboard: React.FC = () => {
         }
       }
     })
+
+    console.log('Leaderboard Debug - Player stats:', playerStats)
 
     // Convert to array and sort by games won
     return Object.entries(playerStats)
@@ -90,6 +98,28 @@ const Leaderboard: React.FC = () => {
         <h1 style={{ fontSize: '32px', fontWeight: 'bold', color: 'var(--primary-color)', marginBottom: '24px' }}>
           Leaderboard
         </h1>
+
+        {/* Debug Information */}
+        <div className="card" style={{ marginBottom: '20px', backgroundColor: '#f8f9fa' }}>
+          <h3 style={{ fontSize: '16px', fontWeight: 'bold', color: '#666', margin: '0 0 12px 0' }}>
+            Debug Information
+          </h3>
+          <div style={{ fontSize: '14px', color: '#666' }}>
+            <p><strong>Total Matches:</strong> {allMatches?.length || 0}</p>
+            <p><strong>Total Players:</strong> {players?.length || 0}</p>
+            <p><strong>Leaderboard Entries:</strong> {leaderboard?.length || 0}</p>
+            {allMatches && allMatches.length > 0 && (
+              <div style={{ marginTop: '8px' }}>
+                <p><strong>Match Statuses:</strong></p>
+                <ul style={{ margin: '4px 0', paddingLeft: '20px' }}>
+                  {Array.from(new Set(allMatches.map(m => m.status))).map(status => (
+                    <li key={status}>{status}: {allMatches.filter(m => m.status === status).length} matches</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        </div>
 
         {leaderboard && leaderboard.length > 0 ? (
           <div className="card">
