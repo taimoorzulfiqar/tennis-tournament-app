@@ -97,6 +97,10 @@
           console.log('Message channel error detected, continuing...');
           return;
         }
+        if (e.error && e.error.message && e.error.message.includes('import.meta')) {
+          console.log('Import.meta error detected, continuing...');
+          return;
+        }
       });
 
       // Handle unhandled promise rejections
@@ -104,6 +108,11 @@
         console.error('Unhandled promise rejection:', e.reason);
         if (e.reason && e.reason.message && e.reason.message.includes('message channel')) {
           console.log('Message channel rejection detected, continuing...');
+          e.preventDefault();
+          return;
+        }
+        if (e.reason && e.reason.message && e.reason.message.includes('import.meta')) {
+          console.log('Import.meta rejection detected, continuing...');
           e.preventDefault();
           return;
         }
