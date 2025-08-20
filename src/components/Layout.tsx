@@ -42,7 +42,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       {/* Header */}
       <header style={{
-        background: 'linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%)',
+        background: '#1a1a1a',
         color: 'white',
         padding: '12px 16px',
         boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
