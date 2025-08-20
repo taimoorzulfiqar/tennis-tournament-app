@@ -32,12 +32,9 @@ const Leaderboard: React.FC = () => {
     return player?.full_name || player?.email || 'Unknown Player'
   }
 
-  // Calculate leaderboard based on games won
+  // Calculate leaderboard based on games won from completed matches only
   const calculateLeaderboard = () => {
     if (!allMatches || !players) return []
-
-    console.log('Leaderboard Debug - All matches:', allMatches)
-    console.log('Leaderboard Debug - Players:', players)
 
     const playerStats: { [key: string]: { gamesWon: number, matchesPlayed: number } } = {}
 
@@ -46,12 +43,9 @@ const Leaderboard: React.FC = () => {
       playerStats[player.id] = { gamesWon: 0, matchesPlayed: 0 }
     })
 
-    // Calculate games won from matches that have scores recorded
+    // Calculate games won from completed matches only
     allMatches.forEach(match => {
-      console.log(`Leaderboard Debug - Match ${match.id}: status=${match.status}, player1_score=${match.player1_score}, player2_score=${match.player2_score}`)
-      
-      // Include matches that have scores recorded (not just completed ones)
-      if (match.player1_score > 0 || match.player2_score > 0) {
+      if (match.status === 'completed' && (match.player1_score > 0 || match.player2_score > 0)) {
         // Add games won by each player
         if (playerStats[match.player1_id]) {
           playerStats[match.player1_id].gamesWon += match.player1_score
@@ -63,8 +57,6 @@ const Leaderboard: React.FC = () => {
         }
       }
     })
-
-    console.log('Leaderboard Debug - Player stats:', playerStats)
 
     // Convert to array and sort by games won
     return Object.entries(playerStats)
@@ -99,15 +91,14 @@ const Leaderboard: React.FC = () => {
           Leaderboard
         </h1>
 
-        {/* Debug Information */}
+        {/* Information */}
         <div className="card" style={{ marginBottom: '20px', backgroundColor: '#f8f9fa' }}>
           <h3 style={{ fontSize: '16px', fontWeight: 'bold', color: '#666', margin: '0 0 12px 0' }}>
-            Debug Information
+            Information
           </h3>
           <div style={{ fontSize: '14px', color: '#666' }}>
             <p><strong>Total Matches:</strong> {allMatches?.length || 0}</p>
             <p><strong>Total Players:</strong> {players?.length || 0}</p>
-            <p><strong>Leaderboard Entries:</strong> {leaderboard?.length || 0}</p>
             {allMatches && allMatches.length > 0 && (
               <div style={{ marginTop: '8px' }}>
                 <p><strong>Match Statuses:</strong></p>
@@ -124,7 +115,7 @@ const Leaderboard: React.FC = () => {
         {leaderboard && leaderboard.length > 0 ? (
           <div className="card">
             <h2 style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--primary-color)', margin: '0 0 20px 0' }}>
-              Player Rankings (Based on Games Won)
+              Player Rankings (Based on Completed Matches)
             </h2>
             <div style={{ display: 'grid', gap: '12px' }}>
               {leaderboard.map((entry, index) => (
