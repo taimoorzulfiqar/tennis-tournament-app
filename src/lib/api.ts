@@ -13,7 +13,7 @@ export const authAPI = {
 
     if (!data.user) throw new Error('Failed to create user')
 
-    // Create profile
+    // Create profile with proper error handling
     const { error: profileError } = await supabase
       .from('profiles')
       .insert({
@@ -24,7 +24,12 @@ export const authAPI = {
         verification_status: role === 'admin' ? 'pending' : 'approved'
       })
 
-    if (profileError) throw profileError
+    if (profileError) {
+      console.error('Profile creation error:', profileError)
+      // If profile creation fails, we should clean up the auth user
+      // However, this requires admin privileges, so we'll just throw the error
+      throw new Error(`Failed to create profile: ${profileError.message}`)
+    }
 
     return {
       id: data.user.id,

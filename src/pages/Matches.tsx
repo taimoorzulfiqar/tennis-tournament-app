@@ -215,30 +215,30 @@ const Matches: React.FC = () => {
       )}
 
       {/* Mobile-specific styles */}
-      <style jsx>{`
+      <style>{`
         @media (max-width: 768px) {
           .match-card {
-            margin: 0;
-            padding: 16px;
+            margin: 0 !important;
+            padding: 16px !important;
           }
           
           .card-header {
-            flex-direction: column;
-            gap: 8px;
-            text-align: center;
+            flex-direction: column !important;
+            gap: 8px !important;
+            text-align: center !important;
           }
         }
         
         @media (min-width: 769px) {
           .match-card {
-            margin: 0;
-            padding: 20px;
+            margin: 0 !important;
+            padding: 20px !important;
           }
           
           .card-header {
-            flex-direction: row;
-            justify-content: space-between;
-            align-items: center;
+            flex-direction: row !important;
+            justify-content: space-between !important;
+            align-items: center !important;
           }
         }
       `}</style>

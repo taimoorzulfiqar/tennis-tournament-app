@@ -1,0 +1,7 @@
+[33mcommit 28324832c16a98226aba683fa2e805cbab478c4c[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmaster[m[33m, [m[1;31morigin/master[m[33m)[m
+Author: taimoorzulfiqar <taimoorzulfiqar97@gmail.com>
+Date:   Wed Aug 20 10:11:09 2025 -0700
+
+    Update matches page to use grid layout with smaller cards
+
+src/pages/Matches.tsx
