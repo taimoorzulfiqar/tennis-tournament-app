@@ -29,11 +29,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     { path: '/profile', label: 'Profile', icon: '👤' },
   ]
 
-  // Add admin nav item only for approved admins and master users
-  if (user && (
-    user.role === 'master' || 
-    (user.role === 'admin' && user.verification_status === 'approved')
-  )) {
+  // Add admin nav item only for master users
+  if (user && user.role === 'master') {
     navItems.push({ path: '/admin', label: 'Admin', icon: '⚙️' })
   }
 

@@ -14,12 +14,9 @@ const Admin: React.FC = () => {
 
   // Redirect if user is not authorized to access admin panel
   React.useEffect(() => {
-    if (user && !(
-      user.role === 'master' || 
-      (user.role === 'admin' && user.verification_status === 'approved')
-    )) {
+    if (user && user.role !== 'master') {
       navigate('/')
-      alert('Access denied. Only approved admins and master users can access the admin panel.')
+      alert('Access denied. Only master users can access the admin panel.')
     }
   }, [user, navigate])
   const [newUser, setNewUser] = useState({
