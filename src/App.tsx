@@ -8,6 +8,7 @@ import TournamentDetails from './pages/TournamentDetails'
 import EditTournament from './pages/EditTournament'
 import Leaderboard from './pages/Leaderboard'
 import Matches from './pages/Matches'
+import Players from './pages/Players'
 import Profile from './pages/Profile'
 import Admin from './pages/Admin'
 import LoadingScreen from './components/LoadingScreen'
@@ -35,6 +36,7 @@ function App() {
       <Route path="/create-tournament" element={<CreateTournament />} />
       <Route path="/tournament/:id" element={<TournamentDetails />} />
       <Route path="/edit-tournament/:id" element={<EditTournament />} />
+      <Route path="/players" element={<Players />} />
       <Route path="/leaderboard" element={<Leaderboard />} />
       <Route path="/matches" element={<Matches />} />
       <Route path="/profile" element={<Profile />} />
