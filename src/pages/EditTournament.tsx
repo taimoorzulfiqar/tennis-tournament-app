@@ -201,6 +201,12 @@ const EditTournament: React.FC = () => {
   const updateMatch = (index: number, field: keyof Match, value: any) => {
     const updatedMatches = [...matches]
     updatedMatches[index] = { ...updatedMatches[index], [field]: value }
+    
+    // If Player 1 is being changed and it matches the current Player 2, clear Player 2
+    if (field === 'player1_id' && value === matches[index].player2_id) {
+      updatedMatches[index].player2_id = ''
+    }
+    
     setMatches(updatedMatches)
   }
 
@@ -362,7 +368,7 @@ const EditTournament: React.FC = () => {
                       required
                     >
                       <option value="">Select Player 2</option>
-                      {players?.map((player) => {
+                      {players?.filter(player => player.id !== match.player1_id).map((player) => {
                         console.log('EditTournament: Rendering player option:', player)
                         return (
                           <option key={player.id} value={player.id}>

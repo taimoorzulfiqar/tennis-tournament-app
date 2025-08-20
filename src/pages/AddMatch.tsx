@@ -157,7 +157,16 @@ const AddMatch: React.FC = () => {
   }
 
   const handleInputChange = (field: keyof Match, value: any) => {
-    setMatch(prev => ({ ...prev, [field]: value }))
+    setMatch(prev => {
+      const newMatch = { ...prev, [field]: value }
+      
+      // If Player 1 is being changed and it matches the current Player 2, clear Player 2
+      if (field === 'player1_id' && value === prev.player2_id) {
+        newMatch.player2_id = ''
+      }
+      
+      return newMatch
+    })
   }
 
   const handleFormatChange = (field: keyof Match['match_format'], value: number) => {
@@ -336,7 +345,7 @@ const AddMatch: React.FC = () => {
                   required
                 >
                   <option value="">Select Player 2</option>
-                  {players?.map((player) => (
+                  {players?.filter(player => player.id !== match.player1_id).map((player) => (
                     <option key={player.id} value={player.id}>
                       {player.full_name}
                     </option>
