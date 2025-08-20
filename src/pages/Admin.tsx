@@ -37,6 +37,8 @@ const Admin: React.FC = () => {
   const deleteUserMutation = useMutation({
     mutationFn: userAPI.deleteUser,
     onSuccess: () => {
+      // Force refetch the users data
+      refetch()
       queryClient.invalidateQueries({ queryKey: ['users'] })
       alert('User deleted successfully!')
     },
@@ -49,6 +51,8 @@ const Admin: React.FC = () => {
     mutationFn: ({ userId, status }: { userId: string; status: 'pending' | 'approved' | 'rejected' }) =>
       userAPI.updateVerificationStatus(userId, { verification_status: status }),
     onSuccess: () => {
+      // Force refetch the users data
+      refetch()
       queryClient.invalidateQueries({ queryKey: ['users'] })
       alert('Verification status updated successfully!')
     },
@@ -146,14 +150,23 @@ const Admin: React.FC = () => {
           <h1 style={{ fontSize: '32px', fontWeight: 'bold', color: 'var(--primary-color)', margin: 0 }}>
             Admin Panel
           </h1>
-          {user?.role === 'master' && (
+          <div style={{ display: 'flex', gap: '12px' }}>
             <button
-              onClick={() => setShowCreateModal(true)}
-              className="btn btn-primary"
+              onClick={() => refetch()}
+              className="btn btn-secondary"
+              disabled={isLoading}
             >
-              👤 Add User
+              🔄 Refresh
             </button>
-          )}
+            {user?.role === 'master' && (
+              <button
+                onClick={() => setShowCreateModal(true)}
+                className="btn btn-primary"
+              >
+                👤 Add User
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Stats Cards */}

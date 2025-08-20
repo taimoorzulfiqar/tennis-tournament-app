@@ -388,6 +388,8 @@ export const userAPI = {
   },
 
   updateVerificationStatus: async (userId: string, status: UpdateVerificationStatusDTO): Promise<User> => {
+    console.log('API: Updating verification status for user:', userId, 'to:', status)
+    
     const { data, error } = await supabase
       .from('profiles')
       .update(status)
@@ -395,7 +397,12 @@ export const userAPI = {
       .select()
       .single()
 
-    if (error) throw new Error(error.message)
+    if (error) {
+      console.error('API: Error updating verification status:', error)
+      throw new Error(error.message)
+    }
+
+    console.log('API: Verification status updated successfully:', data)
     return data
   },
 
