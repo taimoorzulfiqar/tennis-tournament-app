@@ -28,8 +28,6 @@ export interface Match {
   games_per_set?: number
   sets_per_match?: number
   court?: string
-  player1_score: number
-  player2_score: number
   winner_id?: string
   status: 'scheduled' | 'in_progress' | 'completed'
   created_at: string
@@ -43,6 +41,7 @@ export interface MatchSet {
   set_number: number
   player1_games: number
   player2_games: number
+  winner_id?: string
   created_at: string
 }
 

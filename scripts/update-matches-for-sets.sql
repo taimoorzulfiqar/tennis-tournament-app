@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS match_sets (
   set_number INTEGER NOT NULL CHECK (set_number > 0),
   player1_games INTEGER DEFAULT 0 CHECK (player1_games >= 0),
   player2_games INTEGER DEFAULT 0 CHECK (player2_games >= 0),
+  winner_id UUID REFERENCES profiles(id),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   UNIQUE(match_id, set_number)
 );
@@ -67,15 +68,15 @@ BEGIN
   -- Get match details
   SELECT * INTO match_record FROM matches WHERE id = match_uuid;
   
-  -- Count sets won by each player
+  -- Count sets won by each player based on winner_id
   FOR set_record IN 
     SELECT * FROM match_sets 
     WHERE match_id = match_uuid 
     ORDER BY set_number
   LOOP
-    IF set_record.player1_games > set_record.player2_games THEN
+    IF set_record.winner_id = match_record.player1_id THEN
       player1_sets_won := player1_sets_won + 1;
-    ELSIF set_record.player2_games > set_record.player1_games THEN
+    ELSIF set_record.winner_id = match_record.player2_id THEN
       player2_sets_won := player2_sets_won + 1;
     END IF;
   END LOOP;
@@ -92,6 +93,44 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+-- Create a function to determine set winner based on games
+CREATE OR REPLACE FUNCTION determine_set_winner(set_uuid UUID)
+RETURNS UUID AS $$
+DECLARE
+  set_record RECORD;
+  match_record RECORD;
+BEGIN
+  -- Get set details
+  SELECT * INTO set_record FROM match_sets WHERE id = set_uuid;
+  
+  -- Get match details
+  SELECT * INTO match_record FROM matches WHERE id = set_record.match_id;
+  
+  -- Determine set winner based on games won
+  IF set_record.player1_games > set_record.player2_games THEN
+    RETURN match_record.player1_id;
+  ELSIF set_record.player2_games > set_record.player1_games THEN
+    RETURN match_record.player2_id;
+  ELSE
+    -- If games are tied, return null (no winner)
+    RETURN NULL;
+  END IF;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Create a function to update set winner when games are updated
+CREATE OR REPLACE FUNCTION update_set_winner()
+RETURNS TRIGGER AS $$
+BEGIN
+  -- Update the winner_id in the match_sets table
+  UPDATE match_sets 
+  SET winner_id = determine_set_winner(NEW.id)
+  WHERE id = NEW.id;
+  
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
 -- Create a function to update match winner when sets are updated
 CREATE OR REPLACE FUNCTION update_match_winner()
 RETURNS TRIGGER AS $$
@@ -105,7 +144,13 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Create trigger to automatically update winner when sets are modified
+-- Create trigger to automatically update set winner when games are modified
+CREATE TRIGGER trigger_update_set_winner
+  AFTER INSERT OR UPDATE ON match_sets
+  FOR EACH ROW
+  EXECUTE FUNCTION update_set_winner();
+
+-- Create trigger to automatically update match winner when sets are modified
 CREATE TRIGGER trigger_update_match_winner
   AFTER INSERT OR UPDATE OR DELETE ON match_sets
   FOR EACH ROW

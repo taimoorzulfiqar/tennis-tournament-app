@@ -98,8 +98,8 @@ export interface Database {
           player1_id: string
           player2_id: string
           court: string | null
-          player1_score: number
-          player2_score: number
+          games_per_set: number
+          sets_per_match: number
           winner_id: string | null
           status: 'scheduled' | 'in_progress' | 'completed'
           created_at: string
@@ -111,8 +111,8 @@ export interface Database {
           player1_id: string
           player2_id: string
           court?: string | null
-          player1_score?: number
-          player2_score?: number
+          games_per_set?: number
+          sets_per_match?: number
           winner_id?: string | null
           status?: 'scheduled' | 'in_progress' | 'completed'
           created_at?: string
@@ -124,12 +124,41 @@ export interface Database {
           player1_id?: string
           player2_id?: string
           court?: string | null
-          player1_score?: number
-          player2_score?: number
+          games_per_set?: number
+          sets_per_match?: number
           winner_id?: string | null
           status?: 'scheduled' | 'in_progress' | 'completed'
           created_at?: string
           updated_at?: string
+        }
+      }
+      match_sets: {
+        Row: {
+          id: string
+          match_id: string
+          set_number: number
+          player1_games: number
+          player2_games: number
+          winner_id: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          match_id: string
+          set_number: number
+          player1_games?: number
+          player2_games?: number
+          winner_id?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          match_id?: string
+          set_number?: number
+          player1_games?: number
+          player2_games?: number
+          winner_id?: string | null
+          created_at?: string
         }
       }
     }
@@ -145,6 +174,12 @@ export interface Database {
           matches_played: number
           rank: number
         }[]
+      }
+      determine_match_winner: {
+        Args: {
+          match_uuid: string
+        }
+        Returns: string | null
       }
     }
   }

@@ -197,10 +197,7 @@ export const matchAPI = {
   getMatches: async (tournamentId?: string): Promise<MatchWithSets[]> => {
     let query = supabase
       .from('matches')
-      .select(`
-        *,
-        match_sets (*)
-      `)
+      .select('*')
       .order('created_at', { ascending: true })
 
     if (tournamentId) {
@@ -210,28 +207,44 @@ export const matchAPI = {
     const { data, error } = await query
     if (error) throw new Error(error.message)
     
-    // Transform the data to match our interface
-    return data.map((match: any) => ({
-      ...match,
-      sets: match.match_sets || []
-    }))
+    // Get sets for each match separately to avoid relationship issues
+    const matchesWithSets = await Promise.all(
+      data.map(async (match: any) => {
+        const { data: setsData } = await supabase
+          .from('match_sets')
+          .select('*')
+          .eq('match_id', match.id)
+          .order('set_number')
+        
+        return {
+          ...match,
+          sets: setsData || []
+        }
+      })
+    )
+    
+    return matchesWithSets
   },
 
   getMatch: async (id: string): Promise<MatchWithSets> => {
     const { data, error } = await supabase
       .from('matches')
-      .select(`
-        *,
-        match_sets (*)
-      `)
+      .select('*')
       .eq('id', id)
       .single()
 
     if (error) throw new Error(error.message)
     
+    // Get sets separately
+    const { data: setsData } = await supabase
+      .from('match_sets')
+      .select('*')
+      .eq('match_id', id)
+      .order('set_number')
+    
     return {
       ...data,
-      sets: data.match_sets || []
+      sets: setsData || []
     }
   },
 
@@ -242,8 +255,6 @@ export const matchAPI = {
       player1_id: match.player1_id,
       player2_id: match.player2_id,
       court: match.court,
-      player1_score: match.player1_score || 0,
-      player2_score: match.player2_score || 0,
       games_per_set: match.games_per_set || 6,
       sets_per_match: match.sets_per_match || 3,
       status: 'scheduled'
@@ -284,6 +295,7 @@ export const matchAPI = {
         set_number: set.set_number,
         player1_games: set.player1_games,
         player2_games: set.player2_games
+        // winner_id will be automatically calculated by the trigger
       }))
       
       const { error: insertError } = await supabase
@@ -301,10 +313,7 @@ export const matchAPI = {
       .from('matches')
       .update({ status: 'completed' })
       .eq('id', id)
-      .select(`
-        *,
-        match_sets (*)
-      `)
+      .select('*')
       .single()
 
     if (error) {
@@ -312,10 +321,17 @@ export const matchAPI = {
       throw new Error(error.message)
     }
     
+    // Get the updated sets
+    const { data: setsData } = await supabase
+      .from('match_sets')
+      .select('*')
+      .eq('match_id', id)
+      .order('set_number')
+    
     console.log('Match sets updated successfully:', data)
     return {
       ...data,
-      sets: data.match_sets || []
+      sets: setsData || []
     }
   },
 
