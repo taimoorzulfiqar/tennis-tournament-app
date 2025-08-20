@@ -11,7 +11,6 @@ interface Match {
   games_per_set: number
   sets_per_match: number
   court: string
-  start_time: string
   player1_score: string | number
   player2_score: string | number
   is_completed: boolean
@@ -49,7 +48,6 @@ const CreateTournament: React.FC = () => {
       games_per_set: 6,
       sets_per_match: 3,
       court: '',
-      start_time: '',
       player1_score: '',
       player2_score: '',
       is_completed: false
@@ -84,9 +82,6 @@ const CreateTournament: React.FC = () => {
       if (!createWithoutMatches) {
         // Then create all matches for the tournament
         for (const match of matches) {
-          // Ensure scheduled_time is properly formatted
-          const scheduledTime = new Date(match.start_time).toISOString()
-          
           await matchAPI.createMatch({
             tournament_id: createdTournament.id,
             player1_id: match.player1_id,
@@ -94,7 +89,6 @@ const CreateTournament: React.FC = () => {
             games_per_set: match.games_per_set || 6,
             sets_per_match: match.sets_per_match || 3,
             court: match.court,
-            scheduled_time: scheduledTime,
             player1_score: match.player1_score === '' ? 0 : Number(match.player1_score) || 0,
             player2_score: match.player2_score === '' ? 0 : Number(match.player2_score) || 0
           })
@@ -135,8 +129,8 @@ const CreateTournament: React.FC = () => {
       // Validate matches
       for (let i = 0; i < matches.length; i++) {
         const match = matches[i]
-        if (!match.player1_id || !match.player2_id || !match.court || !match.start_time) {
-          alert(`Please fill in all fields for match ${i + 1}`)
+        if (!match.player1_id || !match.player2_id) {
+          alert(`Please fill in all required fields for match ${i + 1}`)
           return
         }
         if (match.player1_id === match.player2_id) {
@@ -156,7 +150,6 @@ const CreateTournament: React.FC = () => {
        games_per_set: 6,
        sets_per_match: 3,
        court: '',
-       start_time: '',
        player1_score: '',
        player2_score: '',
        is_completed: false
@@ -368,29 +361,15 @@ const CreateTournament: React.FC = () => {
                     </div>
                   </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                    <div className="form-group">
-                      <label className="form-label">Court *</label>
-                      <input
-                        type="text"
-                        className="form-input"
-                        value={match.court}
-                        onChange={(e) => updateMatch(index, 'court', e.target.value)}
-                        placeholder="e.g., Court 1, Center Court"
-                        required
-                      />
-                    </div>
-
-                    <div className="form-group">
-                      <label className="form-label">Start Time *</label>
-                      <input
-                        type="datetime-local"
-                        className="form-input"
-                        value={match.start_time}
-                        onChange={(e) => updateMatch(index, 'start_time', e.target.value)}
-                        required
-                      />
-                    </div>
+                  <div className="form-group">
+                    <label className="form-label">Court</label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      value={match.court}
+                      onChange={(e) => updateMatch(index, 'court', e.target.value)}
+                      placeholder="e.g., Court 1, Center Court"
+                    />
                   </div>
 
                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>

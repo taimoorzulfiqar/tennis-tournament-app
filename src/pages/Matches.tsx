@@ -118,10 +118,7 @@ const Matches: React.FC = () => {
 
                 <div style={{ marginBottom: '12px' }}>
                   <p style={{ fontSize: '14px', color: '#666', margin: '4px 0' }}>
-                    <strong>Court:</strong> {match.court}
-                  </p>
-                  <p style={{ fontSize: '14px', color: '#666', margin: '4px 0' }}>
-                    <strong>Time:</strong> {new Date(match.scheduled_time).toLocaleString()}
+                    <strong>Court:</strong> {match.court || 'Not specified'}
                   </p>
                 </div>
 

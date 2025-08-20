@@ -11,7 +11,6 @@ interface EditMatchModalProps {
     games_per_set: number
     sets_per_match: number
     court: string
-    scheduled_time: string
     player1_score: number
     player2_score: number
     status: string
@@ -28,8 +27,7 @@ const EditMatchModal: React.FC<EditMatchModalProps> = ({ match, isOpen, onClose,
     player1_score: match.player1_score,
     player2_score: match.player2_score,
     status: match.status,
-    court: match.court,
-    scheduled_time: match.scheduled_time.split('T')[0] + 'T' + match.scheduled_time.split('T')[1].substring(0, 5)
+    court: match.court
   })
 
   const { data: players } = useQuery({
@@ -50,8 +48,7 @@ const EditMatchModal: React.FC<EditMatchModalProps> = ({ match, isOpen, onClose,
       const updates: any = {
         player1_score: formData.player1_score,
         player2_score: formData.player2_score,
-        court: formData.court,
-        scheduled_time: new Date(formData.scheduled_time).toISOString()
+        court: formData.court
       }
 
       // If status is being set to completed, use updateMatchScore to set winner_id
@@ -63,7 +60,6 @@ const EditMatchModal: React.FC<EditMatchModalProps> = ({ match, isOpen, onClose,
         // Update other fields separately
         await matchAPI.updateMatch(match.id, {
           court: formData.court,
-          scheduled_time: new Date(formData.scheduled_time).toISOString(),
           player1_id: match.player1_id,
           player2_id: match.player2_id,
           player1_score: formData.player1_score,
@@ -204,19 +200,7 @@ const EditMatchModal: React.FC<EditMatchModalProps> = ({ match, isOpen, onClose,
                 className="form-input"
                 value={formData.court}
                 onChange={(e) => setFormData({ ...formData, court: e.target.value })}
-                required
                 placeholder="Enter court name"
-              />
-            </div>
-
-            <div className="form-group">
-              <label className="form-label">Scheduled Time</label>
-              <input
-                type="datetime-local"
-                className="form-input"
-                value={formData.scheduled_time}
-                onChange={(e) => setFormData({ ...formData, scheduled_time: e.target.value })}
-                required
               />
             </div>
 

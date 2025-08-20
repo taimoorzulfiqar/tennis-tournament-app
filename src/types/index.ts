@@ -26,8 +26,7 @@ export interface Match {
   player2_id: string
   games_per_set?: number
   sets_per_match?: number
-  court: string
-  scheduled_time: string
+  court?: string
   player1_score: number
   player2_score: number
   winner_id?: string
@@ -73,8 +72,7 @@ export interface CreateMatchDTO {
   player2_id: string
   games_per_set?: number
   sets_per_match?: number
-  court: string
-  scheduled_time: string
+  court?: string
   player1_score?: number
   player2_score?: number
 }

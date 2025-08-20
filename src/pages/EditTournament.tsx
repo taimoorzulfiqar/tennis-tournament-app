@@ -12,7 +12,6 @@ interface Match {
   games_per_set: number
   sets_per_match: number
   court: string
-  start_time: string
   player1_score: string | number
   player2_score: string | number
   is_completed: boolean
@@ -91,7 +90,6 @@ const EditTournament: React.FC = () => {
          games_per_set: match.games_per_set || 6,
          sets_per_match: match.sets_per_match || 3,
          court: match.court,
-         start_time: match.scheduled_time.split('T')[0] + 'T' + match.scheduled_time.split('T')[1].substring(0, 5), // Convert to datetime-local format
          player1_score: match.player1_score || '',
          player2_score: match.player2_score || ''
        })))
@@ -117,7 +115,6 @@ const EditTournament: React.FC = () => {
              player1_id: match.player1_id,
              player2_id: match.player2_id,
              court: match.court,
-             start_time: match.start_time,
              player1_score: match.player1_score === '' ? 0 : Number(match.player1_score) || 0,
              player2_score: match.player2_score === '' ? 0 : Number(match.player2_score) || 0
            }
@@ -130,23 +127,16 @@ const EditTournament: React.FC = () => {
             matchUpdates.sets_per_match = match.sets_per_match
           }
           
-          // Ensure scheduled_time is properly formatted
-          matchUpdates.scheduled_time = new Date(match.start_time).toISOString()
-          
           await matchAPI.updateMatch(match.id, matchUpdates)
         } else {
           // Create new match
-          // Ensure scheduled_time is properly formatted
-          const scheduledTime = new Date(match.start_time).toISOString()
-          
-                     await matchAPI.createMatch({
-             tournament_id: id!,
-             player1_id: match.player1_id,
-             player2_id: match.player2_id,
-             games_per_set: match.games_per_set || 6,
-             sets_per_match: match.sets_per_match || 3,
-             court: match.court,
-             scheduled_time: scheduledTime,
+          await matchAPI.createMatch({
+            tournament_id: id!,
+            player1_id: match.player1_id,
+            player2_id: match.player2_id,
+            games_per_set: match.games_per_set || 6,
+            sets_per_match: match.sets_per_match || 3,
+            court: match.court,
              player1_score: match.player1_score === '' ? 0 : Number(match.player1_score) || 0,
              player2_score: match.player2_score === '' ? 0 : Number(match.player2_score) || 0
            })
@@ -177,8 +167,8 @@ const EditTournament: React.FC = () => {
     // Validate matches
     for (let i = 0; i < matches.length; i++) {
       const match = matches[i]
-      if (!match.player1_id || !match.player2_id || !match.court || !match.start_time) {
-        alert(`Please fill in all fields for match ${i + 1}`)
+      if (!match.player1_id || !match.player2_id) {
+        alert(`Please fill in all required fields for match ${i + 1}`)
         return
       }
       if (match.player1_id === match.player2_id) {
@@ -197,7 +187,6 @@ const EditTournament: React.FC = () => {
        games_per_set: 6,
        sets_per_match: 3,
        court: '',
-       start_time: '',
        player1_score: '',
        player2_score: ''
      }])
@@ -411,29 +400,15 @@ const EditTournament: React.FC = () => {
                   </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                  <div className="form-group">
-                    <label className="form-label">Court *</label>
-                    <input
-                      type="text"
-                      className="form-input"
-                      value={match.court}
-                      onChange={(e) => updateMatch(index, 'court', e.target.value)}
-                      placeholder="e.g., Court 1, Center Court"
-                      required
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label className="form-label">Start Time *</label>
-                    <input
-                      type="datetime-local"
-                      className="form-input"
-                      value={match.start_time}
-                      onChange={(e) => updateMatch(index, 'start_time', e.target.value)}
-                      required
-                    />
-                  </div>
+                <div className="form-group">
+                  <label className="form-label">Court</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    value={match.court}
+                    onChange={(e) => updateMatch(index, 'court', e.target.value)}
+                    placeholder="e.g., Court 1, Center Court"
+                  />
                 </div>
 
                                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
