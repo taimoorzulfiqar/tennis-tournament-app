@@ -24,8 +24,8 @@ interface EditMatchModalProps {
 const EditMatchModal: React.FC<EditMatchModalProps> = ({ match, isOpen, onClose, onSuccess }) => {
   const queryClient = useQueryClient()
   const [formData, setFormData] = useState({
-    player1_score: match.player1_score,
-    player2_score: match.player2_score,
+    player1_score: match.player1_score > 0 ? match.player1_score : '',
+    player2_score: match.player2_score > 0 ? match.player2_score : '',
     status: match.status,
     court: match.court
   })
@@ -51,26 +51,26 @@ const EditMatchModal: React.FC<EditMatchModalProps> = ({ match, isOpen, onClose,
 
   const updateMatchMutation = useMutation({
     mutationFn: async () => {
-      const updates: any = {
-        player1_score: formData.player1_score,
-        player2_score: formData.player2_score,
-        court: formData.court
-      }
+             const updates: any = {
+         player1_score: formData.player1_score === '' ? 0 : Number(formData.player1_score) || 0,
+         player2_score: formData.player2_score === '' ? 0 : Number(formData.player2_score) || 0,
+         court: formData.court
+       }
 
       // If status is being set to completed, use updateMatchScore to set winner_id
       if (formData.status === 'completed') {
-        await matchAPI.updateMatchScore(match.id, {
-          player1_score: formData.player1_score,
-          player2_score: formData.player2_score
-        })
+                 await matchAPI.updateMatchScore(match.id, {
+           player1_score: formData.player1_score === '' ? 0 : Number(formData.player1_score) || 0,
+           player2_score: formData.player2_score === '' ? 0 : Number(formData.player2_score) || 0
+         })
         // Update other fields separately
-        await matchAPI.updateMatch(match.id, {
-          court: formData.court,
-          player1_id: match.player1_id,
-          player2_id: match.player2_id,
-          player1_score: formData.player1_score,
-          player2_score: formData.player2_score
-        })
+                 await matchAPI.updateMatch(match.id, {
+           court: formData.court,
+           player1_id: match.player1_id,
+           player2_id: match.player2_id,
+           player1_score: formData.player1_score === '' ? 0 : Number(formData.player1_score) || 0,
+           player2_score: formData.player2_score === '' ? 0 : Number(formData.player2_score) || 0
+         })
       } else {
         // Update match details normally
         await matchAPI.updateMatch(match.id, updates)
@@ -223,26 +223,26 @@ const EditMatchModal: React.FC<EditMatchModalProps> = ({ match, isOpen, onClose,
             }} className="mobile-grid">
               <div className="form-group">
                 <label className="form-label">{getPlayerName(match.player1_id)} Score</label>
-                <input
-                  type="number"
-                  className="form-input"
-                  value={formData.player1_score}
-                  onChange={(e) => setFormData({ ...formData, player1_score: parseInt(e.target.value) || 0 })}
-                  min="0"
-                  placeholder="Enter score"
-                />
+                                 <input
+                   type="number"
+                   className="form-input"
+                   value={formData.player1_score}
+                   onChange={(e) => setFormData({ ...formData, player1_score: e.target.value === '' ? '' : parseInt(e.target.value) || 0 })}
+                   min="0"
+                   placeholder="Enter score"
+                 />
               </div>
 
               <div className="form-group">
                 <label className="form-label">{getPlayerName(match.player2_id)} Score</label>
-                <input
-                  type="number"
-                  className="form-input"
-                  value={formData.player2_score}
-                  onChange={(e) => setFormData({ ...formData, player2_score: parseInt(e.target.value) || 0 })}
-                  min="0"
-                  placeholder="Enter score"
-                />
+                                 <input
+                   type="number"
+                   className="form-input"
+                   value={formData.player2_score}
+                   onChange={(e) => setFormData({ ...formData, player2_score: e.target.value === '' ? '' : parseInt(e.target.value) || 0 })}
+                   min="0"
+                   placeholder="Enter score"
+                 />
               </div>
             </div>
 
