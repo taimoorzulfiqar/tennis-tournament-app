@@ -548,23 +548,22 @@ const EditMatchModal: React.FC<EditMatchModalProps> = ({ match, isOpen, onClose,
                        type="text"
                        inputMode="numeric"
                        pattern="[0-9]*"
-                       value={formData.detailed_score.player1_sets[setIndex] || ''}
-                       onChange={(e) => {
-                         const value = e.target.value.replace(/[^0-9]/g, '')
-                         handleSetScoreChange(setIndex, 'player1', value === '' ? null : parseInt(value))
-                       }}
-                       style={{
-                         width: '100%',
-                         padding: '8px',
-                         border: '2px solid #e0e0e0',
-                         borderRadius: '6px',
-                         fontSize: '14px',
-                         textAlign: 'center',
-                         transition: 'border-color 0.2s ease'
-                       }}
-                       onFocus={(e) => e.target.style.borderColor = 'var(--primary-color)'}
-                       onBlur={(e) => e.target.style.borderColor = '#e0e0e0'}
-                       placeholder="0"
+                                               value={formData.detailed_score.player1_sets[setIndex] || ''}
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/[^0-9]/g, '')
+                          handleSetScoreChange(setIndex, 'player1', value === '' ? null : parseInt(value))
+                        }}
+                        style={{
+                          width: '100%',
+                          padding: '8px',
+                          border: '2px solid #e0e0e0',
+                          borderRadius: '6px',
+                          fontSize: '14px',
+                          textAlign: 'center',
+                          transition: 'border-color 0.2s ease'
+                        }}
+                        onFocus={(e) => e.target.style.borderColor = 'var(--primary-color)'}
+                        onBlur={(e) => e.target.style.borderColor = '#e0e0e0'}
                      />
                   ))}
                 </div>
@@ -589,23 +588,22 @@ const EditMatchModal: React.FC<EditMatchModalProps> = ({ match, isOpen, onClose,
                        type="text"
                        inputMode="numeric"
                        pattern="[0-9]*"
-                       value={formData.detailed_score.player2_sets[setIndex] || ''}
-                       onChange={(e) => {
-                         const value = e.target.value.replace(/[^0-9]/g, '')
-                         handleSetScoreChange(setIndex, 'player2', value === '' ? null : parseInt(value))
-                       }}
-                       style={{
-                         width: '100%',
-                         padding: '8px',
-                         border: '2px solid #e0e0e0',
-                         borderRadius: '6px',
-                         fontSize: '14px',
-                         textAlign: 'center',
-                         transition: 'border-color 0.2s ease'
-                       }}
-                       onFocus={(e) => e.target.style.borderColor = 'var(--primary-color)'}
-                       onBlur={(e) => e.target.style.borderColor = '#e0e0e0'}
-                       placeholder="0"
+                                               value={formData.detailed_score.player2_sets[setIndex] || ''}
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/[^0-9]/g, '')
+                          handleSetScoreChange(setIndex, 'player2', value === '' ? null : parseInt(value))
+                        }}
+                        style={{
+                          width: '100%',
+                          padding: '8px',
+                          border: '2px solid #e0e0e0',
+                          borderRadius: '6px',
+                          fontSize: '14px',
+                          textAlign: 'center',
+                          transition: 'border-color 0.2s ease'
+                        }}
+                        onFocus={(e) => e.target.style.borderColor = 'var(--primary-color)'}
+                        onBlur={(e) => e.target.style.borderColor = '#e0e0e0'}
                      />
                   ))}
                 </div>

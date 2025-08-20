@@ -569,7 +569,6 @@ const AddMatch: React.FC = () => {
                        }}
                        onFocus={(e) => e.target.style.borderColor = 'var(--primary-color)'}
                        onBlur={(e) => e.target.style.borderColor = '#e0e0e0'}
-                       placeholder="0"
                      />
                   ))}
                 </div>
@@ -610,7 +609,6 @@ const AddMatch: React.FC = () => {
                        }}
                        onFocus={(e) => e.target.style.borderColor = 'var(--primary-color)'}
                        onBlur={(e) => e.target.style.borderColor = '#e0e0e0'}
-                       placeholder="0"
                      />
                   ))}
                 </div>
