@@ -3,6 +3,7 @@ export interface User {
   email: string
   full_name: string | null
   role: 'master' | 'admin' | 'player'
+  verification_status: 'pending' | 'approved' | 'rejected'
   created_at: string
   updated_at: string
 }
@@ -56,6 +57,10 @@ export interface UpdateProfileDTO {
 export interface UpdatePasswordDTO {
   current_password: string
   new_password: string
+}
+
+export interface UpdateVerificationStatusDTO {
+  verification_status: 'pending' | 'approved' | 'rejected'
 }
 
 export interface CreateTournamentDTO {

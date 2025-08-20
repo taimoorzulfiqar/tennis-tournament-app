@@ -9,6 +9,7 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "setup-master": "node scripts/setup-master-user.js",
     "create-user": "node scripts/create-admin-user.js",
+    "delete-user": "node scripts/delete-user.js",
     "test-master": "node scripts/test-master-user.js",
     "fix-master": "node scripts/fix-master-profile.js",
     "check-profiles": "node scripts/check-profiles.js",

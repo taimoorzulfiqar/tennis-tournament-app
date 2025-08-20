@@ -350,6 +350,9 @@ export const userAPI = {
 
     console.log('API: Auth user created:', authData.user.id)
 
+    // Set verification status based on role
+    const verificationStatus = userData.role === 'admin' ? 'pending' : 'approved'
+
     // Create profile
     const { data: profileData, error: profileError } = await supabase
       .from('profiles')
@@ -358,6 +361,7 @@ export const userAPI = {
         email: userData.email,
         full_name: userData.full_name,
         role: userData.role,
+        verification_status: verificationStatus,
       })
       .select()
       .single()
@@ -375,6 +379,18 @@ export const userAPI = {
     const { data, error } = await supabase
       .from('profiles')
       .update(updates)
+      .eq('id', userId)
+      .select()
+      .single()
+
+    if (error) throw new Error(error.message)
+    return data
+  },
+
+  updateVerificationStatus: async (userId: string, status: UpdateVerificationStatusDTO): Promise<User> => {
+    const { data, error } = await supabase
+      .from('profiles')
+      .update(status)
       .eq('id', userId)
       .select()
       .single()
@@ -406,11 +422,37 @@ export const userAPI = {
   },
 
   deleteUser: async (userId: string): Promise<void> => {
-    const { error } = await supabase
+    console.log('API: Deleting user:', userId)
+    
+    // First, get the user's email from the profile
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('email')
+      .eq('id', userId)
+      .single()
+
+    if (profileError) {
+      console.error('API: Error fetching profile for deletion:', profileError)
+      throw new Error(profileError.message)
+    }
+
+    // Delete from profiles table first
+    const { error: deleteProfileError } = await supabase
       .from('profiles')
       .delete()
       .eq('id', userId)
 
-    if (error) throw new Error(error.message)
+    if (deleteProfileError) {
+      console.error('API: Error deleting profile:', deleteProfileError)
+      throw new Error(deleteProfileError.message)
+    }
+
+    console.log('API: Profile deleted successfully')
+    
+    // Note: Auth user deletion requires service role access
+    // For now, we'll just delete the profile and let the user know they need to delete from auth manually
+    // The profile deletion is sufficient for UI updates
+    console.log('API: Note: Auth user deletion requires service role access')
+    console.log('API: You can use the delete-user script to delete from auth: npm run delete-user <email>')
   },
 }

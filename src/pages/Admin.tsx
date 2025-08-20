@@ -16,7 +16,7 @@ const Admin: React.FC = () => {
     role: 'player' as 'admin' | 'player'
   })
 
-  const { data: users, isLoading } = useQuery({
+  const { data: users, isLoading, refetch } = useQuery({
     queryKey: ['users'],
     queryFn: userAPI.getUsers,
   })
@@ -45,6 +45,18 @@ const Admin: React.FC = () => {
     },
   })
 
+  const updateVerificationMutation = useMutation({
+    mutationFn: ({ userId, status }: { userId: string; status: 'pending' | 'approved' | 'rejected' }) =>
+      userAPI.updateVerificationStatus(userId, { verification_status: status }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['users'] })
+      alert('Verification status updated successfully!')
+    },
+    onError: (error) => {
+      alert(error instanceof Error ? error.message : 'Failed to update verification status')
+    },
+  })
+
   const handleCreateUser = (e: React.FormEvent) => {
     e.preventDefault()
     if (!newUser.email || !newUser.password || !newUser.full_name) {
@@ -63,8 +75,26 @@ const Admin: React.FC = () => {
       alert('You cannot delete your own account')
       return
     }
-    if (confirm(`Are you sure you want to delete ${userEmail}?`)) {
+    if (confirm(`Are you sure you want to delete ${userEmail}? This action cannot be undone.`)) {
       deleteUserMutation.mutate(userId)
+    }
+  }
+
+  const handleVerificationUpdate = (userId: string, currentStatus: string, userEmail: string) => {
+    let newStatus: 'pending' | 'approved' | 'rejected'
+    
+    if (currentStatus === 'pending') {
+      newStatus = 'approved'
+    } else if (currentStatus === 'approved') {
+      newStatus = 'rejected'
+    } else {
+      newStatus = 'approved'
+    }
+
+    const action = newStatus === 'approved' ? 'approve' : newStatus === 'rejected' ? 'reject' : 'set to pending'
+    
+    if (confirm(`Are you sure you want to ${action} ${userEmail}?`)) {
+      updateVerificationMutation.mutate({ userId, status: newStatus })
     }
   }
 
@@ -72,8 +102,26 @@ const Admin: React.FC = () => {
     switch (role) {
       case 'master': return '#f44336'
       case 'admin': return '#ff9800'
-      case 'player': return '#4caf50'
+      case 'player': return 'var(--primary-color)'
       default: return '#666'
+    }
+  }
+
+  const getVerificationColor = (status: string) => {
+    switch (status) {
+      case 'approved': return 'var(--primary-color)'
+      case 'pending': return 'var(--accent-color)'
+      case 'rejected': return '#f44336'
+      default: return '#666'
+    }
+  }
+
+  const getVerificationText = (status: string) => {
+    switch (status) {
+      case 'approved': return 'Approved'
+      case 'pending': return 'Pending'
+      case 'rejected': return 'Rejected'
+      default: return status
     }
   }
 
@@ -88,11 +136,14 @@ const Admin: React.FC = () => {
     )
   }
 
+  const pendingAdmins = users?.filter(u => u.role === 'admin' && u.verification_status === 'pending') || []
+  const approvedUsers = users?.filter(u => u.verification_status === 'approved') || []
+
   return (
     <Layout>
       <div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-          <h1 style={{ fontSize: '32px', fontWeight: 'bold', color: '#2E7D32', margin: 0 }}>
+          <h1 style={{ fontSize: '32px', fontWeight: 'bold', color: 'var(--primary-color)', margin: 0 }}>
             Admin Panel
           </h1>
           {user?.role === 'master' && (
@@ -109,30 +160,97 @@ const Admin: React.FC = () => {
         <div style={{ display: 'grid', gap: '20px', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', marginBottom: '32px' }}>
           <div className="card" style={{ textAlign: 'center' }}>
             <div style={{ fontSize: '32px', marginBottom: '8px' }}>👥</div>
-            <h3 style={{ fontSize: '24px', fontWeight: 'bold', color: '#2E7D32', margin: '0 0 4px 0' }}>
+            <h3 style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--primary-color)', margin: '0 0 4px 0' }}>
               {users?.length || 0}
             </h3>
             <p style={{ color: '#666', margin: 0 }}>Total Users</p>
           </div>
           <div className="card" style={{ textAlign: 'center' }}>
             <div style={{ fontSize: '32px', marginBottom: '8px' }}>⚙️</div>
-            <h3 style={{ fontSize: '24px', fontWeight: 'bold', color: '#2E7D32', margin: '0 0 4px 0' }}>
+            <h3 style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--primary-color)', margin: '0 0 4px 0' }}>
               {users?.filter(u => u.role === 'admin').length || 0}
             </h3>
             <p style={{ color: '#666', margin: 0 }}>Admins</p>
           </div>
           <div className="card" style={{ textAlign: 'center' }}>
             <div style={{ fontSize: '32px', marginBottom: '8px' }}>🎾</div>
-            <h3 style={{ fontSize: '24px', fontWeight: 'bold', color: '#2E7D32', margin: '0 0 4px 0' }}>
+            <h3 style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--primary-color)', margin: '0 0 4px 0' }}>
               {users?.filter(u => u.role === 'player').length || 0}
             </h3>
             <p style={{ color: '#666', margin: 0 }}>Players</p>
           </div>
+          <div className="card" style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: '32px', marginBottom: '8px' }}>⏳</div>
+            <h3 style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--accent-color)', margin: '0 0 4px 0' }}>
+              {pendingAdmins.length}
+            </h3>
+            <p style={{ color: '#666', margin: 0 }}>Pending Admins</p>
+          </div>
         </div>
 
-        {/* Users List */}
+        {/* Pending Admin Approvals */}
+        {pendingAdmins.length > 0 && user?.role === 'master' && (
+          <div className="card" style={{ marginBottom: '24px' }}>
+            <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: 'var(--accent-color)', marginBottom: '20px' }}>
+              ⏳ Pending Admin Approvals
+            </h2>
+            <div style={{ display: 'grid', gap: '16px' }}>
+              {pendingAdmins.map((userItem: User) => (
+                <div key={userItem.id} style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  padding: '16px',
+                  backgroundColor: '#fff3cd',
+                  border: '1px solid #ffeaa7',
+                  borderRadius: '8px'
+                }}>
+                  <div>
+                    <h3 style={{ fontSize: '16px', fontWeight: '600', margin: '0 0 4px 0' }}>
+                      {userItem.full_name || 'No name set'}
+                    </h3>
+                    <p style={{ color: '#666', margin: '0 0 4px 0', fontSize: '14px' }}>
+                      {userItem.email}
+                    </p>
+                    <span style={{
+                      padding: '2px 8px',
+                      borderRadius: '12px',
+                      fontSize: '12px',
+                      fontWeight: '600',
+                      backgroundColor: getVerificationColor(userItem.verification_status) + '20',
+                      color: getVerificationColor(userItem.verification_status),
+                      textTransform: 'capitalize'
+                    }}>
+                      {getVerificationText(userItem.verification_status)}
+                    </span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <button
+                      onClick={() => handleVerificationUpdate(userItem.id, userItem.verification_status, userItem.email)}
+                      className="btn btn-primary"
+                      style={{ padding: '8px 16px', fontSize: '12px' }}
+                      disabled={updateVerificationMutation.isPending}
+                    >
+                      ✅ Approve
+                    </button>
+                    <button
+                      onClick={() => updateVerificationMutation.mutate({ userId: userItem.id, status: 'rejected' })}
+                      className="btn btn-secondary"
+                      style={{ padding: '8px 16px', fontSize: '12px' }}
+                      disabled={updateVerificationMutation.isPending}
+                    >
+                      ❌ Reject
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* All Users List */}
         <div className="card">
-          <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: '#2E7D32', marginBottom: '20px' }}>
+          <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: 'var(--primary-color)', marginBottom: '20px' }}>
             User Management
           </h2>
 
@@ -154,31 +272,58 @@ const Admin: React.FC = () => {
                     <p style={{ color: '#666', margin: '0 0 4px 0', fontSize: '14px' }}>
                       {userItem.email}
                     </p>
-                    <span style={{
-                      padding: '2px 8px',
-                      borderRadius: '12px',
-                      fontSize: '12px',
-                      fontWeight: '600',
-                      backgroundColor: getRoleColor(userItem.role) + '20',
-                      color: getRoleColor(userItem.role),
-                      textTransform: 'capitalize'
-                    }}>
-                      {userItem.role}
-                    </span>
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                      <span style={{
+                        padding: '2px 8px',
+                        borderRadius: '12px',
+                        fontSize: '12px',
+                        fontWeight: '600',
+                        backgroundColor: getRoleColor(userItem.role) + '20',
+                        color: getRoleColor(userItem.role),
+                        textTransform: 'capitalize'
+                      }}>
+                        {userItem.role}
+                      </span>
+                      {userItem.role === 'admin' && (
+                        <span style={{
+                          padding: '2px 8px',
+                          borderRadius: '12px',
+                          fontSize: '12px',
+                          fontWeight: '600',
+                          backgroundColor: getVerificationColor(userItem.verification_status) + '20',
+                          color: getVerificationColor(userItem.verification_status),
+                          textTransform: 'capitalize'
+                        }}>
+                          {getVerificationText(userItem.verification_status)}
+                        </span>
+                      )}
+                    </div>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <span style={{ fontSize: '12px', color: '#999' }}>
                       {new Date(userItem.created_at).toLocaleDateString()}
                     </span>
                     {user?.role === 'master' && userItem.id !== user.id && (
-                      <button
-                        onClick={() => handleDeleteUser(userItem.id, userItem.email)}
-                        className="btn btn-secondary"
-                        style={{ padding: '8px 12px', fontSize: '12px' }}
-                        disabled={deleteUserMutation.isPending}
-                      >
-                        🗑️ Delete
-                      </button>
+                      <div style={{ display: 'flex', gap: '4px' }}>
+                        {userItem.role === 'admin' && userItem.verification_status !== 'pending' && (
+                          <button
+                            onClick={() => handleVerificationUpdate(userItem.id, userItem.verification_status, userItem.email)}
+                            className="btn btn-secondary"
+                            style={{ padding: '6px 10px', fontSize: '11px' }}
+                            disabled={updateVerificationMutation.isPending}
+                          >
+                            {userItem.verification_status === 'approved' ? '❌' : '✅'}
+                          </button>
+                        )}
+                        <button
+                          onClick={() => handleDeleteUser(userItem.id, userItem.email)}
+                          className="btn btn-secondary"
+                          style={{ padding: '6px 10px', fontSize: '11px' }}
+                          disabled={deleteUserMutation.isPending}
+                        >
+                          🗑️
+                        </button>
+                      </div>
                     )}
                   </div>
                 </div>
@@ -216,7 +361,7 @@ const Admin: React.FC = () => {
             maxHeight: '90vh',
             overflowY: 'auto'
           }}>
-            <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '24px', color: '#2E7D32' }}>
+            <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '24px', color: 'var(--primary-color)' }}>
               Create New User
             </h2>
 
@@ -267,6 +412,11 @@ const Admin: React.FC = () => {
                   <option value="player">Player</option>
                   <option value="admin">Admin</option>
                 </select>
+                {newUser.role === 'admin' && (
+                  <p style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
+                    ⚠️ Admin users will require approval from the master user before they can access admin features.
+                  </p>
+                )}
               </div>
 
               <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>

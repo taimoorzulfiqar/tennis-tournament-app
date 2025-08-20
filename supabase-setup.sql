@@ -8,9 +8,18 @@ CREATE TABLE IF NOT EXISTS profiles (
     full_name TEXT,
     phone TEXT,
     role TEXT NOT NULL CHECK (role IN ('master', 'admin', 'player')) DEFAULT 'player',
+    verification_status TEXT NOT NULL CHECK (verification_status IN ('pending', 'approved', 'rejected')) DEFAULT 'approved',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
+
+-- Add verification_status column if it doesn't exist (for existing databases)
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'profiles' AND column_name = 'verification_status') THEN
+        ALTER TABLE profiles ADD COLUMN verification_status TEXT NOT NULL CHECK (verification_status IN ('pending', 'approved', 'rejected')) DEFAULT 'approved';
+    END IF;
+END $$;
 
 -- Create tournaments table
 CREATE TABLE IF NOT EXISTS tournaments (
@@ -40,9 +49,9 @@ CREATE TABLE IF NOT EXISTS matches (
     player1_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
     player2_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
     court TEXT NOT NULL,
-    scheduled_time TIMESTAMP WITH TIME ZONE NOT NULL,
-    player1_games_won INTEGER DEFAULT 0 CHECK (player1_games_won >= 0),
-    player2_games_won INTEGER DEFAULT 0 CHECK (player2_games_won >= 0),
+    start_time TIMESTAMP WITH TIME ZONE NOT NULL,
+    player1_score INTEGER DEFAULT 0 CHECK (player1_score >= 0),
+    player2_score INTEGER DEFAULT 0 CHECK (player2_score >= 0),
     winner_id UUID REFERENCES profiles(id) ON DELETE SET NULL,
     status TEXT NOT NULL CHECK (status IN ('scheduled', 'in_progress', 'completed')) DEFAULT 'scheduled',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -52,6 +61,7 @@ CREATE TABLE IF NOT EXISTS matches (
 -- Create indexes for better performance
 CREATE INDEX IF NOT EXISTS idx_profiles_email ON profiles(email);
 CREATE INDEX IF NOT EXISTS idx_profiles_role ON profiles(role);
+CREATE INDEX IF NOT EXISTS idx_profiles_verification_status ON profiles(verification_status);
 CREATE INDEX IF NOT EXISTS idx_tournaments_created_by ON tournaments(created_by);
 CREATE INDEX IF NOT EXISTS idx_tournament_players_tournament_id ON tournament_players(tournament_id);
 CREATE INDEX IF NOT EXISTS idx_tournament_players_player_id ON tournament_players(player_id);
@@ -93,10 +103,9 @@ CREATE OR REPLACE FUNCTION get_tournament_leaderboard(tournament_id UUID)
 RETURNS TABLE (
     player_id UUID,
     player_name TEXT,
-    total_games_won BIGINT,
+    games_won BIGINT,
     matches_played BIGINT,
-    wins BIGINT,
-    losses BIGINT
+    rank BIGINT
 ) AS $$
 BEGIN
     RETURN QUERY
@@ -106,24 +115,12 @@ BEGIN
             p.full_name as player_name,
             COALESCE(SUM(
                 CASE 
-                    WHEN m.player1_id = p.id THEN m.player1_games_won
-                    WHEN m.player2_id = p.id THEN m.player2_games_won
+                    WHEN m.player1_id = p.id THEN m.player1_score
+                    WHEN m.player2_id = p.id THEN m.player2_score
                     ELSE 0
                 END
-            ), 0) as total_games_won,
-            COUNT(m.id) as matches_played,
-            COALESCE(SUM(
-                CASE 
-                    WHEN m.winner_id = p.id THEN 1
-                    ELSE 0
-                END
-            ), 0) as wins,
-            COALESCE(SUM(
-                CASE 
-                    WHEN m.winner_id IS NOT NULL AND m.winner_id != p.id THEN 1
-                    ELSE 0
-                END
-            ), 0) as losses
+            ), 0) as games_won,
+            COUNT(m.id) as matches_played
         FROM profiles p
         LEFT JOIN tournament_players tp ON p.id = tp.player_id
         LEFT JOIN matches m ON (
@@ -137,12 +134,11 @@ BEGIN
     SELECT 
         ps.player_id,
         ps.player_name,
-        ps.total_games_won,
+        ps.games_won,
         ps.matches_played,
-        ps.wins,
-        ps.losses
+        ROW_NUMBER() OVER (ORDER BY ps.games_won DESC, ps.matches_played DESC) as rank
     FROM player_stats ps
-    ORDER BY ps.total_games_won DESC, ps.wins DESC, ps.losses ASC;
+    ORDER BY ps.games_won DESC, ps.matches_played DESC;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -174,6 +170,26 @@ BEGIN
                 )
             );
     END IF;
+
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Master users can delete profiles' AND tablename = 'profiles') THEN
+        CREATE POLICY "Master users can delete profiles" ON profiles
+            FOR DELETE USING (
+                EXISTS (
+                    SELECT 1 FROM profiles 
+                    WHERE id = auth.uid() AND role = 'master'
+                )
+            );
+    END IF;
+
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Master users can update verification status' AND tablename = 'profiles') THEN
+        CREATE POLICY "Master users can update verification status" ON profiles
+            FOR UPDATE USING (
+                EXISTS (
+                    SELECT 1 FROM profiles 
+                    WHERE id = auth.uid() AND role = 'master'
+                )
+            );
+    END IF;
 END $$;
 
 -- Tournaments RLS policies
@@ -184,12 +200,12 @@ BEGIN
             FOR SELECT USING (true);
     END IF;
 
-    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Admins and masters can create tournaments' AND tablename = 'tournaments') THEN
-        CREATE POLICY "Admins and masters can create tournaments" ON tournaments
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Approved admins and masters can create tournaments' AND tablename = 'tournaments') THEN
+        CREATE POLICY "Approved admins and masters can create tournaments" ON tournaments
             FOR INSERT WITH CHECK (
                 EXISTS (
                     SELECT 1 FROM profiles 
-                    WHERE id = auth.uid() AND role IN ('admin', 'master')
+                    WHERE id = auth.uid() AND role IN ('admin', 'master') AND verification_status = 'approved'
                 )
             );
     END IF;
@@ -208,12 +224,12 @@ BEGIN
             FOR SELECT USING (true);
     END IF;
 
-    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Admins and masters can manage tournament players' AND tablename = 'tournament_players') THEN
-        CREATE POLICY "Admins and masters can manage tournament players" ON tournament_players
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Approved admins and masters can manage tournament players' AND tablename = 'tournament_players') THEN
+        CREATE POLICY "Approved admins and masters can manage tournament players" ON tournament_players
             FOR ALL USING (
                 EXISTS (
                     SELECT 1 FROM profiles 
-                    WHERE id = auth.uid() AND role IN ('admin', 'master')
+                    WHERE id = auth.uid() AND role IN ('admin', 'master') AND verification_status = 'approved'
                 )
             );
     END IF;
@@ -227,45 +243,28 @@ BEGIN
             FOR SELECT USING (true);
     END IF;
 
-    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Admins and masters can create matches' AND tablename = 'matches') THEN
-        CREATE POLICY "Admins and masters can create matches" ON matches
-            FOR INSERT WITH CHECK (
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Approved admins and masters can manage matches' AND tablename = 'matches') THEN
+        CREATE POLICY "Approved admins and masters can manage matches" ON matches
+            FOR ALL USING (
                 EXISTS (
                     SELECT 1 FROM profiles 
-                    WHERE id = auth.uid() AND role IN ('admin', 'master')
-                )
-            );
-    END IF;
-
-    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Admins and masters can update matches' AND tablename = 'matches') THEN
-        CREATE POLICY "Admins and masters can update matches" ON matches
-            FOR UPDATE USING (
-                EXISTS (
-                    SELECT 1 FROM profiles 
-                    WHERE id = auth.uid() AND role IN ('admin', 'master')
+                    WHERE id = auth.uid() AND role IN ('admin', 'master') AND verification_status = 'approved'
                 )
             );
     END IF;
 END $$;
 
--- Create master user with password
+-- Insert master user (this should be done via Supabase Auth API in practice)
 DO $$
-DECLARE
-    master_user_id UUID;
 BEGIN
-    -- Generate a UUID for the master user
-    master_user_id := uuid_generate_v4();
-    
-    -- Insert the master user profile
-    INSERT INTO profiles (id, email, full_name, role) 
-    VALUES (
-        master_user_id,
-        'taimoorzulfiqar97@gmail.com',
-        'Taimoor Zulfiqar',
-        'master'
-    ) ON CONFLICT (email) DO NOTHING;
-    
-    -- Note: The actual auth user creation with password should be done through Supabase Auth API
-    -- This is just the profile record. The password will be set when the user first signs up
-    -- or through the Supabase dashboard manually.
+    IF NOT EXISTS (SELECT 1 FROM profiles WHERE email = 'taimoorzulfiqar97@gmail.com') THEN
+        INSERT INTO profiles (id, email, full_name, role, verification_status) 
+        VALUES (
+            gen_random_uuid(), 
+            'taimoorzulfiqar97@gmail.com', 
+            'Taimoor Zulfiqar', 
+            'master', 
+            'approved'
+        );
+    END IF;
 END $$;
