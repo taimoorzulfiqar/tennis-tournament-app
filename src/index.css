@@ -190,19 +190,20 @@ body {
   gap: 12px;
   font-weight: bold;
   font-size: 20px;
+  min-width: fit-content;
 }
 
 .logo-icon {
-  width: 40px;
-  height: 40px;
+  width: 48px;
+  height: 48px;
   background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
-  border-radius: 50%;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
-  font-size: 20px;
-  box-shadow: 0 2px 8px rgba(50, 205, 50, 0.3);
+  box-shadow: 0 4px 12px rgba(50, 205, 50, 0.3);
+  flex-shrink: 0;
 }
 
 .logo-text {
@@ -234,12 +235,12 @@ body {
   
   .logo {
     font-size: 18px;
+    gap: 10px;
   }
   
   .logo-icon {
-    width: 36px;
-    height: 36px;
-    font-size: 18px;
+    width: 40px;
+    height: 40px;
   }
   
   /* Improve mobile navigation */
