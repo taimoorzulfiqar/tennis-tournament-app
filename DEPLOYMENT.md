@@ -1,170 +1,110 @@
-# 🚀 Tennis Tournament App - Vercel Deployment Guide
+# 🚀 Deploy Tennis Tournament App to Vercel
 
-## Overview
-This guide will help you deploy your Tennis Tournament App to Vercel, making it accessible as a web application while sharing the same Supabase database as your mobile app.
+## ✅ **Updated Configuration**
 
-## 🎯 Prerequisites
-- [Vercel Account](https://vercel.com/signup) (free)
-- [GitHub Account](https://github.com) (to connect your repository)
-- Your existing Supabase project (already configured)
+The `vercel.json` has been fixed to work properly with Expo projects. The framework detection issue has been resolved.
 
-## 📋 Step-by-Step Deployment
+## 📋 **Step-by-Step Deployment Guide**
 
-### 1. Prepare Your Repository
-Make sure your code is pushed to a GitHub repository:
-```bash
-git add .
-git commit -m "Add web deployment support"
-git push origin main
-```
+### **Step 1: Connect to Vercel**
 
-### 2. Connect to Vercel
-1. Go to [vercel.com](https://vercel.com) and sign in
-2. Click **"New Project"**
-3. Import your GitHub repository
-4. Vercel will automatically detect it as an Expo project
+1. **Go to [vercel.com](https://vercel.com)**
+2. **Sign up/login** with your GitHub account
+3. **Click "New Project"**
 
-### 3. Configure Environment Variables
-In your Vercel project settings, add these environment variables:
+### **Step 2: Import Your Repository**
+
+1. **Find your repository**: `tennis-tournament-app`
+2. **Click "Import"**
+3. **Configure the project**:
+   - **Project Name**: `tennis-tournament-app` (or your preferred name)
+   - **Framework Preset**: Leave as **"Other"** (Vercel will auto-detect)
+   - **Root Directory**: Leave as `/` (root)
+   - **Build Command**: `npm run build:web`
+   - **Output Directory**: `web-build`
+
+### **Step 3: Configure Environment Variables**
+
+**IMPORTANT**: Add these environment variables in Vercel:
+
+1. **Go to Project Settings** → **Environment Variables**
+2. **Add the following variables**:
+
 ```
 EXPO_PUBLIC_SUPABASE_URL=https://apttvxzslzlgxmdvtuhe.supabase.co
 EXPO_PUBLIC_SUPABASE_ANON_KEY=your_anon_key_here
 ```
 
-### 4. Build Settings
-Vercel will automatically use the configuration from `vercel.json`:
-- **Build Command**: `npm run build:web`
-- **Output Directory**: `web-build`
-- **Framework**: Expo
+**Replace `your_anon_key_here`** with your actual Supabase anon key from your `.env` file.
 
-### 5. Deploy
-Click **"Deploy"** and wait for the build to complete (usually 2-3 minutes).
+### **Step 4: Deploy**
 
-## 🌐 Web App Features
+1. **Click "Deploy"**
+2. **Wait for the build to complete** (usually 2-3 minutes)
+3. **Your app will be live** at `https://your-project-name.vercel.app`
 
-### ✅ What Works on Web
-- **Authentication**: Sign in/sign up with email/password
-- **Tournament Management**: Create and view tournaments
-- **Leaderboards**: View player rankings
-- **User Profiles**: Update profile information
-- **Admin Panel**: Manage users and tournaments
-- **Responsive Design**: Works on desktop, tablet, and mobile browsers
+## 🔧 **Troubleshooting**
 
-### 🎨 Web-Specific Enhancements
-- **Desktop Navigation**: Optimized tab bar for larger screens
-- **Responsive Layout**: Adapts to different screen sizes
-- **Web Typography**: Optimized fonts for web browsers
-- **PWA Support**: Can be installed as a web app
-- **Fast Loading**: Optimized for web performance
+### **If you get framework detection errors:**
 
-## 🔧 Local Web Development
+1. **Make sure you're using the latest code** from GitHub
+2. **The `vercel.json` has been updated** to fix this issue
+3. **Try deploying again** - it should work now
 
-### Start Web Development Server
-```bash
-npm run web
-```
+### **If build fails:**
 
-### Build for Production
-```bash
-npm run build:web
-```
+1. **Check the build logs** in Vercel dashboard
+2. **Ensure environment variables are set correctly**
+3. **Verify your Supabase URL and key are correct**
 
-### Test Production Build Locally
-```bash
-npx serve web-build
-```
+### **If the app doesn't load:**
 
-## 📱 Cross-Platform Benefits
+1. **Check the browser console** for errors
+2. **Verify Supabase connection** in the Network tab
+3. **Ensure all environment variables are set**
 
-### Shared Database
-- ✅ Same Supabase database for web and mobile
-- ✅ Real-time updates across all platforms
-- ✅ Consistent user authentication
-- ✅ Unified tournament data
+## 🎯 **After Deployment**
 
-### Code Sharing
-- ✅ Single codebase for web and mobile
-- ✅ Shared business logic
-- ✅ Consistent UI/UX design
-- ✅ Same API endpoints
+### **Test Your Web App**
 
-## 🚀 Performance Optimizations
+Once deployed, test these features:
 
-### Web-Specific
-- **Code Splitting**: Automatic bundle optimization
-- **Image Optimization**: Automatic image compression
-- **CDN**: Global content delivery
-- **Caching**: Intelligent caching strategies
+- ✅ **Sign in** with master user: `taimoorzulfiqar97@gmail.com` / `TechPM@321`
+- ✅ **Create tournaments**
+- ✅ **View leaderboards**
+- ✅ **Test responsive design** on mobile browsers
+- ✅ **Create new users** (admin functionality)
 
-### Mobile-Specific
-- **Native Performance**: Optimized for mobile devices
-- **Offline Support**: Works without internet
-- **Push Notifications**: Native mobile notifications
+### **Share Your App**
 
-## 🔒 Security
+Your tennis club members can now access the app via:
 
-### Environment Variables
-- ✅ Supabase credentials secured in Vercel
-- ✅ No sensitive data in client code
-- ✅ Row Level Security (RLS) enforced
-- ✅ Authentication tokens managed securely
+- 🌐 **Web browsers**: Desktop, tablet, mobile
+- 📱 **Mobile apps**: iOS and Android (when built)
+- 🔗 **Direct link**: Share the Vercel URL
 
-## 📊 Analytics & Monitoring
+## 🔄 **Future Updates**
 
-### Vercel Analytics
-- **Performance Metrics**: Page load times
-- **User Analytics**: Visitor statistics
-- **Error Tracking**: Automatic error reporting
-- **Real-time Monitoring**: Live performance data
+To update your deployed app:
 
-## 🔄 Continuous Deployment
+1. **Make changes locally**
+2. **Commit and push to GitHub**:
+   ```bash
+   git add .
+   git commit -m "Your update message"
+   git push
+   ```
+3. **Vercel will automatically redeploy** (if connected to GitHub)
 
-### Automatic Deployments
-- ✅ Push to main branch = automatic deployment
-- ✅ Preview deployments for pull requests
-- ✅ Rollback to previous versions
-- ✅ Environment-specific configurations
+## 📞 **Support**
 
-## 🛠️ Troubleshooting
+If you encounter any issues:
 
-### Common Issues
+1. **Check the Vercel build logs**
+2. **Verify your environment variables**
+3. **Ensure your Supabase database is running**
+4. **Test locally first** with `npm run web`
 
-**Build Fails**
-- Check environment variables are set correctly
-- Verify all dependencies are installed
-- Check for TypeScript errors
+---
 
-**Authentication Issues**
-- Ensure Supabase URL and keys are correct
-- Check RLS policies are configured
-- Verify email confirmation settings
-
-**Performance Issues**
-- Check bundle size with `npm run build:web`
-- Optimize images and assets
-- Review network requests
-
-## 📞 Support
-
-### Resources
-- [Vercel Documentation](https://vercel.com/docs)
-- [Expo Web Documentation](https://docs.expo.dev/guides/web/)
-- [Supabase Documentation](https://supabase.com/docs)
-
-### Getting Help
-- Check Vercel deployment logs
-- Review browser console for errors
-- Test with different browsers
-- Verify mobile app still works
-
-## 🎉 Success!
-
-Once deployed, your Tennis Tournament App will be available at:
-`https://your-project-name.vercel.app`
-
-Users can now access your app from:
-- 🌐 **Web browsers** (desktop, tablet, mobile)
-- 📱 **Mobile apps** (iOS, Android)
-- 🔗 **Direct links** shared via email/messaging
-
-All platforms share the same data and provide a consistent experience!
+**Your Tennis Tournament App is now ready for production! 🎾✨**
