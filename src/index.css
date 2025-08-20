@@ -122,7 +122,7 @@ body {
   border-radius: 8px;
   font-size: 16px; /* Minimum 16px for iOS */
   transition: border-color 0.2s ease;
-  background-color: #f8f9fa; /* Light gray background */
+  background-color: #e8e8e8; /* Light gray background */
   /* Prevent zoom on iOS */
   -webkit-appearance: none;
   appearance: none;
@@ -218,9 +218,6 @@ body {
   -webkit-text-fill-color: transparent;
   background-clip: text;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 200px;
 }
 
 /* Mobile-first responsive design */
@@ -249,8 +246,7 @@ body {
   }
   
   .logo-text {
-    max-width: 120px;
-    font-size: 14px;
+    font-size: 12px;
   }
   
   /* Extra small screens */
@@ -261,8 +257,7 @@ body {
     }
     
     .logo-text {
-      max-width: 100px;
-      font-size: 12px;
+      font-size: 10px;
     }
     
     .logo-icon {
