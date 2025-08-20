@@ -23,7 +23,12 @@
     "web": {
       "bundler": "metro",
       "output": "static",
-      "template": "public/index.html"
+      "template": "public/index.html",
+      "build": {
+        "babel": {
+          "include": ["@expo/vector-icons"]
+        }
+      }
     },
     "plugins": [
       "expo-router"

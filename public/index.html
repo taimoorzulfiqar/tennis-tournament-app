@@ -143,6 +143,25 @@
           loading.style.display = 'none';
         }
       }, 15000);
+
+      // Try to find and load the main script
+      function loadMainScript() {
+        const scripts = document.querySelectorAll('script[src*="entry"]');
+        if (scripts.length > 0) {
+          const mainScript = scripts[0];
+          if (mainScript.src && !mainScript.type) {
+            mainScript.type = 'module';
+            console.log('Set script type to module:', mainScript.src);
+          }
+        }
+      }
+
+      // Run after DOM is loaded
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', loadMainScript);
+      } else {
+        loadMainScript();
+      }
     </script>
   </body>
 </html>

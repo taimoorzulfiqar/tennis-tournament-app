@@ -7,7 +7,7 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "build:web": "expo export --platform web",
+    "build:web": "expo export --platform web --clear",
     "setup-master": "node scripts/setup-master-user.js",
     "create-user": "node scripts/create-admin-user.js",
     "test-master": "node scripts/test-master-user.js",
