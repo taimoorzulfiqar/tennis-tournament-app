@@ -49,8 +49,12 @@ const EditTournament: React.FC = () => {
   const { data: players, isLoading: playersLoading } = useQuery({
     queryKey: ['players'],
     queryFn: async () => {
+      console.log('EditTournament: Fetching players...')
       const allUsers = await userAPI.getUsers()
-      return allUsers.filter(u => u.role === 'player')
+      console.log('EditTournament: All users:', allUsers)
+      const playerUsers = allUsers.filter(u => u.role === 'player')
+      console.log('EditTournament: Player users:', playerUsers)
+      return playerUsers
     },
   })
 
@@ -323,11 +327,14 @@ const EditTournament: React.FC = () => {
                       required
                     >
                       <option value="">Select Player 1</option>
-                      {players?.map((player) => (
-                        <option key={player.id} value={player.id}>
-                          {player.full_name || player.email}
-                        </option>
-                      ))}
+                      {players?.map((player) => {
+                        console.log('EditTournament: Rendering player option:', player)
+                        return (
+                          <option key={player.id} value={player.id}>
+                            {player.full_name || player.email}
+                          </option>
+                        )
+                      })}
                     </select>
                   </div>
 
@@ -340,11 +347,14 @@ const EditTournament: React.FC = () => {
                       required
                     >
                       <option value="">Select Player 2</option>
-                      {players?.map((player) => (
-                        <option key={player.id} value={player.id}>
-                          {player.full_name || player.email}
-                        </option>
-                      ))}
+                      {players?.map((player) => {
+                        console.log('EditTournament: Rendering player option:', player)
+                        return (
+                          <option key={player.id} value={player.id}>
+                            {player.full_name || player.email}
+                          </option>
+                        )
+                      })}
                     </select>
                   </div>
                 </div>

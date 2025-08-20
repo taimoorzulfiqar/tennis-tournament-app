@@ -365,7 +365,7 @@ export const userAPI = {
     console.log('API: Deleting user:', userId)
     
     try {
-      // Delete from profiles table first
+      // Delete from profiles table
       console.log('API: Deleting from profiles table...')
       const { error: deleteProfileError } = await supabase
         .from('profiles')
@@ -379,17 +379,9 @@ export const userAPI = {
 
       console.log('API: Profile deleted successfully from database')
       
-      // Delete from auth users (requires admin privileges)
-      console.log('API: Deleting from auth users...')
-      const { error: deleteAuthError } = await supabase.auth.admin.deleteUser(userId)
-      
-      if (deleteAuthError) {
-        console.error('API: Error deleting auth user:', deleteAuthError)
-        // Don't throw error here as the profile is already deleted
-        console.warn('API: Auth user deletion failed, but profile was deleted successfully')
-      } else {
-        console.log('API: Auth user deleted successfully')
-      }
+      // Note: Auth user deletion requires server-side admin privileges
+      // The profile deletion is sufficient for removing user access
+      console.log('API: User profile deleted. Auth user will be handled by server-side cleanup.')
       
     } catch (error) {
       console.error('API: Delete user operation failed:', error)

@@ -49,11 +49,14 @@ const Admin: React.FC = () => {
         return filteredData
       })
       
-      // Force refetch to ensure data is in sync
-      refetch()
-      
-      // Also invalidate the cache
+      // Invalidate all related queries
       queryClient.invalidateQueries({ queryKey: ['users'] })
+      queryClient.invalidateQueries({ queryKey: ['players'] })
+      
+      // Force refetch to ensure data is in sync
+      setTimeout(() => {
+        refetch()
+      }, 100)
       
       alert('User deleted successfully!')
     },

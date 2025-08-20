@@ -43,8 +43,12 @@ const CreateTournament: React.FC = () => {
   const { data: players, isLoading: playersLoading } = useQuery({
     queryKey: ['players'],
     queryFn: async () => {
+      console.log('CreateTournament: Fetching players...')
       const allUsers = await userAPI.getUsers()
-      return allUsers.filter(u => u.role === 'player')
+      console.log('CreateTournament: All users:', allUsers)
+      const playerUsers = allUsers.filter(u => u.role === 'player')
+      console.log('CreateTournament: Player users:', playerUsers)
+      return playerUsers
     },
   })
 
