@@ -166,12 +166,6 @@ const TournamentDetails: React.FC = () => {
               >
                 📊 View Leaderboard
               </button>
-              <button 
-                onClick={() => navigate('/admin')}
-                className="btn btn-secondary"
-              >
-                👥 Manage Players
-              </button>
             </div>
           </div>
         </div>
