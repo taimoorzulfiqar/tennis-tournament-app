@@ -401,21 +401,27 @@ const AddMatch: React.FC = () => {
                   }}>
                     Number of Sets
                   </label>
-                  <select
-                    value={match.match_format.sets}
-                    onChange={(e) => handleFormatChange('sets', parseInt(e.target.value))}
-                    style={{
-                      width: '100%',
-                      padding: '12px 16px',
-                      border: '2px solid #e0e0e0',
-                      borderRadius: '8px',
-                      fontSize: '16px',
-                      backgroundColor: 'white',
-                      transition: 'border-color 0.2s ease'
-                    }}
-                    onFocus={(e) => e.target.style.borderColor = 'var(--primary-color)'}
-                    onBlur={(e) => e.target.style.borderColor = '#e0e0e0'}
-                  >
+                                     <select
+                     value={match.match_format.sets}
+                     onChange={(e) => handleFormatChange('sets', parseInt(e.target.value))}
+                     style={{
+                       width: '100%',
+                       padding: '12px 16px',
+                       border: '2px solid #e0e0e0',
+                       borderRadius: '8px',
+                       fontSize: '16px',
+                       backgroundColor: 'white',
+                       transition: 'border-color 0.2s ease',
+                       appearance: 'none',
+                       backgroundImage: 'url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2212%22%20height%3D%228%22%20viewBox%3D%220%200%2012%208%22%3E%3Cpath%20fill%3D%22%23666%22%20d%3D%22M1.41%200L6%204.59%2010.59%200%2012%201.41%206%207.41%200%201.41z%22/%3E%3C/svg%3E")',
+                       backgroundRepeat: 'no-repeat',
+                       backgroundPosition: 'right 12px center',
+                       backgroundSize: '12px 8px',
+                       paddingRight: '36px'
+                     }}
+                     onFocus={(e) => e.target.style.borderColor = 'var(--primary-color)'}
+                     onBlur={(e) => e.target.style.borderColor = '#e0e0e0'}
+                   >
                     <option value={1}>1</option>
                     <option value={3}>3</option>
                     <option value={5}>5</option>
@@ -432,21 +438,27 @@ const AddMatch: React.FC = () => {
                   }}>
                     Games per Set
                   </label>
-                  <select
-                    value={match.match_format.games_per_set}
-                    onChange={(e) => handleFormatChange('games_per_set', parseInt(e.target.value))}
-                    style={{
-                      width: '100%',
-                      padding: '12px 16px',
-                      border: '2px solid #e0e0e0',
-                      borderRadius: '8px',
-                      fontSize: '16px',
-                      backgroundColor: 'white',
-                      transition: 'border-color 0.2s ease'
-                    }}
-                    onFocus={(e) => e.target.style.borderColor = 'var(--primary-color)'}
-                    onBlur={(e) => e.target.style.borderColor = '#e0e0e0'}
-                  >
+                                     <select
+                     value={match.match_format.games_per_set}
+                     onChange={(e) => handleFormatChange('games_per_set', parseInt(e.target.value))}
+                     style={{
+                       width: '100%',
+                       padding: '12px 16px',
+                       border: '2px solid #e0e0e0',
+                       borderRadius: '8px',
+                       fontSize: '16px',
+                       backgroundColor: 'white',
+                       transition: 'border-color 0.2s ease',
+                       appearance: 'none',
+                       backgroundImage: 'url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2212%22%20height%3D%228%22%20viewBox%3D%220%200%2012%208%22%3E%3Cpath%20fill%3D%22%23666%22%20d%3D%22M1.41%200L6%204.59%2010.59%200%2012%201.41%206%207.41%200%201.41z%22/%3E%3C/svg%3E")',
+                       backgroundRepeat: 'no-repeat',
+                       backgroundPosition: 'right 12px center',
+                       backgroundSize: '12px 8px',
+                       paddingRight: '36px'
+                     }}
+                     onFocus={(e) => e.target.style.borderColor = 'var(--primary-color)'}
+                     onBlur={(e) => e.target.style.borderColor = '#e0e0e0'}
+                   >
                     <option value={4}>4</option>
                     <option value={6}>6</option>
                     <option value={8}>8</option>
@@ -533,26 +545,29 @@ const AddMatch: React.FC = () => {
                     {players?.find(p => p.id === match.player1_id)?.full_name || 'Player 1'}
                   </div>
                   {Array.from({ length: match.match_format.sets }, (_, setIndex) => (
-                    <input
-                      key={setIndex}
-                      type="number"
-                      min="0"
-                      max="20"
-                      value={match.detailed_score.player1_sets[setIndex] || ''}
-                      onChange={(e) => handleSetScoreChange(setIndex, 'player1', parseInt(e.target.value) || 0)}
-                      style={{
-                        width: '100%',
-                        padding: '8px',
-                        border: '2px solid #e0e0e0',
-                        borderRadius: '6px',
-                        fontSize: '14px',
-                        textAlign: 'center',
-                        transition: 'border-color 0.2s ease'
-                      }}
-                      onFocus={(e) => e.target.style.borderColor = 'var(--primary-color)'}
-                      onBlur={(e) => e.target.style.borderColor = '#e0e0e0'}
-                      placeholder="0"
-                    />
+                                         <input
+                       key={setIndex}
+                       type="text"
+                       inputMode="numeric"
+                       pattern="[0-9]*"
+                       value={match.detailed_score.player1_sets[setIndex] || ''}
+                       onChange={(e) => {
+                         const value = e.target.value.replace(/[^0-9]/g, '')
+                         handleSetScoreChange(setIndex, 'player1', parseInt(value) || 0)
+                       }}
+                       style={{
+                         width: '100%',
+                         padding: '8px',
+                         border: '2px solid #e0e0e0',
+                         borderRadius: '6px',
+                         fontSize: '14px',
+                         textAlign: 'center',
+                         transition: 'border-color 0.2s ease'
+                       }}
+                       onFocus={(e) => e.target.style.borderColor = 'var(--primary-color)'}
+                       onBlur={(e) => e.target.style.borderColor = '#e0e0e0'}
+                       placeholder="0"
+                     />
                   ))}
                 </div>
                 
@@ -571,26 +586,29 @@ const AddMatch: React.FC = () => {
                     {players?.find(p => p.id === match.player2_id)?.full_name || 'Player 2'}
                   </div>
                   {Array.from({ length: match.match_format.sets }, (_, setIndex) => (
-                    <input
-                      key={setIndex}
-                      type="number"
-                      min="0"
-                      max="20"
-                      value={match.detailed_score.player2_sets[setIndex] || ''}
-                      onChange={(e) => handleSetScoreChange(setIndex, 'player2', parseInt(e.target.value) || 0)}
-                      style={{
-                        width: '100%',
-                        padding: '8px',
-                        border: '2px solid #e0e0e0',
-                        borderRadius: '6px',
-                        fontSize: '14px',
-                        textAlign: 'center',
-                        transition: 'border-color 0.2s ease'
-                      }}
-                      onFocus={(e) => e.target.style.borderColor = 'var(--primary-color)'}
-                      onBlur={(e) => e.target.style.borderColor = '#e0e0e0'}
-                      placeholder="0"
-                    />
+                                         <input
+                       key={setIndex}
+                       type="text"
+                       inputMode="numeric"
+                       pattern="[0-9]*"
+                       value={match.detailed_score.player2_sets[setIndex] || ''}
+                       onChange={(e) => {
+                         const value = e.target.value.replace(/[^0-9]/g, '')
+                         handleSetScoreChange(setIndex, 'player2', parseInt(value) || 0)
+                       }}
+                       style={{
+                         width: '100%',
+                         padding: '8px',
+                         border: '2px solid #e0e0e0',
+                         borderRadius: '6px',
+                         fontSize: '14px',
+                         textAlign: 'center',
+                         transition: 'border-color 0.2s ease'
+                       }}
+                       onFocus={(e) => e.target.style.borderColor = 'var(--primary-color)'}
+                       onBlur={(e) => e.target.style.borderColor = '#e0e0e0'}
+                       placeholder="0"
+                     />
                   ))}
                 </div>
               </div>
