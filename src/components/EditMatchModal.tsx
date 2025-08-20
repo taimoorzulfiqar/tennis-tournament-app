@@ -127,43 +127,126 @@ const EditMatchModal: React.FC<EditMatchModalProps> = ({ match, isOpen, onClose,
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold">Edit Match</h2>
+    <div style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 1000
+    }}>
+      <div style={{
+        backgroundColor: 'white',
+        borderRadius: '12px',
+        padding: '24px',
+        width: '100%',
+        maxWidth: '600px',
+        maxHeight: '90vh',
+        overflowY: 'auto',
+        boxShadow: '0 20px 40px rgba(0, 0, 0, 0.3)',
+        margin: '20px'
+      }}>
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '24px'
+        }}>
+          <h2 style={{
+            fontSize: '24px',
+            fontWeight: 'bold',
+            color: 'var(--text-primary)'
+          }}>
+            Edit Match
+          </h2>
           <button
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-700"
+            style={{
+              background: 'none',
+              border: 'none',
+              fontSize: '24px',
+              color: 'var(--text-secondary)',
+              cursor: 'pointer',
+              padding: '4px',
+              borderRadius: '4px',
+              transition: 'color 0.2s ease'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.color = 'var(--text-primary)'}
+            onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-secondary)'}
           >
             ✕
           </button>
         </div>
 
         {tournament && (
-          <div className="mb-4 p-3 bg-gray-50 rounded">
-            <p className="text-sm text-gray-600">
-              Tournament: <span className="font-medium">{tournament.name}</span>
+          <div style={{
+            marginBottom: '24px',
+            padding: '16px',
+            backgroundColor: 'var(--primary-light)',
+            borderRadius: '8px',
+            border: '1px solid var(--primary-color)'
+          }}>
+            <p style={{
+              fontSize: '14px',
+              color: 'var(--text-secondary)',
+              margin: 0
+            }}>
+              Tournament: <span style={{ fontWeight: '600', color: 'var(--text-primary)' }}>{tournament.name}</span>
             </p>
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           {/* Players Display */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+            gap: '16px'
+          }}>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label style={{
+                display: 'block',
+                fontSize: '14px',
+                fontWeight: '600',
+                marginBottom: '8px',
+                color: 'var(--text-primary)'
+              }}>
                 Player 1
               </label>
-              <div className="p-3 bg-gray-50 rounded border">
+              <div style={{
+                padding: '12px 16px',
+                backgroundColor: '#f8f9fa',
+                borderRadius: '8px',
+                border: '1px solid #e0e0e0',
+                fontSize: '16px',
+                color: 'var(--text-primary)'
+              }}>
                 {getPlayerName(match.player1_id)}
               </div>
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label style={{
+                display: 'block',
+                fontSize: '14px',
+                fontWeight: '600',
+                marginBottom: '8px',
+                color: 'var(--text-primary)'
+              }}>
                 Player 2
               </label>
-              <div className="p-3 bg-gray-50 rounded border">
+              <div style={{
+                padding: '12px 16px',
+                backgroundColor: '#f8f9fa',
+                borderRadius: '8px',
+                border: '1px solid #e0e0e0',
+                fontSize: '16px',
+                color: 'var(--text-primary)'
+              }}>
                 {getPlayerName(match.player2_id)}
               </div>
             </div>
@@ -171,27 +254,58 @@ const EditMatchModal: React.FC<EditMatchModalProps> = ({ match, isOpen, onClose,
 
           {/* Court */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label style={{
+              display: 'block',
+              fontSize: '14px',
+              fontWeight: '600',
+              marginBottom: '8px',
+              color: 'var(--text-primary)'
+            }}>
               Court
             </label>
             <input
               type="text"
               value={formData.court}
               onChange={(e) => handleInputChange('court', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              style={{
+                width: '100%',
+                padding: '12px 16px',
+                border: '2px solid #e0e0e0',
+                borderRadius: '8px',
+                fontSize: '16px',
+                transition: 'border-color 0.2s ease'
+              }}
+              onFocus={(e) => e.target.style.borderColor = 'var(--primary-color)'}
+              onBlur={(e) => e.target.style.borderColor = '#e0e0e0'}
               placeholder="e.g., Court 1, Indoor Court, etc."
             />
           </div>
 
           {/* Status */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label style={{
+              display: 'block',
+              fontSize: '14px',
+              fontWeight: '600',
+              marginBottom: '8px',
+              color: 'var(--text-primary)'
+            }}>
               Status
             </label>
             <select
               value={formData.status}
               onChange={(e) => handleInputChange('status', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              style={{
+                width: '100%',
+                padding: '12px 16px',
+                border: '2px solid #e0e0e0',
+                borderRadius: '8px',
+                fontSize: '16px',
+                backgroundColor: 'white',
+                transition: 'border-color 0.2s ease'
+              }}
+              onFocus={(e) => e.target.style.borderColor = 'var(--primary-color)'}
+              onBlur={(e) => e.target.style.borderColor = '#e0e0e0'}
             >
               <option value="scheduled">Scheduled</option>
               <option value="in_progress">In Progress</option>
@@ -201,9 +315,19 @@ const EditMatchModal: React.FC<EditMatchModalProps> = ({ match, isOpen, onClose,
 
           {/* Score Inputs (only show if completed) */}
           {formData.status === 'completed' && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+              gap: '16px'
+            }}>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label style={{
+                  display: 'block',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  marginBottom: '8px',
+                  color: 'var(--text-primary)'
+                }}>
                   {getPlayerName(match.player1_id)} Score
                 </label>
                 <input
@@ -211,13 +335,28 @@ const EditMatchModal: React.FC<EditMatchModalProps> = ({ match, isOpen, onClose,
                   min="0"
                   value={formData.player1_score}
                   onChange={(e) => handleInputChange('player1_score', parseInt(e.target.value) || 0)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  style={{
+                    width: '100%',
+                    padding: '12px 16px',
+                    border: '2px solid #e0e0e0',
+                    borderRadius: '8px',
+                    fontSize: '16px',
+                    transition: 'border-color 0.2s ease'
+                  }}
+                  onFocus={(e) => e.target.style.borderColor = 'var(--primary-color)'}
+                  onBlur={(e) => e.target.style.borderColor = '#e0e0e0'}
                   required
                 />
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label style={{
+                  display: 'block',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  marginBottom: '8px',
+                  color: 'var(--text-primary)'
+                }}>
                   {getPlayerName(match.player2_id)} Score
                 </label>
                 <input
@@ -225,7 +364,16 @@ const EditMatchModal: React.FC<EditMatchModalProps> = ({ match, isOpen, onClose,
                   min="0"
                   value={formData.player2_score}
                   onChange={(e) => handleInputChange('player2_score', parseInt(e.target.value) || 0)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  style={{
+                    width: '100%',
+                    padding: '12px 16px',
+                    border: '2px solid #e0e0e0',
+                    borderRadius: '8px',
+                    fontSize: '16px',
+                    transition: 'border-color 0.2s ease'
+                  }}
+                  onFocus={(e) => e.target.style.borderColor = 'var(--primary-color)'}
+                  onBlur={(e) => e.target.style.borderColor = '#e0e0e0'}
                   required
                 />
               </div>
@@ -234,26 +382,73 @@ const EditMatchModal: React.FC<EditMatchModalProps> = ({ match, isOpen, onClose,
 
           {/* Winner Display */}
           {match.winner_id && (
-            <div className="p-3 bg-green-50 border border-green-200 rounded">
-              <p className="text-sm text-green-800">
-                <span className="font-medium">Winner:</span> {getPlayerName(match.winner_id)}
+            <div style={{
+              padding: '16px',
+              backgroundColor: '#e8f5e8',
+              border: '1px solid #4caf50',
+              borderRadius: '8px'
+            }}>
+              <p style={{
+                fontSize: '14px',
+                color: '#2e7d32',
+                margin: 0
+              }}>
+                <span style={{ fontWeight: '600' }}>Winner:</span> {getPlayerName(match.winner_id)}
               </p>
             </div>
           )}
 
           {/* Submit Button */}
-          <div className="flex justify-end space-x-4 pt-4">
+          <div style={{
+            display: 'flex',
+            justifyContent: 'flex-end',
+            gap: '16px',
+            paddingTop: '20px',
+            flexWrap: 'wrap'
+          }}>
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500"
+              style={{
+                padding: '12px 24px',
+                color: 'var(--text-primary)',
+                backgroundColor: '#f5f5f5',
+                border: '1px solid #e0e0e0',
+                borderRadius: '8px',
+                fontSize: '16px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                transition: 'background-color 0.2s ease'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e0e0e0'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#f5f5f5'}
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={updateMatchMutation.isPending}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+              style={{
+                padding: '12px 24px',
+                backgroundColor: updateMatchMutation.isPending ? '#ccc' : 'var(--primary-color)',
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px',
+                fontSize: '16px',
+                fontWeight: '600',
+                cursor: updateMatchMutation.isPending ? 'not-allowed' : 'pointer',
+                transition: 'background-color 0.2s ease'
+              }}
+              onMouseEnter={(e) => {
+                if (!updateMatchMutation.isPending) {
+                  e.currentTarget.style.backgroundColor = 'var(--primary-dark)'
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!updateMatchMutation.isPending) {
+                  e.currentTarget.style.backgroundColor = 'var(--primary-color)'
+                }
+              }}
             >
               {updateMatchMutation.isPending ? 'Updating...' : 'Update Match'}
             </button>

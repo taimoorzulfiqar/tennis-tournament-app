@@ -134,8 +134,21 @@ const AddMatch: React.FC = () => {
   if (tournamentLoading || playersLoading) {
     return (
       <Layout>
-        <div className="flex justify-center items-center h-64">
-          <div className="text-lg">Loading...</div>
+        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '24px' }}>
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '256px' }}>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{
+                width: '48px',
+                height: '48px',
+                border: '4px solid var(--primary-light)',
+                borderTop: '4px solid var(--primary-color)',
+                borderRadius: '50%',
+                animation: 'spin 1s linear infinite',
+                margin: '0 auto 16px'
+              }}></div>
+              <div style={{ fontSize: '18px', color: 'var(--text-secondary)' }}>Loading...</div>
+            </div>
+          </div>
         </div>
       </Layout>
     )
@@ -144,8 +157,13 @@ const AddMatch: React.FC = () => {
   if (!tournament) {
     return (
       <Layout>
-        <div className="flex justify-center items-center h-64">
-          <div className="text-lg text-red-600">Tournament not found</div>
+        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '24px' }}>
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '256px' }}>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '64px', marginBottom: '16px', color: '#f44336' }}>⚠️</div>
+              <div style={{ fontSize: '18px', color: '#f44336', fontWeight: '500' }}>Tournament not found</div>
+            </div>
+          </div>
         </div>
       </Layout>
     )
@@ -153,130 +171,278 @@ const AddMatch: React.FC = () => {
 
   return (
     <Layout>
-      <div className="max-w-2xl mx-auto p-6">
-        <h1 className="text-3xl font-bold mb-6">Add Match to {tournament.name}</h1>
+      <div style={{ maxWidth: '600px', margin: '0 auto', padding: '24px' }}>
+        <div style={{ marginBottom: '32px' }}>
+          <h1 style={{ fontSize: '32px', fontWeight: 'bold', marginBottom: '8px', color: 'var(--text-primary)' }}>
+            Add Match to {tournament.name}
+          </h1>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '16px' }}>
+            Create a new match for this tournament
+          </p>
+        </div>
         
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Player Selection */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Player 1
-              </label>
-              <select
-                value={match.player1_id}
-                onChange={(e) => handleInputChange('player1_id', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
-              >
-                <option value="">Select Player 1</option>
-                {players?.map((player) => (
-                  <option key={player.id} value={player.id}>
-                    {player.full_name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Player 2
-              </label>
-              <select
-                value={match.player2_id}
-                onChange={(e) => handleInputChange('player2_id', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
-              >
-                <option value="">Select Player 2</option>
-                {players?.map((player) => (
-                  <option key={player.id} value={player.id}>
-                    {player.full_name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          {/* Court */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Court
-            </label>
-            <input
-              type="text"
-              value={match.court}
-              onChange={(e) => handleInputChange('court', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="e.g., Court 1, Indoor Court, etc."
-            />
-          </div>
-
-          {/* Match Completion */}
-          <div className="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              id="is_completed"
-              checked={match.is_completed}
-              onChange={(e) => handleInputChange('is_completed', e.target.checked)}
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-            />
-            <label htmlFor="is_completed" className="text-sm font-medium text-gray-700">
-              Mark as completed
-            </label>
-          </div>
-
-          {/* Score Inputs (only show if completed) */}
-          {match.is_completed && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div style={{
+          backgroundColor: 'white',
+          borderRadius: '12px',
+          padding: '32px',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+          border: '1px solid #e0e0e0'
+        }}>
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+            {/* Player Selection */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+              gap: '16px'
+            }}>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {players?.find(p => p.id === match.player1_id)?.full_name || 'Player 1'} Score
+                <label style={{
+                  display: 'block',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  marginBottom: '8px',
+                  color: 'var(--text-primary)'
+                }}>
+                  Player 1
                 </label>
-                <input
-                  type="number"
-                  min="0"
-                  value={match.player1_score}
-                  onChange={(e) => handleInputChange('player1_score', parseInt(e.target.value) || 0)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                <select
+                  value={match.player1_id}
+                  onChange={(e) => handleInputChange('player1_id', e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '12px 16px',
+                    border: '2px solid #e0e0e0',
+                    borderRadius: '8px',
+                    fontSize: '16px',
+                    backgroundColor: 'white',
+                    transition: 'border-color 0.2s ease'
+                  }}
+                  onFocus={(e) => e.target.style.borderColor = 'var(--primary-color)'}
+                  onBlur={(e) => e.target.style.borderColor = '#e0e0e0'}
                   required
-                />
+                >
+                  <option value="">Select Player 1</option>
+                  {players?.map((player) => (
+                    <option key={player.id} value={player.id}>
+                      {player.full_name}
+                    </option>
+                  ))}
+                </select>
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {players?.find(p => p.id === match.player2_id)?.full_name || 'Player 2'} Score
+                <label style={{
+                  display: 'block',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  marginBottom: '8px',
+                  color: 'var(--text-primary)'
+                }}>
+                  Player 2
                 </label>
-                <input
-                  type="number"
-                  min="0"
-                  value={match.player2_score}
-                  onChange={(e) => handleInputChange('player2_score', parseInt(e.target.value) || 0)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                <select
+                  value={match.player2_id}
+                  onChange={(e) => handleInputChange('player2_id', e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '12px 16px',
+                    border: '2px solid #e0e0e0',
+                    borderRadius: '8px',
+                    fontSize: '16px',
+                    backgroundColor: 'white',
+                    transition: 'border-color 0.2s ease'
+                  }}
+                  onFocus={(e) => e.target.style.borderColor = 'var(--primary-color)'}
+                  onBlur={(e) => e.target.style.borderColor = '#e0e0e0'}
                   required
-                />
+                >
+                  <option value="">Select Player 2</option>
+                  {players?.map((player) => (
+                    <option key={player.id} value={player.id}>
+                      {player.full_name}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
-          )}
 
-          {/* Submit Button */}
-          <div className="flex justify-end space-x-4">
-            <button
-              type="button"
-              onClick={() => navigate(`/tournaments/${tournamentId}`)}
-              className="px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={createMatchMutation.isPending}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
-            >
-              {createMatchMutation.isPending ? 'Creating...' : 'Create Match'}
-            </button>
-          </div>
-        </form>
+            {/* Court */}
+            <div>
+              <label style={{
+                display: 'block',
+                fontSize: '14px',
+                fontWeight: '600',
+                marginBottom: '8px',
+                color: 'var(--text-primary)'
+              }}>
+                Court
+              </label>
+              <input
+                type="text"
+                value={match.court}
+                onChange={(e) => handleInputChange('court', e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '12px 16px',
+                  border: '2px solid #e0e0e0',
+                  borderRadius: '8px',
+                  fontSize: '16px',
+                  transition: 'border-color 0.2s ease'
+                }}
+                onFocus={(e) => e.target.style.borderColor = 'var(--primary-color)'}
+                onBlur={(e) => e.target.style.borderColor = '#e0e0e0'}
+                placeholder="e.g., Court 1, Indoor Court, etc."
+              />
+            </div>
+
+            {/* Match Completion */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <input
+                type="checkbox"
+                id="is_completed"
+                checked={match.is_completed}
+                onChange={(e) => handleInputChange('is_completed', e.target.checked)}
+                style={{
+                  width: '20px',
+                  height: '20px',
+                  accentColor: 'var(--primary-color)',
+                  cursor: 'pointer'
+                }}
+              />
+              <label htmlFor="is_completed" style={{
+                fontSize: '16px',
+                fontWeight: '500',
+                color: 'var(--text-primary)',
+                cursor: 'pointer'
+              }}>
+                Mark as completed
+              </label>
+            </div>
+
+            {/* Score Inputs (only show if completed) */}
+            {match.is_completed && (
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+                gap: '16px'
+              }}>
+                <div>
+                  <label style={{
+                    display: 'block',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    marginBottom: '8px',
+                    color: 'var(--text-primary)'
+                  }}>
+                    {players?.find(p => p.id === match.player1_id)?.full_name || 'Player 1'} Score
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={match.player1_score}
+                    onChange={(e) => handleInputChange('player1_score', parseInt(e.target.value) || 0)}
+                    style={{
+                      width: '100%',
+                      padding: '12px 16px',
+                      border: '2px solid #e0e0e0',
+                      borderRadius: '8px',
+                      fontSize: '16px',
+                      transition: 'border-color 0.2s ease'
+                    }}
+                    onFocus={(e) => e.target.style.borderColor = 'var(--primary-color)'}
+                    onBlur={(e) => e.target.style.borderColor = '#e0e0e0'}
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <label style={{
+                    display: 'block',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    marginBottom: '8px',
+                    color: 'var(--text-primary)'
+                  }}>
+                    {players?.find(p => p.id === match.player2_id)?.full_name || 'Player 2'} Score
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={match.player2_score}
+                    onChange={(e) => handleInputChange('player2_score', parseInt(e.target.value) || 0)}
+                    style={{
+                      width: '100%',
+                      padding: '12px 16px',
+                      border: '2px solid #e0e0e0',
+                      borderRadius: '8px',
+                      fontSize: '16px',
+                      transition: 'border-color 0.2s ease'
+                    }}
+                    onFocus={(e) => e.target.style.borderColor = 'var(--primary-color)'}
+                    onBlur={(e) => e.target.style.borderColor = '#e0e0e0'}
+                    required
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Submit Button */}
+            <div style={{
+              display: 'flex',
+              justifyContent: 'flex-end',
+              gap: '16px',
+              paddingTop: '20px',
+              flexWrap: 'wrap'
+            }}>
+              <button
+                type="button"
+                onClick={() => navigate(`/tournaments/${tournamentId}`)}
+                style={{
+                  padding: '12px 24px',
+                  color: 'var(--text-primary)',
+                  backgroundColor: '#f5f5f5',
+                  border: '1px solid #e0e0e0',
+                  borderRadius: '8px',
+                  fontSize: '16px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  transition: 'background-color 0.2s ease'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e0e0e0'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#f5f5f5'}
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={createMatchMutation.isPending}
+                style={{
+                  padding: '12px 24px',
+                  backgroundColor: createMatchMutation.isPending ? '#ccc' : 'var(--primary-color)',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '8px',
+                  fontSize: '16px',
+                  fontWeight: '600',
+                  cursor: createMatchMutation.isPending ? 'not-allowed' : 'pointer',
+                  transition: 'background-color 0.2s ease'
+                }}
+                onMouseEnter={(e) => {
+                  if (!createMatchMutation.isPending) {
+                    e.currentTarget.style.backgroundColor = 'var(--primary-dark)'
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!createMatchMutation.isPending) {
+                    e.currentTarget.style.backgroundColor = 'var(--primary-color)'
+                  }
+                }}
+              >
+                {createMatchMutation.isPending ? 'Creating...' : 'Create Match'}
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </Layout>
   )
