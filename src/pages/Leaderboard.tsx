@@ -32,43 +32,43 @@ const Leaderboard: React.FC = () => {
     return player?.full_name || player?.email || 'Unknown Player'
   }
 
-  // Calculate leaderboard based on games won from completed matches only
+  // Calculate leaderboard based on sets won from completed matches only
   const calculateLeaderboard = () => {
     if (!allMatches || !players) return []
 
-    const playerStats: { [key: string]: { gamesWon: number, matchesPlayed: number } } = {}
+    const playerStats: { [key: string]: { setsWon: number, matchesPlayed: number } } = {}
 
     // Initialize player stats
     players.forEach(player => {
-      playerStats[player.id] = { gamesWon: 0, matchesPlayed: 0 }
+      playerStats[player.id] = { setsWon: 0, matchesPlayed: 0 }
     })
 
-    // Calculate games won from completed matches only
+    // Calculate sets won from completed matches only
     allMatches.forEach(match => {
       if (match.status === 'completed' && (match.player1_score > 0 || match.player2_score > 0)) {
-        // Add games won by each player
+        // Add sets won by each player
         if (playerStats[match.player1_id]) {
-          playerStats[match.player1_id].gamesWon += match.player1_score
+          playerStats[match.player1_id].setsWon += match.player1_score
           playerStats[match.player1_id].matchesPlayed += 1
         }
         if (playerStats[match.player2_id]) {
-          playerStats[match.player2_id].gamesWon += match.player2_score
+          playerStats[match.player2_id].setsWon += match.player2_score
           playerStats[match.player2_id].matchesPlayed += 1
         }
       }
     })
 
-    // Convert to array and sort by games won
+    // Convert to array and sort by sets won
     return Object.entries(playerStats)
       .map(([playerId, stats]) => ({
         player_id: playerId,
         player_name: getPlayerName(playerId),
         player_email: players.find(p => p.id === playerId)?.email || '',
-        games_won: stats.gamesWon,
+        sets_won: stats.setsWon,
         matches_played: stats.matchesPlayed
       }))
       .filter(entry => entry.matches_played > 0) // Only show players who have played matches
-      .sort((a, b) => b.games_won - a.games_won) // Sort by games won (descending)
+      .sort((a, b) => b.sets_won - a.sets_won) // Sort by sets won (descending)
   }
 
   const leaderboard = calculateLeaderboard()
@@ -115,7 +115,7 @@ const Leaderboard: React.FC = () => {
         {leaderboard && leaderboard.length > 0 ? (
           <div className="card">
             <h2 style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--primary-color)', margin: '0 0 20px 0' }}>
-              Player Rankings (Based on Completed Matches)
+              Player Rankings (Based on Sets Won)
             </h2>
             <div style={{ display: 'grid', gap: '12px' }}>
               {leaderboard.map((entry, index) => (
@@ -154,10 +154,10 @@ const Leaderboard: React.FC = () => {
                   
                   <div style={{ textAlign: 'right' }}>
                     <div style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--primary-color)' }}>
-                      {entry.games_won}
+                      {entry.sets_won}
                     </div>
                     <div style={{ fontSize: '12px', color: '#666' }}>
-                      games won ({entry.matches_played} matches)
+                      sets won ({entry.matches_played} matches)
                     </div>
                   </div>
                 </div>
