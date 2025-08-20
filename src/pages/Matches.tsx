@@ -63,15 +63,27 @@ const Matches: React.FC = () => {
   if (matchesLoading || playersLoading) {
     return (
       <Layout>
-        <div className="max-w-6xl mx-auto p-6">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">All Matches</h1>
-            <p className="text-gray-600 text-lg">View and manage all tournament matches</p>
+        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '24px' }}>
+          <div style={{ marginBottom: '32px' }}>
+            <h1 style={{ fontSize: '32px', fontWeight: 'bold', marginBottom: '8px', color: 'var(--text-primary)' }}>
+              All Matches
+            </h1>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '18px' }}>
+              View and manage all tournament matches
+            </p>
           </div>
-          <div className="flex justify-center items-center h-64">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
-              <div className="text-lg text-gray-600">Loading matches...</div>
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '256px' }}>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{
+                width: '48px',
+                height: '48px',
+                border: '4px solid var(--primary-light)',
+                borderTop: '4px solid var(--primary-color)',
+                borderRadius: '50%',
+                animation: 'spin 1s linear infinite',
+                margin: '0 auto 16px'
+              }}></div>
+              <div style={{ fontSize: '18px', color: 'var(--text-secondary)' }}>Loading matches...</div>
             </div>
           </div>
         </div>
@@ -82,25 +94,39 @@ const Matches: React.FC = () => {
   if (matchesError) {
     return (
       <Layout>
-        <div className="max-w-6xl mx-auto p-6">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">All Matches</h1>
-            <p className="text-gray-600 text-lg">View and manage all tournament matches</p>
+        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '24px' }}>
+          <div style={{ marginBottom: '32px' }}>
+            <h1 style={{ fontSize: '32px', fontWeight: 'bold', marginBottom: '8px', color: 'var(--text-primary)' }}>
+              All Matches
+            </h1>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '18px' }}>
+              View and manage all tournament matches
+            </p>
           </div>
-          <div className="flex justify-center items-center h-64">
-            <div className="text-center">
-              <div className="text-red-400 mb-4">
-                <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                </svg>
-              </div>
-              <h2 className="text-red-600 text-xl mb-4 font-semibold">Error Loading Matches</h2>
-              <p className="text-gray-600 mb-6 max-w-md mx-auto">
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '256px' }}>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '64px', marginBottom: '16px', color: '#f44336' }}>⚠️</div>
+              <h2 style={{ color: '#f44336', fontSize: '24px', marginBottom: '16px', fontWeight: 'bold' }}>
+                Error Loading Matches
+              </h2>
+              <p style={{ color: 'var(--text-secondary)', marginBottom: '24px', maxWidth: '400px', margin: '0 auto' }}>
                 {matchesError instanceof Error ? matchesError.message : 'Unknown error occurred'}
               </p>
               <button 
                 onClick={() => window.location.reload()} 
-                className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 transition-all duration-200 font-medium"
+                style={{
+                  padding: '12px 24px',
+                  backgroundColor: 'var(--primary-color)',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '8px',
+                  fontSize: '16px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  transition: 'background-color 0.2s ease'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--primary-dark)'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--primary-color)'}
               >
                 Retry
               </button>
@@ -113,55 +139,80 @@ const Matches: React.FC = () => {
 
   return (
     <Layout>
-      <div className="max-w-6xl mx-auto p-6">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">All Matches</h1>
-          <p className="text-gray-600 text-lg">View and manage all tournament matches</p>
+      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '24px' }}>
+        <div style={{ marginBottom: '32px' }}>
+          <h1 style={{ fontSize: '32px', fontWeight: 'bold', marginBottom: '8px', color: 'var(--text-primary)' }}>
+            All Matches
+          </h1>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '18px' }}>
+            View and manage all tournament matches
+          </p>
         </div>
         
         {matches && matches.length > 0 ? (
-          <div className="grid gap-6">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             {matches.map((match) => (
-              <div key={match.id} className="bg-white rounded-xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-all duration-200">
-                <div className="flex flex-col lg:flex-row justify-between items-start gap-4">
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-xl font-bold text-gray-900">
+              <div key={match.id} style={{
+                backgroundColor: 'white',
+                borderRadius: '12px',
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+                padding: '24px',
+                border: '1px solid #e0e0e0',
+                transition: 'box-shadow 0.2s ease'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.boxShadow = '0 8px 24px rgba(0, 0, 0, 0.15)'}
+              onMouseLeave={(e) => e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.1)'}
+              >
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+                      <h3 style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--text-primary)' }}>
                         {getPlayerName(match.player1_id)} vs {getPlayerName(match.player2_id)}
                       </h3>
-                      <span className={`px-4 py-2 rounded-full text-sm font-semibold ${
-                        match.status === 'completed' ? 'bg-green-100 text-green-800 border border-green-200' :
-                        match.status === 'in_progress' ? 'bg-yellow-100 text-yellow-800 border border-yellow-200' :
-                        'bg-gray-100 text-gray-800 border border-gray-200'
-                      }`}>
+                      <span style={{
+                        padding: '8px 16px',
+                        borderRadius: '20px',
+                        fontSize: '14px',
+                        fontWeight: 'bold',
+                        backgroundColor: match.status === 'completed' ? '#e8f5e8' : 
+                                         match.status === 'in_progress' ? '#fff3e0' : '#f5f5f5',
+                        color: match.status === 'completed' ? '#2e7d32' : 
+                               match.status === 'in_progress' ? '#f57c00' : '#666',
+                        border: `1px solid ${match.status === 'completed' ? '#4caf50' : 
+                                           match.status === 'in_progress' ? '#ff9800' : '#e0e0e0'}`
+                      }}>
                         {match.status.replace('_', ' ').toUpperCase()}
                       </span>
                     </div>
                     
                     {match.court && (
-                      <div className="mb-3 flex items-center gap-2">
-                        <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                        </svg>
-                        <span className="text-sm text-gray-600 font-medium">Court: {match.court}</span>
+                      <div style={{ marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ fontSize: '16px' }}>🏟️</span>
+                        <span style={{ fontSize: '14px', color: 'var(--text-secondary)', fontWeight: '500' }}>
+                          Court: {match.court}
+                        </span>
                       </div>
                     )}
                     
                     {match.status === 'completed' && (
-                      <div className="mb-4">
-                        <div className="flex items-center gap-4 mb-2">
-                          <div className="bg-blue-50 px-4 py-2 rounded-lg border border-blue-200">
-                            <p className="text-sm text-blue-600 font-semibold">
-                              Score: <span className="text-lg">{match.player1_score} - {match.player2_score}</span>
+                      <div style={{ marginBottom: '16px' }}>
+                        <div style={{ marginBottom: '8px' }}>
+                          <div style={{
+                            backgroundColor: '#e3f2fd',
+                            padding: '12px 16px',
+                            borderRadius: '8px',
+                            border: '1px solid #2196f3',
+                            display: 'inline-block'
+                          }}>
+                            <p style={{ fontSize: '14px', color: '#1976d2', fontWeight: 'bold' }}>
+                              Score: <span style={{ fontSize: '20px' }}>{match.player1_score} - {match.player2_score}</span>
                             </p>
                           </div>
                         </div>
                         {match.winner_id && (
-                          <div className="flex items-center gap-2">
-                            <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            <p className="text-sm font-semibold text-green-600">
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <span style={{ fontSize: '20px' }}>🏆</span>
+                            <p style={{ fontSize: '14px', fontWeight: 'bold', color: '#2e7d32' }}>
                               Winner: {getPlayerName(match.winner_id)}
                             </p>
                           </div>
@@ -169,34 +220,58 @@ const Matches: React.FC = () => {
                       </div>
                     )}
                     
-                    <div className="flex items-center gap-2 text-xs text-gray-500">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                      </svg>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: 'var(--text-secondary)' }}>
+                      <span>📅</span>
                       <span>Created: {new Date(match.created_at).toLocaleDateString()}</span>
                     </div>
                   </div>
                   
                   {/* Action buttons - only show for admins */}
                   {user && (user.role === 'master' || (user.role === 'admin' && user.verification_status === 'approved')) && (
-                    <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                       <button
                         onClick={() => handleEditMatch(match)}
-                        className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 transition-all duration-200 flex items-center justify-center gap-2 text-sm font-medium"
+                        style={{
+                          padding: '12px 16px',
+                          backgroundColor: 'var(--primary-color)',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '8px',
+                          fontSize: '14px',
+                          fontWeight: '600',
+                          cursor: 'pointer',
+                          transition: 'background-color 0.2s ease',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '8px'
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--primary-dark)'}
+                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--primary-color)'}
                       >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                        </svg>
-                        Edit
+                        ✏️ Edit
                       </button>
                       <button
                         onClick={() => handleDeleteMatch(match.id)}
-                        className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200 flex items-center justify-center gap-2 text-sm font-medium"
+                        style={{
+                          padding: '12px 16px',
+                          backgroundColor: '#f44336',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '8px',
+                          fontSize: '14px',
+                          fontWeight: '600',
+                          cursor: 'pointer',
+                          transition: 'background-color 0.2s ease',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '8px'
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#d32f2f'}
+                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#f44336'}
                       >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                        Delete
+                        🗑️ Delete
                       </button>
                     </div>
                   )}
@@ -205,14 +280,14 @@ const Matches: React.FC = () => {
             ))}
           </div>
         ) : (
-          <div className="text-center py-16">
-            <div className="text-gray-400 mb-4">
-              <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-              </svg>
-            </div>
-            <p className="text-gray-600 text-lg font-medium">No matches found.</p>
-            <p className="text-gray-500 text-sm mt-2">Matches will appear here once they are created.</p>
+          <div style={{ textAlign: 'center', padding: '64px 24px' }}>
+            <div style={{ fontSize: '64px', marginBottom: '16px', color: '#ccc' }}>🎾</div>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '18px', fontWeight: '500', marginBottom: '8px' }}>
+              No matches found.
+            </p>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>
+              Matches will appear here once they are created.
+            </p>
           </div>
         )}
         
