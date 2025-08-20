@@ -26,6 +26,8 @@ export interface Match {
   player2_id: string
   start_time: string
   court: string
+  games_per_set: number
+  sets_per_match: number
   player1_score: number
   player2_score: number
   status: 'scheduled' | 'in_progress' | 'completed'
@@ -70,6 +72,10 @@ export interface CreateMatchDTO {
   player2_id: string
   start_time: string
   court: string
+  games_per_set: number
+  sets_per_match: number
+  player1_score?: number
+  player2_score?: number
 }
 
 export interface UpdateMatchScoreDTO {
