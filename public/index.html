@@ -90,6 +90,28 @@
     <div id="root"></div>
     
     <script>
+      // Intercept script loading to fix import.meta issues
+      const originalCreateElement = document.createElement;
+      document.createElement = function(tagName) {
+        const element = originalCreateElement.call(document, tagName);
+        if (tagName.toLowerCase() === 'script') {
+          const originalSetAttribute = element.setAttribute;
+          element.setAttribute = function(name, value) {
+            if (name === 'src' && value && value.includes('entry')) {
+              // Set module type for entry scripts
+              setTimeout(() => {
+                if (!this.type) {
+                  this.type = 'module';
+                  console.log('Set module type for:', value);
+                }
+              }, 0);
+            }
+            return originalSetAttribute.call(this, name, value);
+          };
+        }
+        return element;
+      };
+
       // Global error handler
       window.addEventListener('error', function(e) {
         console.error('Global error:', e.error);

@@ -21,7 +21,7 @@
       }
     },
     "web": {
-      "bundler": "webpack",
+      "bundler": "metro",
       "output": "static",
       "template": "public/index.html"
     },
