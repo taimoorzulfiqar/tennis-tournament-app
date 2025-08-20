@@ -1,5 +1,5 @@
 {
-  "buildCommand": "npm run build:web",
+  "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "rewrites": [
     {
@@ -9,21 +9,8 @@
   ],
   "headers": [
     {
-      "source": "/static/(.*)",
+      "source": "/assets/(.*)",
       "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=31536000, immutable"
-        }
-      ]
-    },
-    {
-      "source": "/_expo/static/js/web/(.*)",
-      "headers": [
-        {
-          "key": "Content-Type",
-          "value": "application/javascript"
-        },
         {
           "key": "Cache-Control",
           "value": "public, max-age=31536000, immutable"
@@ -40,20 +27,11 @@
       ]
     },
     {
-      "source": "/entry-(.*).js",
+      "source": "/(.*).css",
       "headers": [
         {
           "key": "Content-Type",
-          "value": "application/javascript"
-        }
-      ]
-    },
-    {
-      "source": "/(.*).mjs",
-      "headers": [
-        {
-          "key": "Content-Type",
-          "value": "application/javascript"
+          "value": "text/css"
         }
       ]
     },
@@ -63,15 +41,6 @@
         {
           "key": "Content-Type",
           "value": "text/html"
-        }
-      ]
-    },
-    {
-      "source": "/(.*)",
-      "headers": [
-        {
-          "key": "X-Content-Type-Options",
-          "value": "nosniff"
         }
       ]
     }
