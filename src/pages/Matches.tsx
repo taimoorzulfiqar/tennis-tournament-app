@@ -13,21 +13,8 @@ const Matches: React.FC = () => {
 
   const { data: matches, isLoading: matchesLoading, error: matchesError } = useQuery({
     queryKey: ['matches'],
-    queryFn: async () => {
-      console.log('Fetching matches...')
-      const result = await matchAPI.getMatches()
-      console.log('Matches API result:', result)
-      return result
-    },
-    refetchOnWindowFocus: true,
-    staleTime: 0,
-    retry: 1,
+    queryFn: () => matchAPI.getMatches(),
   })
-
-  // Debug logging
-  console.log('Matches data:', matches)
-  console.log('Matches loading:', matchesLoading)
-  console.log('Matches error:', matchesError)
 
   const { data: players, isLoading: playersLoading } = useQuery({
     queryKey: ['players'],
@@ -116,56 +103,7 @@ const Matches: React.FC = () => {
           Matches
         </h1>
 
-        {/* Debug info - remove this after fixing */}
-        <div style={{ 
-          backgroundColor: '#f0f0f0', 
-          padding: '10px', 
-          marginBottom: '20px', 
-          borderRadius: '5px',
-          fontSize: '12px'
-        }}>
-          <strong>Debug Info:</strong> Matches count: {matches?.length || 0} | 
-          Players count: {players?.length || 0} | 
-          Data type: {typeof matches}
-          <br />
-                  <button 
-          onClick={() => {
-            queryClient.invalidateQueries({ queryKey: ['matches'] })
-            console.log('Cache invalidated, refetching matches...')
-          }}
-          style={{ 
-            marginTop: '5px', 
-            padding: '2px 8px', 
-            fontSize: '10px',
-            backgroundColor: '#007bff',
-            color: 'white',
-            border: 'none',
-            borderRadius: '3px',
-            cursor: 'pointer'
-          }}
-        >
-          Refresh Matches
-        </button>
-        <button 
-          onClick={() => {
-            console.log('Current query cache:', queryClient.getQueryData(['matches']))
-            console.log('All queries:', queryClient.getQueryCache().getAll())
-          }}
-          style={{ 
-            marginTop: '5px', 
-            marginLeft: '5px',
-            padding: '2px 8px', 
-            fontSize: '10px',
-            backgroundColor: '#28a745',
-            color: 'white',
-            border: 'none',
-            borderRadius: '3px',
-            cursor: 'pointer'
-          }}
-        >
-          Debug Cache
-        </button>
-        </div>
+        
 
         {matches && matches.length > 0 ? (
           <div style={{ 

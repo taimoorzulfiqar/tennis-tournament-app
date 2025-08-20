@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
-import { matchAPI, userAPI } from '../lib/api'
+import { matchAPI, userAPI, tournamentAPI } from '../lib/api'
 
 interface EditMatchModalProps {
   match: {
@@ -36,6 +36,12 @@ const EditMatchModal: React.FC<EditMatchModalProps> = ({ match, isOpen, onClose,
       const allUsers = await userAPI.getUsers()
       return allUsers.filter(u => u.role === 'player')
     }
+  })
+
+  const { data: tournament } = useQuery({
+    queryKey: ['tournament', match.tournament_id],
+    queryFn: () => tournamentAPI.getTournament(match.tournament_id),
+    enabled: !!match.tournament_id,
   })
 
   const getPlayerName = (playerId: string) => {
@@ -190,7 +196,7 @@ const EditMatchModal: React.FC<EditMatchModalProps> = ({ match, isOpen, onClose,
               {getPlayerName(match.player1_id)} vs {getPlayerName(match.player2_id)}
             </h3>
             <p style={{ color: '#666', margin: '0 0 8px 0', fontSize: '14px' }}>
-              <strong>Tournament:</strong> {match.tournament_id}
+              <strong>Tournament:</strong> {tournament?.name || 'Loading...'}
             </p>
             <p style={{ color: '#666', margin: 0, fontSize: '14px' }}>
               <strong>Format:</strong> {match.sets_per_match} sets, {match.games_per_set} games per set

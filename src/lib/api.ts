@@ -195,8 +195,6 @@ export const tournamentAPI = {
 // Match API
 export const matchAPI = {
   getMatches: async (tournamentId?: string): Promise<Match[]> => {
-    console.log('API: getMatches called with tournamentId:', tournamentId)
-    
     let query = supabase
       .from('matches')
       .select('*')
@@ -207,8 +205,6 @@ export const matchAPI = {
     }
 
     const { data, error } = await query
-    console.log('API: getMatches result - data:', data, 'error:', error)
-    
     if (error) throw new Error(error.message)
     return data
   },
@@ -225,8 +221,6 @@ export const matchAPI = {
   },
 
   createMatch: async (match: CreateMatchDTO): Promise<Match> => {
-    console.log('API: createMatch called with:', match)
-    
     // Prepare match data with defaults for missing columns
     const matchData = {
       tournament_id: match.tournament_id,
@@ -240,16 +234,12 @@ export const matchAPI = {
       status: 'scheduled'
     }
     
-    console.log('API: createMatch prepared data:', matchData)
-    
     const { data, error } = await supabase
       .from('matches')
       .insert(matchData)
       .select()
       .single()
 
-    console.log('API: createMatch result - data:', data, 'error:', error)
-    
     if (error) throw new Error(error.message)
     return data
   },
