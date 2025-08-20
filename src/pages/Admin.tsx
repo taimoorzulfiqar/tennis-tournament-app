@@ -56,6 +56,8 @@ const Admin: React.FC = () => {
       // Force refetch to ensure data is in sync
       setTimeout(() => {
         refetch()
+        // Force a page refresh to ensure UI is completely updated
+        window.location.reload()
       }, 100)
       
       alert('User deleted successfully!')
