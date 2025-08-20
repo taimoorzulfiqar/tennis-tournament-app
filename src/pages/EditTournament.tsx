@@ -48,7 +48,10 @@ const EditTournament: React.FC = () => {
   // Fetch players for selection
   const { data: players, isLoading: playersLoading } = useQuery({
     queryKey: ['players'],
-    queryFn: () => userAPI.getUsers().then(users => users.filter(u => u.role === 'player')),
+    queryFn: async () => {
+      const allUsers = await userAPI.getUsers()
+      return allUsers.filter(u => u.role === 'player')
+    },
   })
 
   // Initialize form data when tournament and matches are loaded
@@ -81,14 +84,20 @@ const EditTournament: React.FC = () => {
 
   const updateTournamentMutation = useMutation({
     mutationFn: async (tournamentData: any) => {
+      // Prepare tournament data - handle empty end_date
+      const tournamentUpdate = {
+        ...tournamentData,
+        end_date: tournamentData.end_date || null // Convert empty string to null
+      }
+      
       // Update tournament
-      const updatedTournament = await tournamentAPI.updateTournament(id!, tournamentData)
+      const updatedTournament = await tournamentAPI.updateTournament(id!, tournamentUpdate)
       
       // Update existing matches and create new ones
       for (const match of matches) {
         if (match.id) {
           // Update existing match
-          await matchAPI.updateMatch(id!, {
+          await matchAPI.updateMatch(match.id, {
             player1_id: match.player1_id,
             player2_id: match.player2_id,
             games_per_set: match.games_per_set,

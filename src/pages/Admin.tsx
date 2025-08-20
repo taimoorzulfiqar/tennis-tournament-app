@@ -39,10 +39,14 @@ const Admin: React.FC = () => {
   const deleteUserMutation = useMutation({
     mutationFn: userAPI.deleteUser,
     onSuccess: (_, userId) => {
+      console.log('Admin: User deleted successfully, updating UI for user:', userId)
+      
       // Optimistically remove the user from the cache
       queryClient.setQueryData(['users'], (oldData: User[] | undefined) => {
         if (!oldData) return oldData
-        return oldData.filter(user => user.id !== userId)
+        const filteredData = oldData.filter(user => user.id !== userId)
+        console.log('Admin: Updated cache, removed user. New count:', filteredData.length)
+        return filteredData
       })
       
       // Force refetch to ensure data is in sync
@@ -54,6 +58,7 @@ const Admin: React.FC = () => {
       alert('User deleted successfully!')
     },
     onError: (error) => {
+      console.error('Admin: Error deleting user:', error)
       alert(error instanceof Error ? error.message : 'Failed to delete user')
     },
   })

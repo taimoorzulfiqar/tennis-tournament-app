@@ -42,13 +42,22 @@ const CreateTournament: React.FC = () => {
   // Fetch players for selection
   const { data: players, isLoading: playersLoading } = useQuery({
     queryKey: ['players'],
-    queryFn: () => userAPI.getUsers().then(users => users.filter(u => u.role === 'player')),
+    queryFn: async () => {
+      const allUsers = await userAPI.getUsers()
+      return allUsers.filter(u => u.role === 'player')
+    },
   })
 
   const createTournamentMutation = useMutation({
     mutationFn: async (tournamentData: any) => {
+      // Prepare tournament data - handle empty end_date
+      const tournamentCreate = {
+        ...tournamentData,
+        end_date: tournamentData.end_date || null // Convert empty string to null
+      }
+      
       // First create the tournament
-      const createdTournament = await tournamentAPI.createTournament(tournamentData, user!.id)
+      const createdTournament = await tournamentAPI.createTournament(tournamentCreate, user!.id)
       
       // Then create all matches for the tournament
       for (const match of matches) {
