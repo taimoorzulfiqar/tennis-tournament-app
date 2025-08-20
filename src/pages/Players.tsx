@@ -55,16 +55,16 @@ const Players: React.FC = () => {
       }
     })
 
-         // Calculate stats from matches
-     matches.forEach(match => {
-       console.log('Processing match:', match)
-       console.log('Match scores - Player1:', match.player1_score, 'Player2:', match.player2_score)
-       console.log('Match status:', match.status, 'Winner ID:', match.winner_id)
-       
-       if (match.status === 'completed' && match.winner_id) {
-         console.log('Match is completed with winner:', match.winner_id)
-         const player1Stats = statsMap.get(match.player1_id)
-         const player2Stats = statsMap.get(match.player2_id)
+    // Calculate stats from matches
+    matches.forEach(match => {
+      console.log('Processing match:', match)
+      console.log('Match scores - Player1:', match.player1_score, 'Player2:', match.player2_score)
+      console.log('Match status:', match.status, 'Winner ID:', match.winner_id)
+      
+      if (match.status === 'completed' && match.winner_id) {
+        console.log('Match is completed with winner:', match.winner_id)
+        const player1Stats = statsMap.get(match.player1_id)
+        const player2Stats = statsMap.get(match.player2_id)
 
         if (player1Stats) {
           player1Stats.matchesPlayed++
@@ -180,8 +180,8 @@ const Players: React.FC = () => {
   if (usersLoading || matchesLoading) {
     return (
       <Layout>
-        <div style={{ textAlign: 'center', padding: '40px' }}>
-          <div style={{ fontSize: '24px', marginBottom: '16px' }}>Loading players...</div>
+        <div className="flex justify-center items-center h-64">
+          <div className="text-lg">Loading players...</div>
         </div>
       </Layout>
     )
@@ -189,226 +189,127 @@ const Players: React.FC = () => {
 
   return (
     <Layout>
-      <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
-        <div style={{ marginBottom: '24px' }}>
-          <h1 style={{ 
-            fontSize: '28px', 
-            fontWeight: '700', 
-            marginBottom: '8px',
-            color: '#1a1a1a'
-          }}>
+      <div className="max-w-7xl mx-auto p-6">
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold mb-2 text-gray-900">
             Players
           </h1>
-          <p style={{ 
-            color: '#666', 
-            fontSize: '16px',
-            marginBottom: '24px'
-          }}>
+          <p className="text-gray-600 text-lg">
             View all registered players and their tournament statistics
           </p>
         </div>
 
-        {/* Search and Stats */}
-        <div style={{ 
-          display: 'flex', 
-          flexDirection: 'column', 
-          gap: '16px',
-          marginBottom: '24px'
-        }}>
-          <div style={{
-            display: 'flex',
-            gap: '16px',
-            alignItems: 'center',
-            flexWrap: 'wrap'
-          }}>
-            <div style={{ flex: 1, minWidth: '250px' }}>
+        {/* Search and Controls */}
+        <div className="mb-6 space-y-4">
+          <div className="flex flex-col sm:flex-row gap-4 items-center">
+            <div className="flex-1 min-w-0">
               <input
                 type="text"
                 placeholder="Search players by name or email..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '12px 16px',
-                  border: '1px solid #ddd',
-                  borderRadius: '8px',
-                  fontSize: '16px',
-                  outline: 'none',
-                  transition: 'border-color 0.2s'
-                }}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
-                         <div style={{
-               display: 'flex',
-               gap: '8px',
-               alignItems: 'center'
-             }}>
-               <span style={{ fontSize: '14px', color: '#666' }}>Sort by:</span>
-               <div style={{ position: 'relative' }}>
-                 <select
-                   value={sortBy}
-                   onChange={(e) => handleSort(e.target.value as typeof sortBy)}
-                   style={{
-                     padding: '8px 12px',
-                     paddingRight: '32px',
-                     border: '1px solid #ddd',
-                     borderRadius: '6px',
-                     fontSize: '14px',
-                     outline: 'none',
-                     appearance: 'none',
-                     backgroundColor: 'white'
-                   }}
-                 >
-                   <option value="name">Name</option>
-                   <option value="matches">Matches Played</option>
-                   <option value="wins">Wins</option>
-                   <option value="gamesWon">Games Won</option>
-                   <option value="winPercentage">Win %</option>
-                 </select>
-                 <div style={{
-                   position: 'absolute',
-                   right: '8px',
-                   top: '50%',
-                   transform: 'translateY(-50%)',
-                   pointerEvents: 'none',
-                   fontSize: '12px',
-                   color: '#666'
-                 }}>
-                   ▼
-                 </div>
-               </div>
-                               <button
-                  onClick={handleRefresh}
-                  style={{
-                    padding: '8px 12px',
-                    border: '1px solid #ddd',
-                    borderRadius: '6px',
-                    fontSize: '14px',
-                    backgroundColor: '#f8f9fa',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '4px'
-                  }}
-                >
-                  🔄 Refresh
-                </button>
-             </div>
+            <div className="flex gap-2 items-center">
+              <span className="text-sm text-gray-600">Sort by:</span>
+              <select
+                value={sortBy}
+                onChange={(e) => handleSort(e.target.value as typeof sortBy)}
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="name">Name</option>
+                <option value="matches">Matches Played</option>
+                <option value="wins">Wins</option>
+                <option value="gamesWon">Games Won</option>
+                <option value="winPercentage">Win %</option>
+              </select>
+              <button
+                onClick={handleRefresh}
+                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 flex items-center gap-2"
+              >
+                <span>🔄</span>
+                Refresh
+              </button>
+            </div>
           </div>
-
-          
         </div>
 
         {/* Players Table */}
-        <div style={{
-          backgroundColor: 'white',
-          borderRadius: '8px',
-          border: '1px solid #e0e0e0',
-          overflow: 'hidden'
-        }}>
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 1fr 1fr',
-            gap: '16px',
-            padding: '16px',
-            backgroundColor: '#f8f9fa',
-            borderBottom: '1px solid #e0e0e0',
-            fontWeight: '600',
-            fontSize: '14px',
-            color: '#495057'
-          }}>
+        <div className="bg-white rounded-lg shadow overflow-hidden">
+          {/* Table Header */}
+          <div className="grid grid-cols-7 gap-4 p-4 bg-gray-50 border-b border-gray-200 font-semibold text-sm text-gray-700">
             <div 
-              style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
+              className="cursor-pointer flex items-center gap-1 hover:text-blue-600"
               onClick={() => handleSort('name')}
             >
               Player {getSortIcon('name')}
             </div>
             <div 
-              style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
+              className="cursor-pointer flex items-center gap-1 hover:text-blue-600"
               onClick={() => handleSort('matches')}
             >
               Matches {getSortIcon('matches')}
             </div>
             <div 
-              style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
+              className="cursor-pointer flex items-center gap-1 hover:text-blue-600"
               onClick={() => handleSort('wins')}
             >
               Wins {getSortIcon('wins')}
             </div>
-            <div style={{ textAlign: 'center' }}>Losses</div>
+            <div className="text-center">Losses</div>
             <div 
-              style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'center' }}
+              className="cursor-pointer flex items-center gap-1 justify-center hover:text-blue-600"
               onClick={() => handleSort('gamesWon')}
             >
               Games Won {getSortIcon('gamesWon')}
             </div>
             <div 
-              style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'center' }}
+              className="cursor-pointer flex items-center gap-1 justify-center hover:text-blue-600"
               onClick={() => handleSort('winPercentage')}
             >
               Win % {getSortIcon('winPercentage')}
             </div>
-            <div style={{ textAlign: 'center' }}>Games W/L</div>
+            <div className="text-center">Games W/L</div>
           </div>
 
+          {/* Table Body */}
           {filteredAndSortedStats.length === 0 ? (
-            <div style={{
-              padding: '40px',
-              textAlign: 'center',
-              color: '#666',
-              fontSize: '16px'
-            }}>
+            <div className="p-12 text-center text-gray-600">
               {searchTerm ? 'No players found matching your search.' : 'No players registered yet.'}
             </div>
           ) : (
             filteredAndSortedStats.map((stats, index) => (
               <div
                 key={stats.player.id}
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 1fr 1fr',
-                  gap: '16px',
-                  padding: '16px',
-                  borderBottom: index < filteredAndSortedStats.length - 1 ? '1px solid #f0f0f0' : 'none',
-                  alignItems: 'center',
-                  transition: 'background-color 0.2s',
-                  cursor: 'pointer'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = '#f8f9fa'
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = 'transparent'
-                }}
+                className="grid grid-cols-7 gap-4 p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors"
               >
                 <div>
-                  <div style={{ fontWeight: '600', color: '#1a1a1a' }}>
+                  <div className="font-semibold text-gray-900">
                     {stats.player.full_name || 'Unnamed Player'}
                   </div>
-                  <div style={{ fontSize: '14px', color: '#666', marginTop: '2px' }}>
+                  <div className="text-sm text-gray-600 mt-1">
                     {stats.player.email}
                   </div>
                 </div>
-                <div style={{ fontWeight: '500', color: '#495057' }}>
+                <div className="font-medium text-gray-700">
                   {stats.matchesPlayed}
                 </div>
-                <div style={{ fontWeight: '500', color: '#28a745' }}>
+                <div className="font-medium text-green-600">
                   {stats.wins}
                 </div>
-                <div style={{ fontWeight: '500', color: '#dc3545', textAlign: 'center' }}>
+                <div className="font-medium text-red-600 text-center">
                   {stats.losses}
                 </div>
-                <div style={{ fontWeight: '500', color: '#007bff', textAlign: 'center' }}>
+                <div className="font-medium text-blue-600 text-center">
                   {stats.gamesWon}
                 </div>
-                <div style={{ 
-                  fontWeight: '600', 
-                  textAlign: 'center',
-                  color: stats.winPercentage >= 50 ? '#28a745' : '#dc3545'
-                }}>
+                <div className={`font-semibold text-center ${
+                  stats.winPercentage >= 50 ? 'text-green-600' : 'text-red-600'
+                }`}>
                   {stats.matchesPlayed > 0 ? `${stats.winPercentage}%` : '-'}
                 </div>
-                <div style={{ textAlign: 'center', fontSize: '14px', color: '#666' }}>
+                <div className="text-center text-sm text-gray-600">
                   {stats.totalGames > 0 ? `${stats.gamesWon}/${stats.gamesLost}` : '-'}
                 </div>
               </div>

@@ -104,6 +104,8 @@ const CreateTournament: React.FC = () => {
     onSuccess: () => {
       console.log('Tournament created successfully')
       queryClient.invalidateQueries({ queryKey: ['tournaments'] })
+      queryClient.invalidateQueries({ queryKey: ['matches'] })
+      queryClient.invalidateQueries({ queryKey: ['users'] })
       alert('Tournament created successfully!')
       navigate('/')
     },

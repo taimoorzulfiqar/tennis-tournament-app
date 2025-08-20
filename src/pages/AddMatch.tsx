@@ -86,6 +86,7 @@ const AddMatch: React.FC = () => {
       console.log('Match created successfully')
       queryClient.invalidateQueries({ queryKey: ['matches'] })
       queryClient.invalidateQueries({ queryKey: ['leaderboard'] })
+      queryClient.invalidateQueries({ queryKey: ['users'] })
       navigate(`/tournaments/${tournamentId}`)
     },
     onError: (error) => {
