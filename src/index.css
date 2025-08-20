@@ -122,50 +122,25 @@ body {
   border-radius: 8px;
   font-size: 16px; /* Minimum 16px for iOS */
   transition: border-color 0.2s ease;
-  background-color: #e8e8e8; /* Light gray background */
-  color: #333; /* Dark text color for visibility */
   /* Prevent zoom on iOS */
   -webkit-appearance: none;
   appearance: none;
   /* Improve mobile input experience */
   -webkit-tap-highlight-color: transparent;
-  /* Ensure cursor is visible */
-  caret-color: var(--primary-color);
 }
 
 .form-input:focus {
   outline: none;
   border-color: var(--primary-color);
-  background-color: #ffffff; /* White background on focus */
-  color: #333; /* Maintain dark text color on focus */
   /* Prevent zoom on focus */
   font-size: 16px;
-  /* Ensure cursor remains visible */
-  caret-color: var(--primary-color);
 }
 
 .form-input.error {
   border-color: var(--error);
 }
 
-/* Placeholder styling */
-.form-input::placeholder {
-  color: #666;
-  opacity: 1; /* Firefox */
-}
 
-.form-input::-webkit-input-placeholder {
-  color: #666;
-}
-
-.form-input::-moz-placeholder {
-  color: #666;
-  opacity: 1;
-}
-
-.form-input:-ms-input-placeholder {
-  color: #666;
-}
 
 /* Card styles */
 .card {

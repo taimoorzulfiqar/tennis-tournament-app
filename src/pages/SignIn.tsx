@@ -70,7 +70,6 @@ const SignIn: React.FC = () => {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter your email"
               required
-              style={{ backgroundColor: '#e8e8e8' }}
             />
           </div>
 
@@ -83,7 +82,6 @@ const SignIn: React.FC = () => {
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Enter your password"
               required
-              style={{ backgroundColor: '#e8e8e8' }}
             />
           </div>
 
