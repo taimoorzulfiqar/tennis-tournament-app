@@ -1,24 +1,20 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  Image,
-} from 'react-native';
-import { Link } from 'expo-router';
-import { useAuth } from '@/hooks/useAuth';
-import { theme } from '@/lib/theme';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Platform } from 'react-native';
+import { useAuth } from '../../hooks/useAuth';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function SignInScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { signIn, isSigningIn } = useAuth();
+  const { signInMutation } = useAuth();
+
+  // Debug environment variables
+  React.useEffect(() => {
+    console.log('=== SIGN IN SCREEN DEBUG ===');
+    console.log('Supabase URL:', process.env.EXPO_PUBLIC_SUPABASE_URL);
+    console.log('Has Anon Key:', !!process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY);
+    console.log('Platform:', Platform.OS);
+  }, []);
 
   const handleSignIn = async () => {
     if (!email || !password) {
@@ -27,183 +23,155 @@ export default function SignInScreen() {
     }
 
     try {
-      console.log('=== SIGN IN PROCESS START ===');
-      console.log('Attempting sign in for:', email);
-      await signIn({ email, password });
-      console.log('Sign in mutation completed successfully');
-      console.log('=== SIGN IN PROCESS END ===');
-      // Let the auth state handle navigation
-    } catch (error: any) {
-      console.log('=== SIGN IN ERROR ===');
-      console.log('Sign in error:', error);
-      Alert.alert('Error', error.message);
+      await signInMutation.mutateAsync({ email, password });
+    } catch (error) {
+      console.error('Sign in error:', error);
+      Alert.alert('Error', error instanceof Error ? error.message : 'Sign in failed');
     }
   };
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={styles.content}>
-          {/* Tennis-themed header */}
-          <View style={styles.header}>
-            <View style={styles.tennisIcon}>
-              <Text style={styles.tennisIconText}>🎾</Text>
-            </View>
-            <Text style={styles.title}>Tennis Tournament</Text>
-            <Text style={styles.subtitle}>Welcome back to the court</Text>
-          </View>
-
-          <View style={styles.form}>
-            <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Email</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Enter your email"
-                value={email}
-                onChangeText={setEmail}
-                keyboardType="email-address"
-                autoCapitalize="none"
-                autoCorrect={false}
-                placeholderTextColor={theme.colors.gray[400]}
-              />
-            </View>
-
-            <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Password</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Enter your password"
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry
-                autoCapitalize="none"
-                autoCorrect={false}
-                placeholderTextColor={theme.colors.gray[400]}
-              />
-            </View>
-
-            <TouchableOpacity
-              style={[styles.button, isSigningIn && styles.buttonDisabled]}
-              onPress={handleSignIn}
-              disabled={isSigningIn}
-            >
-              <Text style={styles.buttonText}>
-                {isSigningIn ? 'Signing in...' : 'Sign In'}
-              </Text>
-            </TouchableOpacity>
-
-            <View style={styles.linkContainer}>
-              <Text style={styles.linkText}>Don't have an account? </Text>
-              <Link href="/(auth)/sign-up" asChild>
-                <TouchableOpacity>
-                  <Text style={styles.link}>Sign up</Text>
-                </TouchableOpacity>
-              </Link>
-            </View>
-          </View>
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <View style={styles.iconContainer}>
+          <Ionicons name="tennisball" size={48} color="#2E7D32" />
         </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+        <Text style={styles.title}>Welcome Back</Text>
+        <Text style={styles.subtitle}>Sign in to your tennis tournament account</Text>
+      </View>
+
+      <View style={styles.form}>
+        <View style={styles.inputContainer}>
+          <Ionicons name="mail" size={20} color="#666" style={styles.inputIcon} />
+          <TextInput
+            style={styles.input}
+            placeholder="Email"
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            autoCorrect={false}
+          />
+        </View>
+
+        <View style={styles.inputContainer}>
+          <Ionicons name="lock-closed" size={20} color="#666" style={styles.inputIcon} />
+          <TextInput
+            style={styles.input}
+            placeholder="Password"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+            autoCapitalize="none"
+          />
+        </View>
+
+        <TouchableOpacity
+          style={[styles.button, signInMutation.isPending && styles.buttonDisabled]}
+          onPress={handleSignIn}
+          disabled={signInMutation.isPending}
+        >
+          {signInMutation.isPending ? (
+            <Text style={styles.buttonText}>Signing In...</Text>
+          ) : (
+            <Text style={styles.buttonText}>Sign In</Text>
+          )}
+        </TouchableOpacity>
+
+        {/* Debug info for development */}
+        {__DEV__ && (
+          <View style={styles.debugInfo}>
+            <Text style={styles.debugText}>
+              Supabase URL: {process.env.EXPO_PUBLIC_SUPABASE_URL ? '✅ Set' : '❌ Missing'}
+            </Text>
+            <Text style={styles.debugText}>
+              Anon Key: {process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ? '✅ Set' : '❌ Missing'}
+            </Text>
+          </View>
+        )}
+      </View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.colors.background,
-  },
-  scrollContent: {
-    flexGrow: 1,
-  },
-  content: {
-    flex: 1,
+    backgroundColor: '#f5f5f5',
+    padding: 20,
     justifyContent: 'center',
-    paddingHorizontal: theme.spacing.lg,
-    paddingVertical: theme.spacing.xl,
   },
   header: {
     alignItems: 'center',
-    marginBottom: theme.spacing['3xl'],
+    marginBottom: 40,
   },
-  tennisIcon: {
+  iconContainer: {
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: theme.colors.primary,
+    backgroundColor: '#E8F5E8',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: theme.spacing.lg,
-    ...theme.shadows.md,
-  },
-  tennisIconText: {
-    fontSize: 40,
+    marginBottom: 20,
   },
   title: {
-    fontSize: theme.typography.fontSize['3xl'],
-    fontWeight: theme.typography.fontWeight.bold,
-    color: theme.colors.black,
-    marginBottom: theme.spacing.sm,
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#2E7D32',
+    marginBottom: 8,
   },
   subtitle: {
-    fontSize: theme.typography.fontSize.lg,
-    color: theme.colors.gray[600],
+    fontSize: 16,
+    color: '#666',
     textAlign: 'center',
   },
   form: {
-    backgroundColor: theme.colors.surface,
-    padding: theme.spacing.xl,
-    borderRadius: theme.borderRadius.xl,
-    ...theme.shadows.lg,
+    width: '100%',
   },
   inputContainer: {
-    marginBottom: theme.spacing.lg,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    marginBottom: 16,
+    paddingHorizontal: 16,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
   },
-  inputLabel: {
-    fontSize: theme.typography.fontSize.sm,
-    fontWeight: theme.typography.fontWeight.medium,
-    color: theme.colors.gray[700],
-    marginBottom: theme.spacing.sm,
+  inputIcon: {
+    marginRight: 12,
   },
   input: {
-    borderWidth: 2,
-    borderColor: theme.colors.gray[200],
-    borderRadius: theme.borderRadius.lg,
-    padding: theme.spacing.md,
-    fontSize: theme.typography.fontSize.base,
-    backgroundColor: theme.colors.surface,
-    color: theme.colors.black,
+    flex: 1,
+    height: 50,
+    fontSize: 16,
+    color: '#333',
   },
   button: {
-    backgroundColor: theme.colors.primary,
-    padding: theme.spacing.md,
-    borderRadius: theme.borderRadius.lg,
+    backgroundColor: '#2E7D32',
+    borderRadius: 12,
+    height: 50,
+    justifyContent: 'center',
     alignItems: 'center',
-    marginTop: theme.spacing.md,
-    ...theme.shadows.sm,
+    marginTop: 8,
   },
   buttonDisabled: {
-    backgroundColor: theme.colors.gray[400],
+    backgroundColor: '#ccc',
   },
   buttonText: {
-    color: theme.colors.white,
-    fontSize: theme.typography.fontSize.lg,
-    fontWeight: theme.typography.fontWeight.semibold,
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
-  linkContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginTop: theme.spacing.xl,
+  debugInfo: {
+    marginTop: 20,
+    padding: 16,
+    backgroundColor: '#f0f0f0',
+    borderRadius: 8,
   },
-  linkText: {
-    color: theme.colors.gray[600],
-    fontSize: theme.typography.fontSize.base,
-  },
-  link: {
-    color: theme.colors.primary,
-    fontWeight: theme.typography.fontWeight.semibold,
-    fontSize: theme.typography.fontSize.base,
+  debugText: {
+    fontSize: 12,
+    color: '#666',
+    marginBottom: 4,
   },
 });

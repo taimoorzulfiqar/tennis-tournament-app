@@ -1,40 +1,51 @@
 import { useEffect, useState } from 'react';
-import { Stack, router } from 'expo-router';
+import { Stack } from 'expo-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useAuth } from '@/hooks/useAuth';
-import { View, Text, ActivityIndicator, StyleSheet, Platform } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { theme } from '@/lib/theme';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
+import { useAuth } from '../hooks/useAuth';
+import { View, Text, StyleSheet } from 'react-native';
 
+// Create a client
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 1000 * 60 * 5, // 5 minutes
       retry: 1,
+      refetchOnWindowFocus: false,
     },
   },
 });
 
+export default function RootLayout() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <SafeAreaProvider>
+        <AppContent />
+      </SafeAreaProvider>
+    </QueryClientProvider>
+  );
+}
+
 function AppContent() {
   const { user, isLoading } = useAuth();
   const [isInitializing, setIsInitializing] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
-    // Give some time for auth state to initialize
     const timer = setTimeout(() => {
       setIsInitializing(false);
     }, 1000);
-
     return () => clearTimeout(timer);
   }, []);
 
-  // Handle authentication routing
   useEffect(() => {
     console.log('=== ROOT LAYOUT AUTH CHECK ===', {
       user: user ? `exists (${user.email})` : 'null',
       isLoading,
-      isInitializing
+      isInitializing,
+      supabaseUrl: process.env.EXPO_PUBLIC_SUPABASE_URL,
+      hasAnonKey: !!process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY
     });
 
     if (!isInitializing && !isLoading) {
@@ -48,54 +59,36 @@ function AppContent() {
     }
   }, [user, isLoading, isInitializing]);
 
+  // Error boundary
+  if (error) {
+    return (
+      <View style={styles.errorContainer}>
+        <Text style={styles.errorTitle}>Something went wrong</Text>
+        <Text style={styles.errorMessage}>{error}</Text>
+        <Text style={styles.errorHint}>
+          Please check your browser console for more details.
+        </Text>
+      </View>
+    );
+  }
+
   if (isInitializing || isLoading) {
     return (
       <View style={styles.loadingContainer}>
-        {/* Background gradient effect */}
-        <View style={styles.backgroundGradient}>
-          <View style={styles.topCircle} />
-          <View style={styles.bottomCircle} />
+        <View style={styles.tennisCourt}>
+          <View style={styles.net} />
+          <View style={styles.ball1} />
+          <View style={styles.ball2} />
         </View>
-        
-        <View style={styles.loadingContent}>
-          {/* Tennis court icon */}
-          <View style={styles.tennisCourt}>
-            <View style={styles.courtOutline}>
-              <View style={styles.courtCenter}>
-                <View style={styles.net} />
-                <View style={styles.centerLine} />
-              </View>
-            </View>
-            <View style={styles.tennisBall}>
-              <Ionicons name="tennisball" size={32} color={theme.colors.secondary} />
-            </View>
-          </View>
-          
-          {/* App title */}
-          <Text style={styles.appTitle}>Tennis Tournament</Text>
-          <Text style={styles.appSubtitle}>Organize • Compete • Win</Text>
-          
-          {/* Loading indicator */}
-          <View style={styles.loadingSection}>
-            <ActivityIndicator size="large" color={theme.colors.primary} style={styles.spinner} />
-            <Text style={styles.loadingText}>Preparing your tournament experience...</Text>
-          </View>
-          
-          {/* Feature highlights */}
-          <View style={styles.featuresContainer}>
-            <View style={styles.featureItem}>
-              <Ionicons name="trophy" size={20} color={theme.colors.primary} />
-              <Text style={styles.featureText}>Tournaments</Text>
-            </View>
-            <View style={styles.featureItem}>
-              <Ionicons name="list" size={20} color={theme.colors.primary} />
-              <Text style={styles.featureText}>Leaderboards</Text>
-            </View>
-            <View style={styles.featureItem}>
-              <Ionicons name="tennisball" size={20} color={theme.colors.primary} />
-              <Text style={styles.featureText}>Matches</Text>
-            </View>
-          </View>
+        <Text style={styles.appTitle}>Tennis Tournament App</Text>
+        <Text style={styles.tagline}>Organize tournaments with ease</Text>
+        <View style={styles.features}>
+          <Text style={styles.feature}>🎾 Tournament Management</Text>
+          <Text style={styles.feature}>🏆 Live Leaderboards</Text>
+          <Text style={styles.feature}>👥 Player Profiles</Text>
+        </View>
+        <View style={styles.loadingSpinner}>
+          <View style={styles.spinner} />
         </View>
       </View>
     );
@@ -112,182 +105,108 @@ function AppContent() {
 const styles = StyleSheet.create({
   loadingContainer: {
     flex: 1,
-    backgroundColor: theme.colors.background,
-    position: 'relative',
-    // Web-specific optimizations
-    ...(Platform.OS === 'web' && {
-      minHeight: '100vh',
-      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-    }),
-  },
-  backgroundGradient: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-  },
-  topCircle: {
-    position: 'absolute',
-    top: -100,
-    right: -100,
-    width: 200,
-    height: 200,
-    borderRadius: 100,
-    backgroundColor: theme.colors.primary + '10',
-  },
-  bottomCircle: {
-    position: 'absolute',
-    bottom: -150,
-    left: -150,
-    width: 300,
-    height: 300,
-    borderRadius: 150,
-    backgroundColor: theme.colors.secondary + '10',
-  },
-  loadingContent: {
-    flex: 1,
+    backgroundColor: '#2E7D32',
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: theme.spacing.xl,
-    // Web-specific responsive design
-    ...(Platform.OS === 'web' && {
-      maxWidth: 600,
-      marginHorizontal: 'auto',
-      paddingHorizontal: theme.spacing['2xl'],
-    }),
+    padding: 20,
   },
   tennisCourt: {
-    position: 'relative',
-    marginBottom: theme.spacing['2xl'],
-  },
-  courtOutline: {
     width: 120,
     height: 80,
-    borderWidth: 3,
-    borderColor: theme.colors.primary,
-    borderRadius: theme.borderRadius.lg,
-    backgroundColor: theme.colors.primary + '20',
-    justifyContent: 'center',
-    alignItems: 'center',
-    ...theme.shadows.lg,
-  },
-  courtCenter: {
-    width: 100,
-    height: 60,
-    borderWidth: 2,
-    borderColor: theme.colors.primary,
-    borderRadius: theme.borderRadius.md,
-    backgroundColor: theme.colors.primary + '10',
+    backgroundColor: '#4CAF50',
+    borderRadius: 8,
     position: 'relative',
+    marginBottom: 30,
+    borderWidth: 2,
+    borderColor: '#fff',
   },
   net: {
     position: 'absolute',
-    top: '50%',
-    left: 0,
-    right: 0,
-    height: 2,
-    backgroundColor: theme.colors.white,
-    transform: [{ translateY: -1 }],
-  },
-  centerLine: {
-    position: 'absolute',
+    left: '50%',
     top: 0,
     bottom: 0,
-    left: '50%',
     width: 2,
-    backgroundColor: theme.colors.white,
+    backgroundColor: '#fff',
     transform: [{ translateX: -1 }],
   },
-  tennisBall: {
+  ball1: {
     position: 'absolute',
-    top: -15,
-    right: -15,
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: theme.colors.white,
-    justifyContent: 'center',
-    alignItems: 'center',
-    ...theme.shadows.md,
+    width: 12,
+    height: 12,
+    backgroundColor: '#fff',
+    borderRadius: 6,
+    top: 10,
+    left: 20,
+  },
+  ball2: {
+    position: 'absolute',
+    width: 12,
+    height: 12,
+    backgroundColor: '#fff',
+    borderRadius: 6,
+    bottom: 10,
+    right: 20,
   },
   appTitle: {
-    fontSize: theme.typography.fontSize['3xl'],
-    fontWeight: theme.typography.fontWeight.bold,
-    color: theme.colors.black,
-    marginBottom: theme.spacing.sm,
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginBottom: 8,
     textAlign: 'center',
-    // Web-specific typography
-    ...(Platform.OS === 'web' && {
-      fontSize: 48,
-      letterSpacing: -0.5,
-    }),
   },
-  appSubtitle: {
-    fontSize: theme.typography.fontSize.lg,
-    color: theme.colors.gray[600],
-    marginBottom: theme.spacing['2xl'],
+  tagline: {
+    fontSize: 16,
+    color: '#E8F5E8',
+    marginBottom: 30,
     textAlign: 'center',
-    fontWeight: theme.typography.fontWeight.medium,
-    // Web-specific typography
-    ...(Platform.OS === 'web' && {
-      fontSize: 20,
-      letterSpacing: 0.5,
-    }),
   },
-  loadingSection: {
+  features: {
     alignItems: 'center',
-    marginBottom: theme.spacing['2xl'],
+    marginBottom: 40,
+  },
+  feature: {
+    fontSize: 14,
+    color: '#E8F5E8',
+    marginBottom: 8,
+  },
+  loadingSpinner: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   spinner: {
-    marginBottom: theme.spacing.lg,
+    width: 30,
+    height: 30,
+    borderWidth: 3,
+    borderColor: '#E8F5E8',
+    borderTopColor: 'transparent',
+    borderRadius: 15,
+    animation: 'spin 1s linear infinite',
   },
-  loadingText: {
-    fontSize: theme.typography.fontSize.base,
-    color: theme.colors.gray[600],
-    textAlign: 'center',
-    lineHeight: 22,
-    // Web-specific typography
-    ...(Platform.OS === 'web' && {
-      fontSize: 16,
-      lineHeight: 24,
-    }),
-  },
-  featuresContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    width: '100%',
-    maxWidth: 300,
-    // Web-specific responsive design
-    ...(Platform.OS === 'web' && {
-      maxWidth: 400,
-      gap: theme.spacing.lg,
-    }),
-  },
-  featureItem: {
-    alignItems: 'center',
+  errorContainer: {
     flex: 1,
+    backgroundColor: '#f44336',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
   },
-  featureText: {
-    fontSize: theme.typography.fontSize.sm,
-    color: theme.colors.gray[600],
-    marginTop: theme.spacing.xs,
+  errorTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginBottom: 16,
     textAlign: 'center',
-    fontWeight: theme.typography.fontWeight.medium,
-    // Web-specific typography
-    ...(Platform.OS === 'web' && {
-      fontSize: 14,
-      marginTop: theme.spacing.sm,
-    }),
+  },
+  errorMessage: {
+    fontSize: 16,
+    color: '#fff',
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  errorHint: {
+    fontSize: 14,
+    color: '#ffcdd2',
+    textAlign: 'center',
   },
 });
-
-export default function RootLayout() {
-  return (
-    <SafeAreaProvider>
-      <QueryClientProvider client={queryClient}>
-        <AppContent />
-      </QueryClientProvider>
-    </SafeAreaProvider>
-  );
-}
