@@ -32,6 +32,10 @@ export interface Match {
   player2_score: number
   winner_id?: string
   status: 'scheduled' | 'in_progress' | 'completed'
+  detailed_score?: {
+    player1_sets: (number | null)[]
+    player2_sets: (number | null)[]
+  }
   created_at: string
   updated_at: string
 }
