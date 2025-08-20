@@ -11,8 +11,11 @@ interface Match {
   games_per_set: number
   sets_per_match: number
   court: string
-  player1_score: string | number
-  player2_score: string | number
+  sets: Array<{
+    set_number: number
+    player1_games: string | number
+    player2_games: string | number
+  }>
   is_completed: boolean
 }
 
@@ -48,8 +51,11 @@ const CreateTournament: React.FC = () => {
       games_per_set: 6,
       sets_per_match: 3,
       court: '',
-      player1_score: '',
-      player2_score: '',
+      sets: [
+        { set_number: 1, player1_games: '', player2_games: '' },
+        { set_number: 2, player1_games: '', player2_games: '' },
+        { set_number: 3, player1_games: '', player2_games: '' }
+      ],
       is_completed: false
     }
   ])
@@ -80,36 +86,36 @@ const CreateTournament: React.FC = () => {
       
       // Only create matches if not creating without matches
       if (!createWithoutMatches) {
-        // Then create all matches for the tournament
-        for (const match of matches) {
-          await matchAPI.createMatch({
-            tournament_id: createdTournament.id,
-            player1_id: match.player1_id,
-            player2_id: match.player2_id,
-            games_per_set: match.games_per_set || 6,
-            sets_per_match: match.sets_per_match || 3,
-            court: match.court,
-            player1_score: match.player1_score === '' ? 0 : Number(match.player1_score) || 0,
-            player2_score: match.player2_score === '' ? 0 : Number(match.player2_score) || 0
-          })
+                 // Then create all matches for the tournament
+         for (const match of matches) {
+           const createdMatch = await matchAPI.createMatch({
+             tournament_id: createdTournament.id,
+             player1_id: match.player1_id,
+             player2_id: match.player2_id,
+             games_per_set: match.games_per_set || 6,
+             sets_per_match: match.sets_per_match || 3,
+             court: match.court,
+             player1_score: 0, // Will be calculated from sets
+             player2_score: 0  // Will be calculated from sets
+           })
 
-          // If match is marked as completed, update its status and set winner
-          if (match.is_completed) {
-            // We need to get the created match and update its status
-            const createdMatches = await matchAPI.getMatches(createdTournament.id)
-            const lastCreatedMatch = createdMatches[createdMatches.length - 1]
-            if (lastCreatedMatch) {
-              const player1Score = match.player1_score === '' ? 0 : Number(match.player1_score) || 0
-              const player2Score = match.player2_score === '' ? 0 : Number(match.player2_score) || 0
-              
-              // Use updateMatchScore to properly set winner_id and status
-              await matchAPI.updateMatchScore(lastCreatedMatch.id!, {
-                player1_score: player1Score,
-                player2_score: player2Score
-              })
-            }
-          }
-        }
+           // If match is marked as completed, update its sets and determine winner
+           if (match.is_completed) {
+             // Filter out empty sets and convert to numbers
+             const validSets = match.sets
+               .filter(set => set.player1_games !== '' || set.player2_games !== '')
+               .map(set => ({
+                 set_number: set.set_number,
+                 player1_games: set.player1_games === '' ? 0 : Number(set.player1_games) || 0,
+                 player2_games: set.player2_games === '' ? 0 : Number(set.player2_games) || 0
+               }))
+             
+             // Use updateMatchSets to properly set winner_id and status
+             await matchAPI.updateMatchSets(createdMatch.id!, {
+               sets: validSets
+             })
+           }
+         }
       }
       
       return createdTournament
@@ -147,17 +153,22 @@ const CreateTournament: React.FC = () => {
         
         // Validate that completed matches have valid scores
         if (match.is_completed) {
-          const player1Score = match.player1_score === '' ? 0 : Number(match.player1_score) || 0
-          const player2Score = match.player2_score === '' ? 0 : Number(match.player2_score) || 0
+          const validSets = match.sets.filter(set => set.player1_games !== '' || set.player2_games !== '')
           
-          if (player1Score === 0 && player2Score === 0) {
-            alert(`Match ${i + 1}: Completed matches must have valid scores. Please enter scores for both players.`)
+          if (validSets.length === 0) {
+            alert(`Match ${i + 1}: Completed matches must have valid scores. Please enter scores for at least one set.`)
             return
           }
           
-          if (player1Score === player2Score) {
-            alert(`Match ${i + 1}: Completed matches cannot have tied scores. Please enter different scores for the players.`)
-            return
+          // Check that each set has valid scores
+          for (const set of validSets) {
+            const player1Games = set.player1_games === '' ? 0 : Number(set.player1_games) || 0
+            const player2Games = set.player2_games === '' ? 0 : Number(set.player2_games) || 0
+            
+            if (player1Games === 0 && player2Games === 0) {
+              alert(`Match ${i + 1}, Set ${set.set_number}: Please enter valid scores for both players.`)
+              return
+            }
           }
         }
       }
@@ -166,18 +177,21 @@ const CreateTournament: React.FC = () => {
     createTournamentMutation.mutate(tournament)
   }
 
-     const addMatch = () => {
-     setMatches([...matches, {
-       player1_id: '',
-       player2_id: '',
-       games_per_set: 6,
-       sets_per_match: 3,
-       court: '',
-       player1_score: '',
-       player2_score: '',
-       is_completed: false
-     }])
-   }
+           const addMatch = () => {
+      setMatches([...matches, {
+        player1_id: '',
+        player2_id: '',
+        games_per_set: 6,
+        sets_per_match: 3,
+        court: '',
+        sets: [
+          { set_number: 1, player1_games: '', player2_games: '' },
+          { set_number: 2, player1_games: '', player2_games: '' },
+          { set_number: 3, player1_games: '', player2_games: '' }
+        ],
+        is_completed: false
+      }])
+    }
 
   const removeMatch = (index: number) => {
     if (matches.length > 1) {
@@ -187,7 +201,25 @@ const CreateTournament: React.FC = () => {
 
   const updateMatch = (index: number, field: keyof Match, value: any) => {
     const updatedMatches = [...matches]
-    updatedMatches[index] = { ...updatedMatches[index], [field]: value }
+    if (field === 'sets_per_match') {
+      const newSetsCount = Number(value) || 3
+      const newSets = Array.from({ length: newSetsCount }, (_, setIndex) => ({
+        set_number: setIndex + 1,
+        player1_games: '',
+        player2_games: ''
+      }))
+      updatedMatches[index] = { ...updatedMatches[index], [field]: value, sets: newSets }
+    } else {
+      updatedMatches[index] = { ...updatedMatches[index], [field]: value }
+    }
+    setMatches(updatedMatches)
+  }
+
+  const updateSet = (matchIndex: number, setIndex: number, field: 'player1_games' | 'player2_games', value: string | number) => {
+    const updatedMatches = [...matches]
+    const updatedSets = [...updatedMatches[matchIndex].sets]
+    updatedSets[setIndex] = { ...updatedSets[setIndex], [field]: value }
+    updatedMatches[matchIndex] = { ...updatedMatches[matchIndex], sets: updatedSets }
     setMatches(updatedMatches)
   }
 
@@ -395,31 +427,47 @@ const CreateTournament: React.FC = () => {
                     />
                   </div>
 
-                                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                     <div className="form-group">
-                       <label className="form-label">Player 1 Score</label>
-                       <input
-                         type="number"
-                         className="form-input"
-                         value={match.player1_score}
-                         onChange={(e) => updateMatch(index, 'player1_score', e.target.value === '' ? '' : parseInt(e.target.value) || 0)}
-                         min="0"
-                         placeholder="Enter score"
-                       />
-                     </div>
+                                                                       {/* Set Scores */}
+                    <div style={{ marginTop: '16px' }}>
+                      <h4 style={{ fontSize: '14px', fontWeight: 'bold', color: 'var(--primary-color)', marginBottom: '12px' }}>
+                        Set Scores
+                      </h4>
+                      {match.sets.map((set, setIndex) => (
+                        <div key={setIndex} style={{ 
+                          display: 'grid', 
+                          gridTemplateColumns: '1fr 1fr', 
+                          gap: '16px',
+                          marginBottom: '8px',
+                          padding: '8px',
+                          backgroundColor: '#f0f0f0',
+                          borderRadius: '4px'
+                        }}>
+                          <div className="form-group">
+                            <label className="form-label">Set {set.set_number} - Player 1 Games</label>
+                            <input
+                              type="number"
+                              className="form-input"
+                              value={set.player1_games}
+                              onChange={(e) => updateSet(index, setIndex, 'player1_games', e.target.value === '' ? '' : parseInt(e.target.value) || 0)}
+                              min="0"
+                              placeholder="Enter games won"
+                            />
+                          </div>
 
-                                           <div className="form-group">
-                        <label className="form-label">Player 2 Score</label>
-                        <input
-                          type="number"
-                          className="form-input"
-                          value={match.player2_score}
-                          onChange={(e) => updateMatch(index, 'player2_score', e.target.value === '' ? '' : parseInt(e.target.value) || 0)}
-                          min="0"
-                          placeholder="Enter score"
-                        />
-                      </div>
-                   </div>
+                          <div className="form-group">
+                            <label className="form-label">Set {set.set_number} - Player 2 Games</label>
+                            <input
+                              type="number"
+                              className="form-input"
+                              value={set.player2_games}
+                              onChange={(e) => updateSet(index, setIndex, 'player2_games', e.target.value === '' ? '' : parseInt(e.target.value) || 0)}
+                              min="0"
+                              placeholder="Enter games won"
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
 
                   <div style={{ marginTop: '16px' }}>
                     <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>

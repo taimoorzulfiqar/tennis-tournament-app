@@ -16,6 +16,22 @@ const Matches: React.FC = () => {
     queryFn: () => matchAPI.getMatches(),
   })
 
+  // Debug: Log matches data
+  React.useEffect(() => {
+    if (matches) {
+      console.log('Matches data received:', matches)
+      matches.forEach((match, index) => {
+        console.log(`Match ${index + 1}:`, {
+          id: match.id,
+          status: match.status,
+          player1_score: match.player1_score,
+          player2_score: match.player2_score,
+          winner_id: match.winner_id
+        })
+      })
+    }
+  }, [matches])
+
   const { data: players, isLoading: playersLoading } = useQuery({
     queryKey: ['players'],
     queryFn: async () => {
@@ -145,60 +161,87 @@ const Matches: React.FC = () => {
                   </p>
                 </div>
 
-                <div style={{ 
-                  display: 'flex', 
-                  justifyContent: 'space-between', 
-                  alignItems: 'center',
-                  padding: '12px',
-                  backgroundColor: '#f5f5f5',
-                  borderRadius: '8px',
-                  marginBottom: '12px'
-                }}>
-                  <div style={{ textAlign: 'center', flex: 1 }}>
-                    <p style={{ 
-                      fontWeight: 'bold', 
-                      margin: '0 0 6px 0',
-                      fontSize: '13px',
-                      wordBreak: 'break-word'
-                    }}>
-                      {getPlayerName(match.player1_id)}
-                    </p>
-                    <p style={{ 
-                      fontSize: '24px', 
-                      fontWeight: 'bold', 
-                      color: '#2E7D32', 
-                      margin: 0 
-                    }}>
-                      {match.player1_score}
-                    </p>
-                  </div>
-                  <div style={{ 
-                    fontSize: '16px', 
-                    fontWeight: 'bold', 
-                    color: '#666',
-                    padding: '0 8px'
-                  }}>
-                    VS
-                  </div>
-                  <div style={{ textAlign: 'center', flex: 1 }}>
-                    <p style={{ 
-                      fontWeight: 'bold', 
-                      margin: '0 0 6px 0',
-                      fontSize: '13px',
-                      wordBreak: 'break-word'
-                    }}>
-                      {getPlayerName(match.player2_id)}
-                    </p>
-                    <p style={{ 
-                      fontSize: '24px', 
-                      fontWeight: 'bold', 
-                      color: '#2E7D32', 
-                      margin: 0 
-                    }}>
-                      {match.player2_score}
-                    </p>
-                  </div>
-                </div>
+                                 {/* Player Names */}
+                 <div style={{ 
+                   display: 'flex', 
+                   justifyContent: 'space-between', 
+                   alignItems: 'center',
+                   padding: '12px',
+                   backgroundColor: '#f5f5f5',
+                   borderRadius: '8px',
+                   marginBottom: '12px'
+                 }}>
+                   <div style={{ textAlign: 'center', flex: 1 }}>
+                     <p style={{ 
+                       fontWeight: 'bold', 
+                       margin: '0 0 6px 0',
+                       fontSize: '13px',
+                       wordBreak: 'break-word'
+                     }}>
+                       {getPlayerName(match.player1_id)}
+                     </p>
+                   </div>
+                   <div style={{ 
+                     fontSize: '16px', 
+                     fontWeight: 'bold', 
+                     color: '#666',
+                     padding: '0 8px'
+                   }}>
+                     VS
+                   </div>
+                   <div style={{ textAlign: 'center', flex: 1 }}>
+                     <p style={{ 
+                       fontWeight: 'bold', 
+                       margin: '0 0 6px 0',
+                       fontSize: '13px',
+                       wordBreak: 'break-word'
+                     }}>
+                       {getPlayerName(match.player2_id)}
+                     </p>
+                   </div>
+                 </div>
+
+                 {/* Set Scores */}
+                 {match.sets && match.sets.length > 0 ? (
+                   <div style={{ marginBottom: '12px' }}>
+                     <h4 style={{ fontSize: '14px', fontWeight: 'bold', margin: '0 0 8px 0', color: '#333' }}>
+                       Set Scores:
+                     </h4>
+                     {match.sets.map((set, index) => (
+                       <div key={index} style={{ 
+                         display: 'flex', 
+                         justifyContent: 'space-between', 
+                         alignItems: 'center',
+                         padding: '8px',
+                         backgroundColor: '#fff',
+                         border: '1px solid #e0e0e0',
+                         borderRadius: '4px',
+                         marginBottom: '4px'
+                       }}>
+                         <span style={{ fontSize: '12px', color: '#666' }}>Set {set.set_number}:</span>
+                         <div style={{ display: 'flex', gap: '16px' }}>
+                           <span style={{ fontWeight: 'bold', color: '#2E7D32' }}>
+                             {set.player1_games}
+                           </span>
+                           <span style={{ color: '#666' }}>-</span>
+                           <span style={{ fontWeight: 'bold', color: '#2E7D32' }}>
+                             {set.player2_games}
+                           </span>
+                         </div>
+                       </div>
+                     ))}
+                   </div>
+                 ) : (
+                   <div style={{ 
+                     textAlign: 'center', 
+                     padding: '8px',
+                     backgroundColor: '#f8f9fa',
+                     borderRadius: '4px',
+                     marginBottom: '12px'
+                   }}>
+                     <span style={{ fontSize: '12px', color: '#666' }}>No scores recorded yet</span>
+                   </div>
+                 )}
 
                 {match.winner_id && (
                   <p style={{ 

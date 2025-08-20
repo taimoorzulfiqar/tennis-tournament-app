@@ -1,5 +1,5 @@
 import { supabase } from './supabase'
-import { User, Tournament, Match, LeaderboardEntry, CreateUserDTO, UpdateProfileDTO, CreateTournamentDTO, CreateMatchDTO, UpdateMatchScoreDTO } from '../types'
+import { User, Tournament, Match, MatchSet, MatchWithSets, LeaderboardEntry, CreateUserDTO, UpdateProfileDTO, CreateTournamentDTO, CreateMatchDTO, UpdateMatchScoreDTO, UpdateMatchSetsDTO } from '../types'
 
 // Auth API
 export const authAPI = {
@@ -194,10 +194,13 @@ export const tournamentAPI = {
 
 // Match API
 export const matchAPI = {
-  getMatches: async (tournamentId?: string): Promise<Match[]> => {
+  getMatches: async (tournamentId?: string): Promise<MatchWithSets[]> => {
     let query = supabase
       .from('matches')
-      .select('*')
+      .select(`
+        *,
+        match_sets (*)
+      `)
       .order('created_at', { ascending: true })
 
     if (tournamentId) {
@@ -206,21 +209,33 @@ export const matchAPI = {
 
     const { data, error } = await query
     if (error) throw new Error(error.message)
-    return data
+    
+    // Transform the data to match our interface
+    return data.map((match: any) => ({
+      ...match,
+      sets: match.match_sets || []
+    }))
   },
 
-  getMatch: async (id: string): Promise<Match> => {
+  getMatch: async (id: string): Promise<MatchWithSets> => {
     const { data, error } = await supabase
       .from('matches')
-      .select('*')
+      .select(`
+        *,
+        match_sets (*)
+      `)
       .eq('id', id)
       .single()
 
     if (error) throw new Error(error.message)
-    return data
+    
+    return {
+      ...data,
+      sets: data.match_sets || []
+    }
   },
 
-  createMatch: async (match: CreateMatchDTO): Promise<Match> => {
+  createMatch: async (match: CreateMatchDTO): Promise<MatchWithSets> => {
     // Prepare match data with defaults for missing columns
     const matchData = {
       tournament_id: match.tournament_id,
@@ -241,32 +256,106 @@ export const matchAPI = {
       .single()
 
     if (error) throw new Error(error.message)
-    return data
+    
+    return {
+      ...data,
+      sets: []
+    }
+  },
+
+  updateMatchSets: async (id: string, setsData: UpdateMatchSetsDTO): Promise<MatchWithSets> => {
+    console.log('updateMatchSets called with:', { id, setsData })
+    
+    // First, delete existing sets for this match
+    const { error: deleteError } = await supabase
+      .from('match_sets')
+      .delete()
+      .eq('match_id', id)
+    
+    if (deleteError) {
+      console.error('Error deleting existing sets:', deleteError)
+      throw new Error(deleteError.message)
+    }
+    
+    // Insert new sets
+    if (setsData.sets.length > 0) {
+      const setsToInsert = setsData.sets.map(set => ({
+        match_id: id,
+        set_number: set.set_number,
+        player1_games: set.player1_games,
+        player2_games: set.player2_games
+      }))
+      
+      const { error: insertError } = await supabase
+        .from('match_sets')
+        .insert(setsToInsert)
+      
+      if (insertError) {
+        console.error('Error inserting sets:', insertError)
+        throw new Error(insertError.message)
+      }
+    }
+    
+    // Update match status to completed
+    const { data, error } = await supabase
+      .from('matches')
+      .update({ status: 'completed' })
+      .eq('id', id)
+      .select(`
+        *,
+        match_sets (*)
+      `)
+      .single()
+
+    if (error) {
+      console.error('Error updating match:', error)
+      throw new Error(error.message)
+    }
+    
+    console.log('Match sets updated successfully:', data)
+    return {
+      ...data,
+      sets: data.match_sets || []
+    }
   },
 
   updateMatchScore: async (id: string, score: UpdateMatchScoreDTO): Promise<Match> => {
+    console.log('updateMatchScore called with:', { id, score })
     const match = await matchAPI.getMatch(id)
+    console.log('Retrieved match:', match)
     let winnerId = null
     
-    // Only set winner if there are actual scores (not both 0)
-    if (score.player1_score > 0 || score.player2_score > 0) {
-      winnerId = score.player1_score > score.player2_score 
-        ? match.player1_id 
-        : match.player2_id
+    // Set winner based on scores
+    if (score.player1_score > score.player2_score) {
+      winnerId = match.player1_id
+    } else if (score.player2_score > score.player1_score) {
+      winnerId = match.player2_id
+    } else {
+      // If scores are equal, default to player1 (or you could set to null)
+      winnerId = match.player1_id
     }
+    console.log('Winner determined:', winnerId, 'Player1 score:', score.player1_score, 'Player2 score:', score.player2_score)
+
+    const updateData = {
+      ...score,
+      winner_id: winnerId,
+      status: 'completed',
+    }
+    console.log('Updating match with data:', updateData)
 
     const { data, error } = await supabase
       .from('matches')
-      .update({
-        ...score,
-        winner_id: winnerId,
-        status: 'completed',
-      })
+      .update(updateData)
       .eq('id', id)
       .select()
       .single()
 
-    if (error) throw new Error(error.message)
+    if (error) {
+      console.error('Error updating match:', error)
+      throw new Error(error.message)
+    }
+    
+    console.log('Match updated successfully:', data)
     return data
   },
 

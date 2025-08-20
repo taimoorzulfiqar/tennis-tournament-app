@@ -11,8 +11,11 @@ interface Match {
   games_per_set: number
   sets_per_match: number
   court: string
-  player1_score: string | number
-  player2_score: string | number
+  sets: Array<{
+    set_number: number
+    player1_games: string | number
+    player2_games: string | number
+  }>
   is_completed: boolean
 }
 
@@ -39,8 +42,11 @@ const AddMatch: React.FC = () => {
     games_per_set: 6,
     sets_per_match: 3,
     court: '',
-    player1_score: '',
-    player2_score: '',
+    sets: [
+      { set_number: 1, player1_games: '', player2_games: '' },
+      { set_number: 2, player1_games: '', player2_games: '' },
+      { set_number: 3, player1_games: '', player2_games: '' }
+    ],
     is_completed: false
   })
 
@@ -69,28 +75,41 @@ const AddMatch: React.FC = () => {
         games_per_set: matchData.games_per_set || 6,
         sets_per_match: matchData.sets_per_match || 3,
         court: matchData.court,
-        player1_score: matchData.player1_score === '' ? 0 : Number(matchData.player1_score) || 0,
-        player2_score: matchData.player2_score === '' ? 0 : Number(matchData.player2_score) || 0
+        player1_score: 0, // Will be calculated from sets
+        player2_score: 0  // Will be calculated from sets
       })
 
-      // If match is marked as completed, update its status and set winner
+      // If match is marked as completed, update its sets and determine winner
       if (matchData.is_completed) {
-        const player1Score = matchData.player1_score === '' ? 0 : Number(matchData.player1_score) || 0
-        const player2Score = matchData.player2_score === '' ? 0 : Number(matchData.player2_score) || 0
+        console.log('Match is marked as completed, updating sets...')
         
-        // Use updateMatchScore to properly set winner_id and status
-        await matchAPI.updateMatchScore(createdMatch.id!, {
-          player1_score: player1Score,
-          player2_score: player2Score
+        // Filter out empty sets and convert to numbers
+        const validSets = matchData.sets
+          .filter(set => set.player1_games !== '' || set.player2_games !== '')
+          .map(set => ({
+            set_number: set.set_number,
+            player1_games: set.player1_games === '' ? 0 : Number(set.player1_games) || 0,
+            player2_games: set.player2_games === '' ? 0 : Number(set.player2_games) || 0
+          }))
+        
+        console.log('Sets to update:', validSets)
+        
+        // Use updateMatchSets to properly set winner_id and status
+        const updatedMatch = await matchAPI.updateMatchSets(createdMatch.id!, {
+          sets: validSets
         })
+        
+        console.log('Match updated with sets and winner:', updatedMatch)
       }
 
       return createdMatch
     },
     onSuccess: (createdMatch) => {
+      console.log('Match created successfully:', createdMatch)
       // Invalidate all match-related queries
       queryClient.invalidateQueries({ queryKey: ['matches'] })
       queryClient.invalidateQueries({ queryKey: ['tournament', tournamentId, 'matches'] })
+      queryClient.invalidateQueries({ queryKey: ['leaderboard'] })
       alert('Match added successfully!')
       navigate(`/tournament/${tournamentId}`)
     },
@@ -112,17 +131,22 @@ const AddMatch: React.FC = () => {
     
     // Validate that completed matches have valid scores
     if (match.is_completed) {
-      const player1Score = match.player1_score === '' ? 0 : Number(match.player1_score) || 0
-      const player2Score = match.player2_score === '' ? 0 : Number(match.player2_score) || 0
+      const validSets = match.sets.filter(set => set.player1_games !== '' || set.player2_games !== '')
       
-      if (player1Score === 0 && player2Score === 0) {
-        alert('Completed matches must have valid scores. Please enter scores for both players.')
+      if (validSets.length === 0) {
+        alert('Completed matches must have valid scores. Please enter scores for at least one set.')
         return
       }
       
-      if (player1Score === player2Score) {
-        alert('Completed matches cannot have tied scores. Please enter different scores for the players.')
-        return
+      // Check that each set has valid scores
+      for (const set of validSets) {
+        const player1Games = set.player1_games === '' ? 0 : Number(set.player1_games) || 0
+        const player2Games = set.player2_games === '' ? 0 : Number(set.player2_games) || 0
+        
+        if (player1Games === 0 && player2Games === 0) {
+          alert(`Set ${set.set_number}: Please enter valid scores for both players.`)
+          return
+        }
       }
     }
 
@@ -130,7 +154,23 @@ const AddMatch: React.FC = () => {
   }
 
   const updateMatch = (field: keyof Match, value: any) => {
-    setMatch({ ...match, [field]: value })
+    if (field === 'sets_per_match') {
+      const newSetsCount = Number(value) || 3
+      const newSets = Array.from({ length: newSetsCount }, (_, index) => ({
+        set_number: index + 1,
+        player1_games: '',
+        player2_games: ''
+      }))
+      setMatch({ ...match, [field]: value, sets: newSets })
+    } else {
+      setMatch({ ...match, [field]: value })
+    }
+  }
+
+  const updateSet = (setIndex: number, field: 'player1_games' | 'player2_games', value: string | number) => {
+    const updatedSets = [...match.sets]
+    updatedSets[setIndex] = { ...updatedSets[setIndex], [field]: value }
+    setMatch({ ...match, sets: updatedSets })
   }
 
   if (tournamentLoading || playersLoading) {
@@ -258,31 +298,47 @@ const AddMatch: React.FC = () => {
               />
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-              <div className="form-group">
-                <label className="form-label">Player 1 Score</label>
-                <input
-                  type="number"
-                  className="form-input"
-                  value={match.player1_score}
-                  onChange={(e) => updateMatch('player1_score', e.target.value === '' ? '' : parseInt(e.target.value) || 0)}
-                  min="0"
-                  placeholder="Enter score"
-                />
-              </div>
+                         {/* Set Scores */}
+             <div style={{ marginTop: '20px' }}>
+               <h3 style={{ fontSize: '16px', fontWeight: 'bold', color: 'var(--primary-color)', marginBottom: '16px' }}>
+                 Set Scores
+               </h3>
+               {match.sets.map((set, index) => (
+                 <div key={index} style={{ 
+                   display: 'grid', 
+                   gridTemplateColumns: '1fr 1fr', 
+                   gap: '16px',
+                   marginBottom: '12px',
+                   padding: '12px',
+                   backgroundColor: '#f8f9fa',
+                   borderRadius: '8px'
+                 }}>
+                   <div className="form-group">
+                     <label className="form-label">Set {set.set_number} - Player 1 Games</label>
+                     <input
+                       type="number"
+                       className="form-input"
+                       value={set.player1_games}
+                       onChange={(e) => updateSet(index, 'player1_games', e.target.value === '' ? '' : parseInt(e.target.value) || 0)}
+                       min="0"
+                       placeholder="Enter games won"
+                     />
+                   </div>
 
-              <div className="form-group">
-                <label className="form-label">Player 2 Score</label>
-                <input
-                  type="number"
-                  className="form-input"
-                  value={match.player2_score}
-                  onChange={(e) => updateMatch('player2_score', e.target.value === '' ? '' : parseInt(e.target.value) || 0)}
-                  min="0"
-                  placeholder="Enter score"
-                />
-              </div>
-            </div>
+                   <div className="form-group">
+                     <label className="form-label">Set {set.set_number} - Player 2 Games</label>
+                     <input
+                       type="number"
+                       className="form-input"
+                       value={set.player2_games}
+                       onChange={(e) => updateSet(index, 'player2_games', e.target.value === '' ? '' : parseInt(e.target.value) || 0)}
+                       min="0"
+                       placeholder="Enter games won"
+                     />
+                   </div>
+                 </div>
+               ))}
+             </div>
 
             <div style={{ marginTop: '16px' }}>
               <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>

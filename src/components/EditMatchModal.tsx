@@ -15,6 +15,12 @@ interface EditMatchModalProps {
     player2_score: number
     status: string
     winner_id?: string
+    sets?: Array<{
+      id: string
+      set_number: number
+      player1_games: number
+      player2_games: number
+    }>
   }
   isOpen: boolean
   onClose: () => void
@@ -24,8 +30,15 @@ interface EditMatchModalProps {
 const EditMatchModal: React.FC<EditMatchModalProps> = ({ match, isOpen, onClose, onSuccess }) => {
   const queryClient = useQueryClient()
   const [formData, setFormData] = useState({
-    player1_score: match.player1_score > 0 ? match.player1_score : '',
-    player2_score: match.player2_score > 0 ? match.player2_score : '',
+    sets: match.sets?.map(set => ({
+      set_number: set.set_number,
+      player1_games: set.player1_games > 0 ? set.player1_games : '',
+      player2_games: set.player2_games > 0 ? set.player2_games : ''
+    })) || Array.from({ length: match.sets_per_match || 3 }, (_, index) => ({
+      set_number: index + 1,
+      player1_games: '',
+      player2_games: ''
+    })),
     status: match.status,
     court: match.court
   })
@@ -49,43 +62,39 @@ const EditMatchModal: React.FC<EditMatchModalProps> = ({ match, isOpen, onClose,
     return player?.full_name || player?.email || 'Unknown Player'
   }
 
-  const updateMatchMutation = useMutation({
+  const updateSet = (setIndex: number, field: 'player1_games' | 'player2_games', value: string | number) => {
+    const updatedSets = [...formData.sets]
+    updatedSets[setIndex] = { ...updatedSets[setIndex], [field]: value }
+    setFormData({ ...formData, sets: updatedSets })
+  }
+
+    const updateMatchMutation = useMutation({
     mutationFn: async () => {
-             const updates: any = {
-         player1_score: formData.player1_score === '' ? 0 : Number(formData.player1_score) || 0,
-         player2_score: formData.player2_score === '' ? 0 : Number(formData.player2_score) || 0,
-         court: formData.court
-       }
+      // Update court and other basic fields
+      await matchAPI.updateMatch(match.id, {
+        court: formData.court,
+        player1_id: match.player1_id,
+        player2_id: match.player2_id,
+        player1_score: 0, // Will be calculated from sets
+        player2_score: 0  // Will be calculated from sets
+      })
 
-      // If status is being set to completed, use updateMatchScore to set winner_id
+      // If status is being set to completed, update sets and determine winner
       if (formData.status === 'completed') {
-                 await matchAPI.updateMatchScore(match.id, {
-           player1_score: formData.player1_score === '' ? 0 : Number(formData.player1_score) || 0,
-           player2_score: formData.player2_score === '' ? 0 : Number(formData.player2_score) || 0
-         })
-        // Update other fields separately
-                 await matchAPI.updateMatch(match.id, {
-           court: formData.court,
-           player1_id: match.player1_id,
-           player2_id: match.player2_id,
-           player1_score: formData.player1_score === '' ? 0 : Number(formData.player1_score) || 0,
-           player2_score: formData.player2_score === '' ? 0 : Number(formData.player2_score) || 0
-         })
+        // Filter out empty sets and convert to numbers
+        const validSets = formData.sets
+          .filter(set => set.player1_games !== '' || set.player2_games !== '')
+          .map(set => ({
+            set_number: set.set_number,
+            player1_games: set.player1_games === '' ? 0 : Number(set.player1_games) || 0,
+            player2_games: set.player2_games === '' ? 0 : Number(set.player2_games) || 0
+          }))
+        
+        await matchAPI.updateMatchSets(match.id, { sets: validSets })
       } else {
-        // Update match details normally
-        await matchAPI.updateMatch(match.id, updates)
-
         // Update status if changed
         if (formData.status !== match.status) {
-          // If status is being set to completed, use updateMatchScore to set winner_id
-          if (formData.status === 'completed') {
-            await matchAPI.updateMatchScore(match.id, {
-              player1_score: formData.player1_score === '' ? 0 : Number(formData.player1_score) || 0,
-              player2_score: formData.player2_score === '' ? 0 : Number(formData.player2_score) || 0
-            })
-          } else {
-            await matchAPI.updateMatchStatus(match.id, formData.status as 'scheduled' | 'in_progress' | 'completed')
-          }
+          await matchAPI.updateMatchStatus(match.id, formData.status as 'scheduled' | 'in_progress' | 'completed')
         }
       }
     },
@@ -110,17 +119,22 @@ const EditMatchModal: React.FC<EditMatchModalProps> = ({ match, isOpen, onClose,
     
     // Validate that completed matches have valid scores
     if (formData.status === 'completed') {
-      const player1Score = formData.player1_score === '' ? 0 : Number(formData.player1_score) || 0
-      const player2Score = formData.player2_score === '' ? 0 : Number(formData.player2_score) || 0
+      const validSets = formData.sets.filter(set => set.player1_games !== '' || set.player2_games !== '')
       
-      if (player1Score === 0 && player2Score === 0) {
-        alert('Completed matches must have valid scores. Please enter scores for both players.')
+      if (validSets.length === 0) {
+        alert('Completed matches must have valid scores. Please enter scores for at least one set.')
         return
       }
       
-      if (player1Score === player2Score) {
-        alert('Completed matches cannot have tied scores. Please enter different scores for the players.')
-        return
+      // Check that each set has valid scores
+      for (const set of validSets) {
+        const player1Games = set.player1_games === '' ? 0 : Number(set.player1_games) || 0
+        const player2Games = set.player2_games === '' ? 0 : Number(set.player2_games) || 0
+        
+        if (player1Games === 0 && player2Games === 0) {
+          alert(`Set ${set.set_number}: Please enter valid scores for both players.`)
+          return
+        }
       }
     }
     
@@ -240,36 +254,47 @@ const EditMatchModal: React.FC<EditMatchModalProps> = ({ match, isOpen, onClose,
               />
             </div>
 
-            <div style={{ 
-              display: 'grid', 
-              gridTemplateColumns: '1fr 1fr', 
-              gap: '16px',
-              gridTemplateColumns: '1fr' // Single column on mobile
-            }} className="mobile-grid">
-              <div className="form-group">
-                <label className="form-label">{getPlayerName(match.player1_id)} Score</label>
-                                 <input
-                   type="number"
-                   className="form-input"
-                   value={formData.player1_score}
-                   onChange={(e) => setFormData({ ...formData, player1_score: e.target.value === '' ? '' : parseInt(e.target.value) || 0 })}
-                   min="0"
-                   placeholder="Enter score"
-                 />
-              </div>
+                         {/* Set Scores */}
+             <div style={{ marginTop: '16px' }}>
+               <h4 style={{ fontSize: '16px', fontWeight: 'bold', color: 'var(--primary-color)', marginBottom: '12px' }}>
+                 Set Scores
+               </h4>
+               {formData.sets.map((set, index) => (
+                 <div key={index} style={{ 
+                   display: 'grid', 
+                   gridTemplateColumns: '1fr 1fr', 
+                   gap: '16px',
+                   marginBottom: '12px',
+                   padding: '12px',
+                   backgroundColor: '#f8f9fa',
+                   borderRadius: '8px'
+                 }}>
+                   <div className="form-group">
+                     <label className="form-label">Set {set.set_number} - {getPlayerName(match.player1_id)} Games</label>
+                     <input
+                       type="number"
+                       className="form-input"
+                       value={set.player1_games}
+                       onChange={(e) => updateSet(index, 'player1_games', e.target.value === '' ? '' : parseInt(e.target.value) || 0)}
+                       min="0"
+                       placeholder="Enter games won"
+                     />
+                   </div>
 
-              <div className="form-group">
-                <label className="form-label">{getPlayerName(match.player2_id)} Score</label>
-                                 <input
-                   type="number"
-                   className="form-input"
-                   value={formData.player2_score}
-                   onChange={(e) => setFormData({ ...formData, player2_score: e.target.value === '' ? '' : parseInt(e.target.value) || 0 })}
-                   min="0"
-                   placeholder="Enter score"
-                 />
-              </div>
-            </div>
+                   <div className="form-group">
+                     <label className="form-label">Set {set.set_number} - {getPlayerName(match.player2_id)} Games</label>
+                     <input
+                       type="number"
+                       className="form-input"
+                       value={set.player2_games}
+                       onChange={(e) => updateSet(index, 'player2_games', e.target.value === '' ? '' : parseInt(e.target.value) || 0)}
+                       min="0"
+                       placeholder="Enter games won"
+                     />
+                   </div>
+                 </div>
+               ))}
+             </div>
 
             <div className="form-group">
               <label className="form-label">Match Status</label>

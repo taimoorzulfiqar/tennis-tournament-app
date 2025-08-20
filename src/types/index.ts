@@ -1,7 +1,8 @@
 export interface User {
   id: string
   email: string
-  full_name: string | null
+  full_name: string
+  phone?: string
   role: 'master' | 'admin' | 'player'
   verification_status: 'pending' | 'approved' | 'rejected'
   created_at: string
@@ -11,9 +12,9 @@ export interface User {
 export interface Tournament {
   id: string
   name: string
-  description: string | null
+  description?: string
   start_date: string
-  end_date: string | null
+  end_date?: string
   created_by: string
   created_at: string
   updated_at: string
@@ -35,14 +36,29 @@ export interface Match {
   updated_at: string
 }
 
+// New interface for match sets
+export interface MatchSet {
+  id: string
+  match_id: string
+  set_number: number
+  player1_games: number
+  player2_games: number
+  created_at: string
+}
+
+// Interface for match with sets
+export interface MatchWithSets extends Match {
+  sets: MatchSet[]
+}
+
 export interface LeaderboardEntry {
   player_id: string
   player_name: string
   games_won: number
+  matches_played: number
   rank: number
 }
 
-// Data transfer objects
 export interface CreateUserDTO {
   email: string
   password: string
@@ -80,4 +96,13 @@ export interface CreateMatchDTO {
 export interface UpdateMatchScoreDTO {
   player1_score: number
   player2_score: number
+}
+
+// New interface for updating match sets
+export interface UpdateMatchSetsDTO {
+  sets: Array<{
+    set_number: number
+    player1_games: number
+    player2_games: number
+  }>
 }
