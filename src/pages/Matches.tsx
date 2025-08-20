@@ -16,22 +16,6 @@ const Matches: React.FC = () => {
     queryFn: () => matchAPI.getMatches(),
   })
 
-  // Debug: Log matches data
-  React.useEffect(() => {
-    if (matches) {
-      console.log('Matches data received:', matches)
-      matches.forEach((match, index) => {
-        console.log(`Match ${index + 1}:`, {
-          id: match.id,
-          status: match.status,
-          player1_score: match.player1_score,
-          player2_score: match.player2_score,
-          winner_id: match.winner_id
-        })
-      })
-    }
-  }, [matches])
-
   const { data: players, isLoading: playersLoading } = useQuery({
     queryKey: ['players'],
     queryFn: async () => {
@@ -45,14 +29,13 @@ const Matches: React.FC = () => {
       await matchAPI.deleteMatch(matchId)
     },
     onSuccess: () => {
-      // Invalidate all match-related queries
       queryClient.invalidateQueries({ queryKey: ['matches'] })
-      // Also invalidate tournament-specific match queries
       queryClient.invalidateQueries({ queryKey: ['tournament'] })
       alert('Match deleted successfully!')
     },
     onError: (error) => {
-      alert(error instanceof Error ? error.message : 'Failed to delete match')
+      console.error('Error deleting match:', error)
+      alert('Failed to delete match. Please try again.')
     },
   })
 
@@ -80,9 +63,8 @@ const Matches: React.FC = () => {
   if (matchesLoading || playersLoading) {
     return (
       <Layout>
-        <div style={{ textAlign: 'center', padding: '40px' }}>
-          <div className="spinner" style={{ margin: '0 auto 20px' }}></div>
-          <p>Loading matches...</p>
+        <div className="flex justify-center items-center h-64">
+          <div className="text-lg">Loading matches...</div>
         </div>
       </Layout>
     )
@@ -91,16 +73,19 @@ const Matches: React.FC = () => {
   if (matchesError) {
     return (
       <Layout>
-        <div style={{ textAlign: 'center', padding: '40px' }}>
-          <h2 style={{ color: '#dc3545', marginBottom: '20px' }}>Error Loading Matches</h2>
-          <p style={{ color: '#666' }}>{matchesError instanceof Error ? matchesError.message : 'Unknown error occurred'}</p>
-          <button 
-            onClick={() => window.location.reload()} 
-            className="btn btn-primary"
-            style={{ marginTop: '20px' }}
-          >
-            Retry
-          </button>
+        <div className="flex justify-center items-center h-64">
+          <div className="text-center">
+            <h2 className="text-red-600 text-xl mb-4">Error Loading Matches</h2>
+            <p className="text-gray-600 mb-4">
+              {matchesError instanceof Error ? matchesError.message : 'Unknown error occurred'}
+            </p>
+            <button 
+              onClick={() => window.location.reload()} 
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              Retry
+            </button>
+          </div>
         </div>
       </Layout>
     )
@@ -108,237 +93,91 @@ const Matches: React.FC = () => {
 
   return (
     <Layout>
-      <div>
-        <h1 style={{ 
-          fontSize: '28px', 
-          fontWeight: 'bold', 
-          color: '#2E7D32', 
-          marginBottom: '20px',
-          textAlign: 'center'
-        }}>
-          Matches
-        </h1>
-
+      <div className="max-w-6xl mx-auto p-6">
+        <h1 className="text-3xl font-bold mb-6">All Matches</h1>
         
-
         {matches && matches.length > 0 ? (
-          <div style={{ 
-            display: 'grid', 
-            gap: '20px', 
-            gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))',
-            maxWidth: '100%'
-          }}>
-            {matches.map((match, index) => (
-              <div key={match.id} className="card match-card">
-                <div className="card-header">
-                  <h3 style={{ 
-                    fontSize: '18px', 
-                    fontWeight: 'bold', 
-                    color: '#2E7D32', 
-                    margin: 0
-                  }}>
-                    Match {index + 1}
-                  </h3>
-                  <span style={{
-                    padding: '4px 12px',
-                    borderRadius: '20px',
-                    fontSize: '12px',
-                    fontWeight: '600',
-                    backgroundColor: match.status === 'completed' ? '#4caf5020' : 
-                                   match.status === 'in_progress' ? '#ff980020' : '#66620',
-                    color: match.status === 'completed' ? '#4caf50' : 
-                          match.status === 'in_progress' ? '#ff9800' : '#666',
-                    textAlign: 'center',
-                    minWidth: '80px'
-                  }}>
-                    {match.status.replace('_', ' ').toUpperCase()}
-                  </span>
-                </div>
-
-                <div style={{ marginBottom: '12px' }}>
-                  <p style={{ fontSize: '14px', color: '#666', margin: '4px 0' }}>
-                    <strong>Court:</strong> {match.court || 'Not specified'}
-                  </p>
-                </div>
-
-                                 {/* Player Names */}
-                 <div style={{ 
-                   display: 'flex', 
-                   justifyContent: 'space-between', 
-                   alignItems: 'center',
-                   padding: '12px',
-                   backgroundColor: '#f5f5f5',
-                   borderRadius: '8px',
-                   marginBottom: '12px'
-                 }}>
-                   <div style={{ textAlign: 'center', flex: 1 }}>
-                     <p style={{ 
-                       fontWeight: 'bold', 
-                       margin: '0 0 6px 0',
-                       fontSize: '13px',
-                       wordBreak: 'break-word'
-                     }}>
-                       {getPlayerName(match.player1_id)}
-                     </p>
-                   </div>
-                   <div style={{ 
-                     fontSize: '16px', 
-                     fontWeight: 'bold', 
-                     color: '#666',
-                     padding: '0 8px'
-                   }}>
-                     VS
-                   </div>
-                   <div style={{ textAlign: 'center', flex: 1 }}>
-                     <p style={{ 
-                       fontWeight: 'bold', 
-                       margin: '0 0 6px 0',
-                       fontSize: '13px',
-                       wordBreak: 'break-word'
-                     }}>
-                       {getPlayerName(match.player2_id)}
-                     </p>
-                   </div>
-                 </div>
-
-                 {/* Set Scores */}
-                 {match.sets && match.sets.length > 0 ? (
-                   <div style={{ marginBottom: '12px' }}>
-                     <h4 style={{ fontSize: '14px', fontWeight: 'bold', margin: '0 0 8px 0', color: '#333' }}>
-                       Set Scores:
-                     </h4>
-                     {match.sets.map((set, index) => (
-                       <div key={index} style={{ 
-                         display: 'flex', 
-                         justifyContent: 'space-between', 
-                         alignItems: 'center',
-                         padding: '8px',
-                         backgroundColor: '#fff',
-                         border: '1px solid #e0e0e0',
-                         borderRadius: '4px',
-                         marginBottom: '4px'
-                       }}>
-                         <span style={{ fontSize: '12px', color: '#666' }}>Set {set.set_number}:</span>
-                         <div style={{ display: 'flex', gap: '16px' }}>
-                           <span style={{ fontWeight: 'bold', color: '#2E7D32' }}>
-                             {set.player1_games}
-                           </span>
-                           <span style={{ color: '#666' }}>-</span>
-                           <span style={{ fontWeight: 'bold', color: '#2E7D32' }}>
-                             {set.player2_games}
-                           </span>
-                         </div>
-                       </div>
-                     ))}
-                   </div>
-                 ) : (
-                   <div style={{ 
-                     textAlign: 'center', 
-                     padding: '8px',
-                     backgroundColor: '#f8f9fa',
-                     borderRadius: '4px',
-                     marginBottom: '12px'
-                   }}>
-                     <span style={{ fontSize: '12px', color: '#666' }}>No scores recorded yet</span>
-                   </div>
-                 )}
-
-                {match.winner_id && (
-                  <p style={{ 
-                    textAlign: 'center', 
-                    marginBottom: '12px', 
-                    fontWeight: 'bold', 
-                    color: '#4caf50',
-                    fontSize: '14px'
-                  }}>
-                    🏆 Winner: {getPlayerName(match.winner_id)}
-                  </p>
-                )}
-
-                {(user?.role === 'master' || (user?.role === 'admin' && user?.verification_status === 'approved')) && (
-                  <div style={{ display: 'flex', gap: '8px' }}>
-                    <button
-                      onClick={() => handleEditMatch(match)}
-                      className="btn btn-secondary"
-                      style={{ 
-                        padding: '8px 16px', 
-                        fontSize: '14px',
-                        flex: 1
-                      }}
-                    >
-                      ✏️ Edit Match
-                    </button>
-                    <button
-                      onClick={() => handleDeleteMatch(match.id!)}
-                      className="btn btn-secondary"
-                      style={{ 
-                        padding: '8px 16px', 
-                        fontSize: '14px',
-                        backgroundColor: '#dc3545',
-                        color: 'white',
-                        border: 'none'
-                      }}
-                      disabled={deleteMatchMutation.isPending}
-                    >
-                      {deleteMatchMutation.isPending ? '🗑️ Deleting...' : '🗑️ Delete'}
-                    </button>
+          <div className="grid gap-4">
+            {matches.map((match) => (
+              <div key={match.id} className="bg-white rounded-lg shadow p-6">
+                <div className="flex justify-between items-start">
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="text-lg font-semibold">
+                        {getPlayerName(match.player1_id)} vs {getPlayerName(match.player2_id)}
+                      </h3>
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        match.status === 'completed' ? 'bg-green-100 text-green-800' :
+                        match.status === 'in_progress' ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-gray-100 text-gray-800'
+                      }`}>
+                        {match.status.replace('_', ' ').toUpperCase()}
+                      </span>
+                    </div>
+                    
+                    {match.court && (
+                      <p className="text-sm text-gray-600 mb-2">
+                        Court: {match.court}
+                      </p>
+                    )}
+                    
+                    {match.status === 'completed' && (
+                      <div className="mb-2">
+                        <p className="text-sm text-gray-600">
+                          Score: {match.player1_score} - {match.player2_score}
+                        </p>
+                        {match.winner_id && (
+                          <p className="text-sm font-medium text-green-600">
+                            Winner: {getPlayerName(match.winner_id)}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                    
+                    <p className="text-xs text-gray-500">
+                      Created: {new Date(match.created_at).toLocaleDateString()}
+                    </p>
                   </div>
-                )}
+                  
+                  {/* Action buttons - only show for admins */}
+                  {user && (user.role === 'master' || (user.role === 'admin' && user.verification_status === 'approved')) && (
+                    <div className="flex space-x-2 ml-4">
+                      <button
+                        onClick={() => handleEditMatch(match)}
+                        className="px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDeleteMatch(match.id)}
+                        className="px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 text-sm"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             ))}
           </div>
         ) : (
-          <div style={{ textAlign: 'center', padding: '40px 20px' }}>
-            <div style={{ fontSize: '64px', marginBottom: '20px' }}>🎾</div>
-            <h2 style={{ fontSize: '20px', color: '#666', marginBottom: '12px' }}>
-              No matches yet
-            </h2>
-            <p style={{ color: '#999', marginBottom: '24px', fontSize: '14px' }}>
-              Matches will appear here once they are scheduled.
-            </p>
+          <div className="text-center py-12">
+            <p className="text-gray-600 text-lg">No matches found.</p>
           </div>
         )}
-      </div>
-
-      {selectedMatch && (
-        <EditMatchModal
-          match={selectedMatch}
-          isOpen={isEditModalOpen}
-          onClose={handleCloseEditModal}
-          onSuccess={() => {
-            // The modal will handle cache invalidation
-          }}
-        />
-      )}
-
-      {/* Mobile-specific styles */}
-      <style>{`
-        @media (max-width: 768px) {
-          .match-card {
-            margin: 0 !important;
-            padding: 16px !important;
-          }
-          
-          .card-header {
-            flex-direction: column !important;
-            gap: 8px !important;
-            text-align: center !important;
-          }
-        }
         
-        @media (min-width: 769px) {
-          .match-card {
-            margin: 0 !important;
-            padding: 20px !important;
-          }
-          
-          .card-header {
-            flex-direction: row !important;
-            justify-content: space-between !important;
-            align-items: center !important;
-          }
-        }
-      `}</style>
+        {/* Edit Modal */}
+        {selectedMatch && (
+          <EditMatchModal
+            match={selectedMatch}
+            isOpen={isEditModalOpen}
+            onClose={handleCloseEditModal}
+            onSuccess={() => {
+              queryClient.invalidateQueries({ queryKey: ['matches'] })
+            }}
+          />
+        )}
+      </div>
     </Layout>
   )
 }

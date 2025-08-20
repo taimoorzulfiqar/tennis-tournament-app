@@ -8,14 +8,9 @@ import { useAuth } from '../hooks/useAuth'
 interface Match {
   player1_id: string
   player2_id: string
-  games_per_set: number
-  sets_per_match: number
   court: string
-  sets: Array<{
-    set_number: number
-    player1_games: string | number
-    player2_games: string | number
-  }>
+  player1_score: number
+  player2_score: number
   is_completed: boolean
 }
 
@@ -39,14 +34,9 @@ const AddMatch: React.FC = () => {
   const [match, setMatch] = useState<Match>({
     player1_id: '',
     player2_id: '',
-    games_per_set: 6,
-    sets_per_match: 3,
     court: '',
-    sets: [
-      { set_number: 1, player1_games: '', player2_games: '' },
-      { set_number: 2, player1_games: '', player2_games: '' },
-      { set_number: 3, player1_games: '', player2_games: '' }
-    ],
+    player1_score: 0,
+    player2_score: 0,
     is_completed: false
   })
 
@@ -72,113 +62,72 @@ const AddMatch: React.FC = () => {
         tournament_id: tournamentId!,
         player1_id: matchData.player1_id,
         player2_id: matchData.player2_id,
-        games_per_set: matchData.games_per_set || 6,
-        sets_per_match: matchData.sets_per_match || 3,
         court: matchData.court,
-        player1_score: 0, // Will be calculated from sets
-        player2_score: 0  // Will be calculated from sets
+        player1_score: matchData.player1_score,
+        player2_score: matchData.player2_score
       })
 
-      // If match is marked as completed, update its sets and determine winner
+      // If match is marked as completed, update its score and determine winner
       if (matchData.is_completed) {
-        console.log('Match is marked as completed, updating sets...')
+        console.log('Match is marked as completed, updating score...')
         
-        // Filter out empty sets and convert to numbers
-        const validSets = matchData.sets
-          .filter(set => set.player1_games !== '' || set.player2_games !== '')
-          .map(set => ({
-            set_number: set.set_number,
-            player1_games: set.player1_games === '' ? 0 : Number(set.player1_games) || 0,
-            player2_games: set.player2_games === '' ? 0 : Number(set.player2_games) || 0
-          }))
-        
-        console.log('Sets to update:', validSets)
-        
-        // Use updateMatchSets to properly set winner_id and status
-        const updatedMatch = await matchAPI.updateMatchSets(createdMatch.id!, {
-          sets: validSets
+        const updatedMatch = await matchAPI.updateMatchScore(createdMatch.id!, {
+          player1_score: matchData.player1_score,
+          player2_score: matchData.player2_score
         })
         
-        console.log('Match updated with sets and winner:', updatedMatch)
+        console.log('Match updated with score:', updatedMatch)
+        return updatedMatch
       }
 
       return createdMatch
     },
-    onSuccess: (createdMatch) => {
-      console.log('Match created successfully:', createdMatch)
-      // Invalidate all match-related queries
+    onSuccess: () => {
+      console.log('Match created successfully')
       queryClient.invalidateQueries({ queryKey: ['matches'] })
-      queryClient.invalidateQueries({ queryKey: ['tournament', tournamentId, 'matches'] })
       queryClient.invalidateQueries({ queryKey: ['leaderboard'] })
-      alert('Match added successfully!')
-      navigate(`/tournament/${tournamentId}`)
+      navigate(`/tournaments/${tournamentId}`)
     },
     onError: (error) => {
-      alert(error instanceof Error ? error.message : 'Failed to add match')
-    },
+      console.error('Error creating match:', error)
+      alert('Failed to create match. Please try again.')
+    }
   })
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+    
+    // Validation
     if (!match.player1_id || !match.player2_id) {
-      alert('Please fill in all required fields.')
-      return
-    }
-    if (match.player1_id === match.player2_id) {
-      alert('Player 1 and Player 2 cannot be the same')
+      alert('Please select both players.')
       return
     }
     
-    // Validate that completed matches have valid scores
+    if (match.player1_id === match.player2_id) {
+      alert('Please select different players.')
+      return
+    }
+
+    // If match is completed, validate scores
     if (match.is_completed) {
-      const validSets = match.sets.filter(set => set.player1_games !== '' || set.player2_games !== '')
-      
-      if (validSets.length === 0) {
-        alert('Completed matches must have valid scores. Please enter scores for at least one set.')
+      if (match.player1_score === 0 && match.player2_score === 0) {
+        alert('Please enter scores for completed matches.')
         return
-      }
-      
-      // Check that each set has valid scores
-      for (const set of validSets) {
-        const player1Games = set.player1_games === '' ? 0 : Number(set.player1_games) || 0
-        const player2Games = set.player2_games === '' ? 0 : Number(set.player2_games) || 0
-        
-        if (player1Games === 0 && player2Games === 0) {
-          alert(`Set ${set.set_number}: Please enter valid scores for both players.`)
-          return
-        }
       }
     }
 
     createMatchMutation.mutate(match)
   }
 
-  const updateMatch = (field: keyof Match, value: any) => {
-    if (field === 'sets_per_match') {
-      const newSetsCount = Number(value) || 3
-      const newSets = Array.from({ length: newSetsCount }, (_, index) => ({
-        set_number: index + 1,
-        player1_games: '',
-        player2_games: ''
-      }))
-      setMatch({ ...match, [field]: value, sets: newSets })
-    } else {
-      setMatch({ ...match, [field]: value })
-    }
-  }
-
-  const updateSet = (setIndex: number, field: 'player1_games' | 'player2_games', value: string | number) => {
-    const updatedSets = [...match.sets]
-    updatedSets[setIndex] = { ...updatedSets[setIndex], [field]: value }
-    setMatch({ ...match, sets: updatedSets })
+  const handleInputChange = (field: keyof Match, value: any) => {
+    setMatch(prev => ({ ...prev, [field]: value }))
   }
 
   if (tournamentLoading || playersLoading) {
     return (
       <Layout>
-        <div style={{ textAlign: 'center', padding: '40px' }}>
-          <div className="spinner" style={{ margin: '0 auto 20px' }}></div>
-          <p>Loading...</p>
+        <div className="flex justify-center items-center h-64">
+          <div className="text-lg">Loading...</div>
         </div>
       </Layout>
     )
@@ -187,11 +136,8 @@ const AddMatch: React.FC = () => {
   if (!tournament) {
     return (
       <Layout>
-        <div style={{ textAlign: 'center', padding: '40px' }}>
-          <h2>Tournament not found</h2>
-          <button onClick={() => navigate('/')} className="btn btn-primary">
-            Back to Tournaments
-          </button>
+        <div className="flex justify-center items-center h-64">
+          <div className="text-lg text-red-600">Tournament not found</div>
         </div>
       </Layout>
     )
@@ -199,178 +145,127 @@ const AddMatch: React.FC = () => {
 
   return (
     <Layout>
-      <div style={{ maxWidth: '600px', margin: '0 auto' }}>
-        <div style={{ display: 'flex', alignItems: 'center', marginBottom: '24px' }}>
-          <button
-            onClick={() => navigate(`/tournament/${tournamentId}`)}
-            className="btn btn-secondary"
-            style={{ marginRight: '16px' }}
-          >
-            ← Back
-          </button>
-          <h1 style={{ fontSize: '32px', fontWeight: 'bold', color: 'var(--primary-color)', margin: 0 }}>
-            Add Match
-          </h1>
-        </div>
-
-        <div className="card" style={{ marginBottom: '24px' }}>
-          <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: 'var(--primary-color)', marginBottom: '16px' }}>
-            Tournament: {tournament.name}
-          </h2>
-        </div>
-
-        <form onSubmit={handleSubmit}>
-          <div className="card">
-            <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: 'var(--primary-color)', marginBottom: '20px' }}>
-              Match Details
-            </h2>
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-              <div className="form-group">
-                <label className="form-label">Player 1 *</label>
-                <select
-                  className="form-input"
-                  value={match.player1_id}
-                  onChange={(e) => updateMatch('player1_id', e.target.value)}
-                  required
-                >
-                  <option value="">Select Player 1</option>
-                  {players?.map((player) => (
-                    <option key={player.id} value={player.id}>
-                      {player.full_name || player.email}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">Player 2 *</label>
-                <select
-                  className="form-input"
-                  value={match.player2_id}
-                  onChange={(e) => updateMatch('player2_id', e.target.value)}
-                  required
-                >
-                  <option value="">Select Player 2</option>
-                  {players?.map((player) => (
-                    <option key={player.id} value={player.id}>
-                      {player.full_name || player.email}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-              <div className="form-group">
-                <label className="form-label">Games per Set</label>
-                <input
-                  type="number"
-                  className="form-input"
-                  value={match.games_per_set}
-                  onChange={(e) => updateMatch('games_per_set', parseInt(e.target.value))}
-                  min="1"
-                  max="10"
-                />
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">Sets per Match</label>
-                <input
-                  type="number"
-                  className="form-input"
-                  value={match.sets_per_match}
-                  onChange={(e) => updateMatch('sets_per_match', parseInt(e.target.value))}
-                  min="1"
-                  max="5"
-                />
-              </div>
-            </div>
-
-            <div className="form-group">
-              <label className="form-label">Court</label>
-              <input
-                type="text"
-                className="form-input"
-                value={match.court}
-                onChange={(e) => updateMatch('court', e.target.value)}
-                placeholder="e.g., Court 1, Center Court"
-              />
-            </div>
-
-                         {/* Set Scores */}
-             <div style={{ marginTop: '20px' }}>
-               <h3 style={{ fontSize: '16px', fontWeight: 'bold', color: 'var(--primary-color)', marginBottom: '16px' }}>
-                 Set Scores
-               </h3>
-               {match.sets.map((set, index) => (
-                 <div key={index} style={{ 
-                   display: 'grid', 
-                   gridTemplateColumns: '1fr 1fr', 
-                   gap: '16px',
-                   marginBottom: '12px',
-                   padding: '12px',
-                   backgroundColor: '#f8f9fa',
-                   borderRadius: '8px'
-                 }}>
-                   <div className="form-group">
-                     <label className="form-label">Set {set.set_number} - Player 1 Games</label>
-                     <input
-                       type="number"
-                       className="form-input"
-                       value={set.player1_games}
-                       onChange={(e) => updateSet(index, 'player1_games', e.target.value === '' ? '' : parseInt(e.target.value) || 0)}
-                       min="0"
-                       placeholder="Enter games won"
-                     />
-                   </div>
-
-                   <div className="form-group">
-                     <label className="form-label">Set {set.set_number} - Player 2 Games</label>
-                     <input
-                       type="number"
-                       className="form-input"
-                       value={set.player2_games}
-                       onChange={(e) => updateSet(index, 'player2_games', e.target.value === '' ? '' : parseInt(e.target.value) || 0)}
-                       min="0"
-                       placeholder="Enter games won"
-                     />
-                   </div>
-                 </div>
-               ))}
-             </div>
-
-            <div style={{ marginTop: '16px' }}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-                <input
-                  type="checkbox"
-                  checked={match.is_completed}
-                  onChange={(e) => updateMatch('is_completed', e.target.checked)}
-                  style={{ width: '16px', height: '16px' }}
-                />
-                <span style={{ fontSize: '14px', color: '#666' }}>
-                  Mark this match as completed
-                </span>
+      <div className="max-w-2xl mx-auto p-6">
+        <h1 className="text-3xl font-bold mb-6">Add Match to {tournament.name}</h1>
+        
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Player Selection */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Player 1
               </label>
+              <select
+                value={match.player1_id}
+                onChange={(e) => handleInputChange('player1_id', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              >
+                <option value="">Select Player 1</option>
+                {players?.map((player) => (
+                  <option key={player.id} value={player.id}>
+                    {player.full_name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Player 2
+              </label>
+              <select
+                value={match.player2_id}
+                onChange={(e) => handleInputChange('player2_id', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              >
+                <option value="">Select Player 2</option>
+                {players?.map((player) => (
+                  <option key={player.id} value={player.id}>
+                    {player.full_name}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
 
-          <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
+          {/* Court */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Court
+            </label>
+            <input
+              type="text"
+              value={match.court}
+              onChange={(e) => handleInputChange('court', e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="e.g., Court 1, Indoor Court, etc."
+            />
+          </div>
+
+          {/* Match Completion */}
+          <div className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              id="is_completed"
+              checked={match.is_completed}
+              onChange={(e) => handleInputChange('is_completed', e.target.checked)}
+              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            />
+            <label htmlFor="is_completed" className="text-sm font-medium text-gray-700">
+              Mark as completed
+            </label>
+          </div>
+
+          {/* Score Inputs (only show if completed) */}
+          {match.is_completed && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {players?.find(p => p.id === match.player1_id)?.full_name || 'Player 1'} Score
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  value={match.player1_score}
+                  onChange={(e) => handleInputChange('player1_score', parseInt(e.target.value) || 0)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {players?.find(p => p.id === match.player2_id)?.full_name || 'Player 2'} Score
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  value={match.player2_score}
+                  onChange={(e) => handleInputChange('player2_score', parseInt(e.target.value) || 0)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Submit Button */}
+          <div className="flex justify-end space-x-4">
             <button
               type="button"
-              onClick={() => navigate(`/tournament/${tournamentId}`)}
-              className="btn btn-secondary"
-              style={{ flex: 1 }}
+              onClick={() => navigate(`/tournaments/${tournamentId}`)}
+              className="px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="btn btn-primary"
-              style={{ flex: 1 }}
               disabled={createMatchMutation.isPending}
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
             >
-              {createMatchMutation.isPending ? 'Adding...' : 'Add Match'}
+              {createMatchMutation.isPending ? 'Creating...' : 'Create Match'}
             </button>
           </div>
         </form>

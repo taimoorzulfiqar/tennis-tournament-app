@@ -25,29 +25,13 @@ export interface Match {
   tournament_id: string
   player1_id: string
   player2_id: string
-  games_per_set?: number
-  sets_per_match?: number
   court?: string
+  player1_score: number
+  player2_score: number
   winner_id?: string
   status: 'scheduled' | 'in_progress' | 'completed'
   created_at: string
   updated_at: string
-}
-
-// New interface for match sets
-export interface MatchSet {
-  id: string
-  match_id: string
-  set_number: number
-  player1_games: number
-  player2_games: number
-  winner_id?: string
-  created_at: string
-}
-
-// Interface for match with sets
-export interface MatchWithSets extends Match {
-  sets: MatchSet[]
 }
 
 export interface LeaderboardEntry {
@@ -85,8 +69,6 @@ export interface CreateMatchDTO {
   tournament_id: string
   player1_id: string
   player2_id: string
-  games_per_set?: number
-  sets_per_match?: number
   court?: string
   player1_score?: number
   player2_score?: number
@@ -95,13 +77,4 @@ export interface CreateMatchDTO {
 export interface UpdateMatchScoreDTO {
   player1_score: number
   player2_score: number
-}
-
-// New interface for updating match sets
-export interface UpdateMatchSetsDTO {
-  sets: Array<{
-    set_number: number
-    player1_games: number
-    player2_games: number
-  }>
 }

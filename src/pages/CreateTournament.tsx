@@ -8,14 +8,9 @@ import { useAuth } from '../hooks/useAuth'
 interface Match {
   player1_id: string
   player2_id: string
-  games_per_set: number
-  sets_per_match: number
   court: string
-  sets: Array<{
-    set_number: number
-    player1_games: string | number
-    player2_games: string | number
-  }>
+  player1_score: number
+  player2_score: number
   is_completed: boolean
 }
 
@@ -48,14 +43,9 @@ const CreateTournament: React.FC = () => {
     {
       player1_id: '',
       player2_id: '',
-      games_per_set: 6,
-      sets_per_match: 3,
       court: '',
-      sets: [
-        { set_number: 1, player1_games: '', player2_games: '' },
-        { set_number: 2, player1_games: '', player2_games: '' },
-        { set_number: 3, player1_games: '', player2_games: '' }
-      ],
+      player1_score: 0,
+      player2_score: 0,
       is_completed: false
     }
   ])
@@ -86,89 +76,71 @@ const CreateTournament: React.FC = () => {
       
       // Only create matches if not creating without matches
       if (!createWithoutMatches) {
-                 // Then create all matches for the tournament
-         for (const match of matches) {
-           const createdMatch = await matchAPI.createMatch({
-             tournament_id: createdTournament.id,
-             player1_id: match.player1_id,
-             player2_id: match.player2_id,
-             games_per_set: match.games_per_set || 6,
-             sets_per_match: match.sets_per_match || 3,
-             court: match.court,
-             player1_score: 0, // Will be calculated from sets
-             player2_score: 0  // Will be calculated from sets
-           })
+        // Then create all matches for the tournament
+        for (const match of matches) {
+          const createdMatch = await matchAPI.createMatch({
+            tournament_id: createdTournament.id,
+            player1_id: match.player1_id,
+            player2_id: match.player2_id,
+            court: match.court,
+            player1_score: match.player1_score,
+            player2_score: match.player2_score
+          })
 
-           // If match is marked as completed, update its sets and determine winner
-           if (match.is_completed) {
-             // Filter out empty sets and convert to numbers
-             const validSets = match.sets
-               .filter(set => set.player1_games !== '' || set.player2_games !== '')
-               .map(set => ({
-                 set_number: set.set_number,
-                 player1_games: set.player1_games === '' ? 0 : Number(set.player1_games) || 0,
-                 player2_games: set.player2_games === '' ? 0 : Number(set.player2_games) || 0
-               }))
-             
-             // Use updateMatchSets to properly set winner_id and status
-             await matchAPI.updateMatchSets(createdMatch.id!, {
-               sets: validSets
-             })
-           }
-         }
+          // If match is marked as completed, update its score and determine winner
+          if (match.is_completed) {
+            console.log('Match is marked as completed, updating score...')
+            
+            await matchAPI.updateMatchScore(createdMatch.id!, {
+              player1_score: match.player1_score,
+              player2_score: match.player2_score
+            })
+          }
+        }
       }
       
       return createdTournament
     },
     onSuccess: () => {
+      console.log('Tournament created successfully')
       queryClient.invalidateQueries({ queryKey: ['tournaments'] })
       alert('Tournament created successfully!')
       navigate('/')
     },
     onError: (error) => {
-      alert(error instanceof Error ? error.message : 'Failed to create tournament')
-    },
+      console.error('Error creating tournament:', error)
+      alert('Failed to create tournament. Please try again.')
+    }
   })
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+    
+    // Validation
     if (!tournament.name || !tournament.start_date) {
       alert('Please fill in all required fields.')
       return
     }
 
-    // Only validate matches if not creating without matches
+    // Validate matches if creating with matches
     if (!createWithoutMatches) {
-      // Validate matches
       for (let i = 0; i < matches.length; i++) {
         const match = matches[i]
         if (!match.player1_id || !match.player2_id) {
-          alert(`Please fill in all required fields for match ${i + 1}`)
-          return
-        }
-        if (match.player1_id === match.player2_id) {
-          alert(`Match ${i + 1}: Player 1 and Player 2 cannot be the same`)
+          alert(`Match ${i + 1}: Please select both players.`)
           return
         }
         
-        // Validate that completed matches have valid scores
+        if (match.player1_id === match.player2_id) {
+          alert(`Match ${i + 1}: Please select different players.`)
+          return
+        }
+
+        // If match is completed, validate scores
         if (match.is_completed) {
-          const validSets = match.sets.filter(set => set.player1_games !== '' || set.player2_games !== '')
-          
-          if (validSets.length === 0) {
-            alert(`Match ${i + 1}: Completed matches must have valid scores. Please enter scores for at least one set.`)
+          if (match.player1_score === 0 && match.player2_score === 0) {
+            alert(`Match ${i + 1}: Please enter scores for completed matches.`)
             return
-          }
-          
-          // Check that each set has valid scores
-          for (const set of validSets) {
-            const player1Games = set.player1_games === '' ? 0 : Number(set.player1_games) || 0
-            const player2Games = set.player2_games === '' ? 0 : Number(set.player2_games) || 0
-            
-            if (player1Games === 0 && player2Games === 0) {
-              alert(`Match ${i + 1}, Set ${set.set_number}: Please enter valid scores for both players.`)
-              return
-            }
           }
         }
       }
@@ -177,21 +149,16 @@ const CreateTournament: React.FC = () => {
     createTournamentMutation.mutate(tournament)
   }
 
-           const addMatch = () => {
-      setMatches([...matches, {
-        player1_id: '',
-        player2_id: '',
-        games_per_set: 6,
-        sets_per_match: 3,
-        court: '',
-        sets: [
-          { set_number: 1, player1_games: '', player2_games: '' },
-          { set_number: 2, player1_games: '', player2_games: '' },
-          { set_number: 3, player1_games: '', player2_games: '' }
-        ],
-        is_completed: false
-      }])
-    }
+  const addMatch = () => {
+    setMatches([...matches, {
+      player1_id: '',
+      player2_id: '',
+      court: '',
+      player1_score: 0,
+      player2_score: 0,
+      is_completed: false
+    }])
+  }
 
   const removeMatch = (index: number) => {
     if (matches.length > 1) {
@@ -201,34 +168,15 @@ const CreateTournament: React.FC = () => {
 
   const updateMatch = (index: number, field: keyof Match, value: any) => {
     const updatedMatches = [...matches]
-    if (field === 'sets_per_match') {
-      const newSetsCount = Number(value) || 3
-      const newSets = Array.from({ length: newSetsCount }, (_, setIndex) => ({
-        set_number: setIndex + 1,
-        player1_games: '',
-        player2_games: ''
-      }))
-      updatedMatches[index] = { ...updatedMatches[index], [field]: value, sets: newSets }
-    } else {
-      updatedMatches[index] = { ...updatedMatches[index], [field]: value }
-    }
-    setMatches(updatedMatches)
-  }
-
-  const updateSet = (matchIndex: number, setIndex: number, field: 'player1_games' | 'player2_games', value: string | number) => {
-    const updatedMatches = [...matches]
-    const updatedSets = [...updatedMatches[matchIndex].sets]
-    updatedSets[setIndex] = { ...updatedSets[setIndex], [field]: value }
-    updatedMatches[matchIndex] = { ...updatedMatches[matchIndex], sets: updatedSets }
+    updatedMatches[index] = { ...updatedMatches[index], [field]: value }
     setMatches(updatedMatches)
   }
 
   if (playersLoading) {
     return (
       <Layout>
-        <div style={{ textAlign: 'center', padding: '40px' }}>
-          <div className="spinner" style={{ margin: '0 auto 20px' }}></div>
-          <p>Loading players...</p>
+        <div className="flex justify-center items-center h-64">
+          <div className="text-lg">Loading...</div>
         </div>
       </Layout>
     )
@@ -236,271 +184,232 @@ const CreateTournament: React.FC = () => {
 
   return (
     <Layout>
-      <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-        <div style={{ display: 'flex', alignItems: 'center', marginBottom: '24px' }}>
-          <button
-            onClick={() => navigate('/')}
-            className="btn btn-secondary"
-            style={{ marginRight: '16px' }}
-          >
-            ← Back
-          </button>
-          <h1 style={{ fontSize: '32px', fontWeight: 'bold', color: 'var(--primary-color)', margin: 0 }}>
-            Create Tournament
-          </h1>
-        </div>
-
-        <form onSubmit={handleSubmit}>
+      <div className="max-w-4xl mx-auto p-6">
+        <h1 className="text-3xl font-bold mb-6">Create Tournament</h1>
+        
+        <form onSubmit={handleSubmit} className="space-y-6">
           {/* Tournament Details */}
-          <div className="card" style={{ marginBottom: '24px' }}>
-            <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: 'var(--primary-color)', marginBottom: '20px' }}>
-              Tournament Information
-            </h2>
+          <div className="bg-white p-6 rounded-lg shadow">
+            <h2 className="text-xl font-semibold mb-4">Tournament Details</h2>
             
-            <div className="form-group">
-              <label className="form-label">Tournament Name *</label>
-              <input
-                type="text"
-                className="form-input"
-                value={tournament.name}
-                onChange={(e) => setTournament({ ...tournament, name: e.target.value })}
-                placeholder="Enter tournament name"
-                required
-              />
-            </div>
-
-            <div className="form-group">
-              <label className="form-label">Description</label>
-              <textarea
-                className="form-input"
-                value={tournament.description}
-                onChange={(e) => setTournament({ ...tournament, description: e.target.value })}
-                placeholder="Enter tournament description"
-                rows={3}
-              />
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-              <div className="form-group">
-                <label className="form-label">Start Date *</label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Tournament Name *
+                </label>
                 <input
-                  type="date"
-                  className="form-input"
-                  value={tournament.start_date}
-                  onChange={(e) => setTournament({ ...tournament, start_date: e.target.value })}
+                  type="text"
+                  value={tournament.name}
+                  onChange={(e) => setTournament({ ...tournament, name: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
                 />
               </div>
-
-              <div className="form-group">
-                <label className="form-label">End Date (Optional)</label>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Start Date *
+                </label>
                 <input
                   type="date"
-                  className="form-input"
-                  value={tournament.end_date}
-                  onChange={(e) => setTournament({ ...tournament, end_date: e.target.value })}
+                  value={tournament.start_date}
+                  onChange={(e) => setTournament({ ...tournament, start_date: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
                 />
               </div>
             </div>
-
-            {/* Option to create without matches */}
-            <div style={{ marginTop: '20px', padding: '16px', backgroundColor: '#f8f9fa', borderRadius: '8px' }}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-                <input
-                  type="checkbox"
-                  checked={createWithoutMatches}
-                  onChange={(e) => setCreateWithoutMatches(e.target.checked)}
-                  style={{ width: '16px', height: '16px' }}
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Description
+                </label>
+                <textarea
+                  value={tournament.description}
+                  onChange={(e) => setTournament({ ...tournament, description: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  rows={3}
                 />
-                <span style={{ fontSize: '14px', color: '#666' }}>
-                  Create tournament without initial matches (you can add matches later)
-                </span>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  End Date
+                </label>
+                <input
+                  type="date"
+                  value={tournament.end_date}
+                  onChange={(e) => setTournament({ ...tournament, end_date: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Create Without Matches Option */}
+          <div className="bg-white p-6 rounded-lg shadow">
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="createWithoutMatches"
+                checked={createWithoutMatches}
+                onChange={(e) => setCreateWithoutMatches(e.target.checked)}
+                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              />
+              <label htmlFor="createWithoutMatches" className="text-sm font-medium text-gray-700">
+                Create tournament without matches (add matches later)
               </label>
             </div>
           </div>
 
-          {/* Matches - only show if not creating without matches */}
+          {/* Matches Section */}
           {!createWithoutMatches && (
-            <div className="card">
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: 'var(--primary-color)', margin: 0 }}>
-                  Tournament Matches
-                </h2>
+            <div className="bg-white p-6 rounded-lg shadow">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-semibold">Matches</h2>
                 <button
                   type="button"
                   onClick={addMatch}
-                  className="btn btn-secondary"
-                  style={{ padding: '8px 16px', fontSize: '14px' }}
+                  className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
                 >
-                  ➕ Add Match
+                  Add Match
                 </button>
               </div>
-
+              
               {matches.map((match, index) => (
-                <div key={index} className="card" style={{ marginBottom: '16px', backgroundColor: '#f8f9fa' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                    <h3 style={{ fontSize: '16px', fontWeight: 'bold', color: '#333', margin: 0 }}>
-                      Match {index + 1}
-                    </h3>
+                <div key={index} className="border border-gray-200 rounded-lg p-4 mb-4">
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-lg font-medium">Match {index + 1}</h3>
                     {matches.length > 1 && (
                       <button
                         type="button"
                         onClick={() => removeMatch(index)}
-                        className="btn btn-secondary"
-                        style={{ padding: '6px 12px', fontSize: '12px' }}
+                        className="px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
                       >
-                        🗑️ Remove
+                        Remove
                       </button>
                     )}
                   </div>
-
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                    <div className="form-group">
-                      <label className="form-label">Player 1 *</label>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Player 1
+                      </label>
                       <select
-                        className="form-input"
                         value={match.player1_id}
                         onChange={(e) => updateMatch(index, 'player1_id', e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                         required
                       >
                         <option value="">Select Player 1</option>
                         {players?.map((player) => (
                           <option key={player.id} value={player.id}>
-                            {player.full_name || player.email}
+                            {player.full_name}
                           </option>
                         ))}
                       </select>
                     </div>
-
-                    <div className="form-group">
-                      <label className="form-label">Player 2 *</label>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Player 2
+                      </label>
                       <select
-                        className="form-input"
                         value={match.player2_id}
                         onChange={(e) => updateMatch(index, 'player2_id', e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                         required
                       >
                         <option value="">Select Player 2</option>
                         {players?.map((player) => (
                           <option key={player.id} value={player.id}>
-                            {player.full_name || player.email}
+                            {player.full_name}
                           </option>
                         ))}
                       </select>
                     </div>
                   </div>
-
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                    <div className="form-group">
-                      <label className="form-label">Games per Set</label>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Court
+                      </label>
                       <input
-                        type="number"
-                        className="form-input"
-                        value={match.games_per_set}
-                        onChange={(e) => updateMatch(index, 'games_per_set', parseInt(e.target.value))}
-                        min="1"
-                        max="10"
+                        type="text"
+                        value={match.court}
+                        onChange={(e) => updateMatch(index, 'court', e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="e.g., Court 1, Indoor Court, etc."
                       />
                     </div>
-
-                    <div className="form-group">
-                      <label className="form-label">Sets per Match</label>
-                      <input
-                        type="number"
-                        className="form-input"
-                        value={match.sets_per_match}
-                        onChange={(e) => updateMatch(index, 'sets_per_match', parseInt(e.target.value))}
-                        min="1"
-                        max="5"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="form-group">
-                    <label className="form-label">Court</label>
-                    <input
-                      type="text"
-                      className="form-input"
-                      value={match.court}
-                      onChange={(e) => updateMatch(index, 'court', e.target.value)}
-                      placeholder="e.g., Court 1, Center Court"
-                    />
-                  </div>
-
-                                                                       {/* Set Scores */}
-                    <div style={{ marginTop: '16px' }}>
-                      <h4 style={{ fontSize: '14px', fontWeight: 'bold', color: 'var(--primary-color)', marginBottom: '12px' }}>
-                        Set Scores
-                      </h4>
-                      {match.sets.map((set, setIndex) => (
-                        <div key={setIndex} style={{ 
-                          display: 'grid', 
-                          gridTemplateColumns: '1fr 1fr', 
-                          gap: '16px',
-                          marginBottom: '8px',
-                          padding: '8px',
-                          backgroundColor: '#f0f0f0',
-                          borderRadius: '4px'
-                        }}>
-                          <div className="form-group">
-                            <label className="form-label">Set {set.set_number} - Player 1 Games</label>
-                            <input
-                              type="number"
-                              className="form-input"
-                              value={set.player1_games}
-                              onChange={(e) => updateSet(index, setIndex, 'player1_games', e.target.value === '' ? '' : parseInt(e.target.value) || 0)}
-                              min="0"
-                              placeholder="Enter games won"
-                            />
-                          </div>
-
-                          <div className="form-group">
-                            <label className="form-label">Set {set.set_number} - Player 2 Games</label>
-                            <input
-                              type="number"
-                              className="form-input"
-                              value={set.player2_games}
-                              onChange={(e) => updateSet(index, setIndex, 'player2_games', e.target.value === '' ? '' : parseInt(e.target.value) || 0)}
-                              min="0"
-                              placeholder="Enter games won"
-                            />
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-
-                  <div style={{ marginTop: '16px' }}>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                    
+                    <div className="flex items-center space-x-2">
                       <input
                         type="checkbox"
+                        id={`is_completed_${index}`}
                         checked={match.is_completed}
                         onChange={(e) => updateMatch(index, 'is_completed', e.target.checked)}
-                        style={{ width: '16px', height: '16px' }}
+                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                       />
-                      <span style={{ fontSize: '14px', color: '#666' }}>
-                        Mark this match as completed
-                      </span>
-                    </label>
+                      <label htmlFor={`is_completed_${index}`} className="text-sm font-medium text-gray-700">
+                        Mark as completed
+                      </label>
+                    </div>
                   </div>
+
+                  {/* Score Inputs (only show if completed) */}
+                  {match.is_completed && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          {players?.find(p => p.id === match.player1_id)?.full_name || 'Player 1'} Score
+                        </label>
+                        <input
+                          type="number"
+                          min="0"
+                          value={match.player1_score}
+                          onChange={(e) => updateMatch(index, 'player1_score', parseInt(e.target.value) || 0)}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          required
+                        />
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          {players?.find(p => p.id === match.player2_id)?.full_name || 'Player 2'} Score
+                        </label>
+                        <input
+                          type="number"
+                          min="0"
+                          value={match.player2_score}
+                          onChange={(e) => updateMatch(index, 'player2_score', parseInt(e.target.value) || 0)}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          required
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
           )}
 
-          <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
+          {/* Submit Button */}
+          <div className="flex justify-end space-x-4">
             <button
               type="button"
               onClick={() => navigate('/')}
-              className="btn btn-secondary"
-              style={{ flex: 1 }}
+              className="px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="btn btn-primary"
-              style={{ flex: 1 }}
               disabled={createTournamentMutation.isPending}
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
             >
               {createTournamentMutation.isPending ? 'Creating...' : 'Create Tournament'}
             </button>
