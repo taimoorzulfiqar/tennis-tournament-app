@@ -60,10 +60,10 @@ const Matches: React.FC = () => {
           <div style={{ display: 'grid', gap: '20px', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))' }}>
             {matches.map((match) => (
               <div key={match.id} className="card">
-                <div className="card-header">
-                  <h3 style={{ fontSize: '18px', fontWeight: 'bold', color: '#2E7D32', margin: 0 }}>
-                    Match #{match.id.slice(0, 8)}
-                  </h3>
+                                 <div className="card-header">
+                   <h3 style={{ fontSize: '18px', fontWeight: 'bold', color: '#2E7D32', margin: 0 }}>
+                     Match {matches.indexOf(match) + 1}
+                   </h3>
                   <span style={{
                     padding: '4px 12px',
                     borderRadius: '20px',

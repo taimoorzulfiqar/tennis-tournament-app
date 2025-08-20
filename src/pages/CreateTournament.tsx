@@ -12,8 +12,8 @@ interface Match {
   sets_per_match: number
   court: string
   start_time: string
-  player1_score: number
-  player2_score: number
+  player1_score: string | number
+  player2_score: string | number
   is_completed: boolean
 }
 
@@ -35,8 +35,8 @@ const CreateTournament: React.FC = () => {
       sets_per_match: 3,
       court: '',
       start_time: '',
-      player1_score: 0,
-      player2_score: 0,
+      player1_score: '',
+      player2_score: '',
       is_completed: false
     }
   ])
@@ -65,22 +65,22 @@ const CreateTournament: React.FC = () => {
       // First create the tournament
       const createdTournament = await tournamentAPI.createTournament(tournamentCreate, user!.id)
       
-      // Then create all matches for the tournament
-      for (const match of matches) {
-        // Ensure scheduled_time is properly formatted
-        const scheduledTime = new Date(match.start_time).toISOString()
-        
-        await matchAPI.createMatch({
-          tournament_id: createdTournament.id,
-          player1_id: match.player1_id,
-          player2_id: match.player2_id,
-          games_per_set: match.games_per_set || 6,
-          sets_per_match: match.sets_per_match || 3,
-          court: match.court,
-          scheduled_time: scheduledTime,
-          player1_score: match.player1_score || 0,
-          player2_score: match.player2_score || 0
-        })
+             // Then create all matches for the tournament
+       for (const match of matches) {
+         // Ensure scheduled_time is properly formatted
+         const scheduledTime = new Date(match.start_time).toISOString()
+         
+         await matchAPI.createMatch({
+           tournament_id: createdTournament.id,
+           player1_id: match.player1_id,
+           player2_id: match.player2_id,
+           games_per_set: match.games_per_set || 6,
+           sets_per_match: match.sets_per_match || 3,
+           court: match.court,
+           scheduled_time: scheduledTime,
+           player1_score: match.player1_score === '' ? 0 : Number(match.player1_score) || 0,
+           player2_score: match.player2_score === '' ? 0 : Number(match.player2_score) || 0
+         })
 
         // If match is marked as completed, update its status
         if (match.is_completed) {
@@ -128,19 +128,19 @@ const CreateTournament: React.FC = () => {
     createTournamentMutation.mutate(tournament)
   }
 
-  const addMatch = () => {
-    setMatches([...matches, {
-      player1_id: '',
-      player2_id: '',
-      games_per_set: 6,
-      sets_per_match: 3,
-      court: '',
-      start_time: '',
-      player1_score: 0,
-      player2_score: 0,
-      is_completed: false
-    }])
-  }
+     const addMatch = () => {
+     setMatches([...matches, {
+       player1_id: '',
+       player2_id: '',
+       games_per_set: 6,
+       sets_per_match: 3,
+       court: '',
+       start_time: '',
+       player1_score: '',
+       player2_score: '',
+       is_completed: false
+     }])
+   }
 
   const removeMatch = (index: number) => {
     if (matches.length > 1) {
@@ -356,29 +356,31 @@ const CreateTournament: React.FC = () => {
                   </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                  <div className="form-group">
-                    <label className="form-label">Player 1 Score</label>
-                    <input
-                      type="number"
-                      className="form-input"
-                      value={match.player1_score}
-                      onChange={(e) => updateMatch(index, 'player1_score', parseInt(e.target.value) || 0)}
-                      min="0"
-                    />
-                  </div>
+                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                   <div className="form-group">
+                     <label className="form-label">Player 1 Score</label>
+                     <input
+                       type="number"
+                       className="form-input"
+                       value={match.player1_score}
+                       onChange={(e) => updateMatch(index, 'player1_score', e.target.value === '' ? '' : parseInt(e.target.value) || 0)}
+                       min="0"
+                       placeholder="Enter score"
+                     />
+                   </div>
 
-                  <div className="form-group">
-                    <label className="form-label">Player 2 Score</label>
-                    <input
-                      type="number"
-                      className="form-input"
-                      value={match.player2_score}
-                      onChange={(e) => updateMatch(index, 'player2_score', parseInt(e.target.value) || 0)}
-                      min="0"
-                    />
-                  </div>
-                </div>
+                   <div className="form-group">
+                     <label className="form-label">Player 2 Score</label>
+                     <input
+                       type="number"
+                       className="form-input"
+                       value={match.player2_score}
+                       onChange={(e) => updateMatch(index, 'player2_score', e.target.value === '' ? '' : parseInt(e.target.value) || 0)}
+                       min="0"
+                       placeholder="Enter score"
+                     />
+                   </div>
+                 </div>
 
                 <div style={{ marginTop: '16px' }}>
                   <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
