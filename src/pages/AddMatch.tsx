@@ -12,6 +12,15 @@ interface Match {
   player1_score: number
   player2_score: number
   is_completed: boolean
+  match_format: {
+    sets: number
+    games_per_set: number
+    tiebreak_at: number
+  }
+  detailed_score: {
+    player1_sets: number[]
+    player2_sets: number[]
+  }
 }
 
 const AddMatch: React.FC = () => {
@@ -37,7 +46,16 @@ const AddMatch: React.FC = () => {
     court: '',
     player1_score: 0,
     player2_score: 0,
-    is_completed: false
+    is_completed: false,
+    match_format: {
+      sets: 3,
+      games_per_set: 6,
+      tiebreak_at: 6
+    },
+    detailed_score: {
+      player1_sets: [],
+      player2_sets: []
+    }
   })
 
   // Fetch tournament details
@@ -112,14 +130,25 @@ const AddMatch: React.FC = () => {
 
     // If match is completed, validate scores
     if (match.is_completed) {
-      if (match.player1_score === 0 && match.player2_score === 0) {
-        alert('Please enter scores for completed matches.')
+      // Check if any set scores are entered
+      const hasSetScores = match.detailed_score.player1_sets.some(score => score > 0) || 
+                          match.detailed_score.player2_sets.some(score => score > 0)
+      
+      if (!hasSetScores) {
+        alert('Please enter set scores for completed matches.')
         return
       }
       
-      // Ensure there's a clear winner (no ties)
+      // Ensure there's a clear winner (no ties in sets won)
       if (match.player1_score === match.player2_score) {
-        alert('Please enter different scores for completed matches. Ties are not allowed.')
+        alert('Please enter scores that result in a clear winner. Match cannot end in a tie.')
+        return
+      }
+      
+      // Validate that the match is actually complete based on the format
+      const setsToWin = Math.ceil(match.match_format.sets / 2)
+      if (match.player1_score < setsToWin && match.player2_score < setsToWin) {
+        alert(`Match is not complete. A player needs to win ${setsToWin} sets in a best of ${match.match_format.sets} format.`)
         return
       }
     }
@@ -129,6 +158,53 @@ const AddMatch: React.FC = () => {
 
   const handleInputChange = (field: keyof Match, value: any) => {
     setMatch(prev => ({ ...prev, [field]: value }))
+  }
+
+  const handleFormatChange = (field: keyof Match['match_format'], value: number) => {
+    setMatch(prev => ({
+      ...prev,
+      match_format: { ...prev.match_format, [field]: value },
+      detailed_score: { player1_sets: [], player2_sets: [] } // Reset scores when format changes
+    }))
+  }
+
+  const handleSetScoreChange = (setIndex: number, player: 'player1' | 'player2', games: number) => {
+    setMatch(prev => {
+      const newDetailedScore = { ...prev.detailed_score }
+      const playerKey = player === 'player1' ? 'player1_sets' : 'player2_sets'
+      
+      // Ensure arrays are long enough
+      while (newDetailedScore.player1_sets.length <= setIndex) {
+        newDetailedScore.player1_sets.push(0)
+      }
+      while (newDetailedScore.player2_sets.length <= setIndex) {
+        newDetailedScore.player2_sets.push(0)
+      }
+      
+      newDetailedScore[playerKey][setIndex] = games
+      
+      // Calculate overall match score (sets won)
+      let player1Score = 0
+      let player2Score = 0
+      
+      for (let i = 0; i < Math.max(newDetailedScore.player1_sets.length, newDetailedScore.player2_sets.length); i++) {
+        const p1Games = newDetailedScore.player1_sets[i] || 0
+        const p2Games = newDetailedScore.player2_sets[i] || 0
+        
+        if (p1Games > p2Games && p1Games >= prev.match_format.games_per_set) {
+          player1Score++
+        } else if (p2Games > p1Games && p2Games >= prev.match_format.games_per_set) {
+          player2Score++
+        }
+      }
+      
+      return {
+        ...prev,
+        detailed_score: newDetailedScore,
+        player1_score: player1Score,
+        player2_score: player2Score
+      }
+    })
   }
 
   if (tournamentLoading || playersLoading) {
@@ -295,96 +371,284 @@ const AddMatch: React.FC = () => {
               />
             </div>
 
-            {/* Match Completion */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <input
-                type="checkbox"
-                id="is_completed"
-                checked={match.is_completed}
-                onChange={(e) => handleInputChange('is_completed', e.target.checked)}
-                style={{
-                  width: '20px',
-                  height: '20px',
-                  accentColor: 'var(--primary-color)',
-                  cursor: 'pointer'
-                }}
-              />
-              <label htmlFor="is_completed" style={{
-                fontSize: '16px',
-                fontWeight: '500',
-                color: 'var(--text-primary)',
-                cursor: 'pointer'
-              }}>
-                Mark as completed
-              </label>
-            </div>
+                         {/* Match Format */}
+             <div style={{
+               padding: '20px',
+               backgroundColor: '#f8f9fa',
+               borderRadius: '8px',
+               border: '1px solid #e0e0e0'
+             }}>
+               <h3 style={{
+                 fontSize: '18px',
+                 fontWeight: '600',
+                 marginBottom: '16px',
+                 color: 'var(--text-primary)'
+               }}>
+                 Match Format
+               </h3>
+               <div style={{
+                 display: 'grid',
+                 gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+                 gap: '16px'
+               }}>
+                 <div>
+                   <label style={{
+                     display: 'block',
+                     fontSize: '14px',
+                     fontWeight: '600',
+                     marginBottom: '8px',
+                     color: 'var(--text-primary)'
+                   }}>
+                     Number of Sets
+                   </label>
+                   <select
+                     value={match.match_format.sets}
+                     onChange={(e) => handleFormatChange('sets', parseInt(e.target.value))}
+                     style={{
+                       width: '100%',
+                       padding: '12px 16px',
+                       border: '2px solid #e0e0e0',
+                       borderRadius: '8px',
+                       fontSize: '16px',
+                       backgroundColor: 'white',
+                       transition: 'border-color 0.2s ease'
+                     }}
+                     onFocus={(e) => e.target.style.borderColor = 'var(--primary-color)'}
+                     onBlur={(e) => e.target.style.borderColor = '#e0e0e0'}
+                   >
+                     <option value={1}>Best of 1</option>
+                     <option value={3}>Best of 3</option>
+                     <option value={5}>Best of 5</option>
+                   </select>
+                 </div>
+                 
+                 <div>
+                   <label style={{
+                     display: 'block',
+                     fontSize: '14px',
+                     fontWeight: '600',
+                     marginBottom: '8px',
+                     color: 'var(--text-primary)'
+                   }}>
+                     Games per Set
+                   </label>
+                   <select
+                     value={match.match_format.games_per_set}
+                     onChange={(e) => handleFormatChange('games_per_set', parseInt(e.target.value))}
+                     style={{
+                       width: '100%',
+                       padding: '12px 16px',
+                       border: '2px solid #e0e0e0',
+                       borderRadius: '8px',
+                       fontSize: '16px',
+                       backgroundColor: 'white',
+                       transition: 'border-color 0.2s ease'
+                     }}
+                     onFocus={(e) => e.target.style.borderColor = 'var(--primary-color)'}
+                     onBlur={(e) => e.target.style.borderColor = '#e0e0e0'}
+                   >
+                     <option value={4}>First to 4</option>
+                     <option value={6}>First to 6</option>
+                     <option value={8}>First to 8</option>
+                   </select>
+                 </div>
+                 
+                 <div>
+                   <label style={{
+                     display: 'block',
+                     fontSize: '14px',
+                     fontWeight: '600',
+                     marginBottom: '8px',
+                     color: 'var(--text-primary)'
+                   }}>
+                     Tiebreak at
+                   </label>
+                   <select
+                     value={match.match_format.tiebreak_at}
+                     onChange={(e) => handleFormatChange('tiebreak_at', parseInt(e.target.value))}
+                     style={{
+                       width: '100%',
+                       padding: '12px 16px',
+                       border: '2px solid #e0e0e0',
+                       borderRadius: '8px',
+                       fontSize: '16px',
+                       backgroundColor: 'white',
+                       transition: 'border-color 0.2s ease'
+                     }}
+                     onFocus={(e) => e.target.style.borderColor = 'var(--primary-color)'}
+                     onBlur={(e) => e.target.style.borderColor = '#e0e0e0'}
+                   >
+                     <option value={6}>6-6</option>
+                     <option value={7}>7-7</option>
+                     <option value={8}>8-8</option>
+                   </select>
+                 </div>
+               </div>
+             </div>
 
-            {/* Score Inputs (only show if completed) */}
-            {match.is_completed && (
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-                gap: '16px'
-              }}>
-                <div>
-                  <label style={{
-                    display: 'block',
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    marginBottom: '8px',
-                    color: 'var(--text-primary)'
-                  }}>
-                    {players?.find(p => p.id === match.player1_id)?.full_name || 'Player 1'} Score
-                  </label>
-                  <input
-                    type="number"
-                    min="0"
-                    value={match.player1_score}
-                    onChange={(e) => handleInputChange('player1_score', parseInt(e.target.value) || 0)}
-                    style={{
-                      width: '100%',
-                      padding: '12px 16px',
-                      border: '2px solid #e0e0e0',
-                      borderRadius: '8px',
-                      fontSize: '16px',
-                      transition: 'border-color 0.2s ease'
-                    }}
-                    onFocus={(e) => e.target.style.borderColor = 'var(--primary-color)'}
-                    onBlur={(e) => e.target.style.borderColor = '#e0e0e0'}
-                    required
-                  />
-                </div>
-                
-                <div>
-                  <label style={{
-                    display: 'block',
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    marginBottom: '8px',
-                    color: 'var(--text-primary)'
-                  }}>
-                    {players?.find(p => p.id === match.player2_id)?.full_name || 'Player 2'} Score
-                  </label>
-                  <input
-                    type="number"
-                    min="0"
-                    value={match.player2_score}
-                    onChange={(e) => handleInputChange('player2_score', parseInt(e.target.value) || 0)}
-                    style={{
-                      width: '100%',
-                      padding: '12px 16px',
-                      border: '2px solid #e0e0e0',
-                      borderRadius: '8px',
-                      fontSize: '16px',
-                      transition: 'border-color 0.2s ease'
-                    }}
-                    onFocus={(e) => e.target.style.borderColor = 'var(--primary-color)'}
-                    onBlur={(e) => e.target.style.borderColor = '#e0e0e0'}
-                    required
-                  />
-                </div>
-              </div>
-            )}
+             {/* Match Completion */}
+             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+               <input
+                 type="checkbox"
+                 id="is_completed"
+                 checked={match.is_completed}
+                 onChange={(e) => handleInputChange('is_completed', e.target.checked)}
+                 style={{
+                   width: '20px',
+                   height: '20px',
+                   accentColor: 'var(--primary-color)',
+                   cursor: 'pointer'
+                 }}
+               />
+               <label htmlFor="is_completed" style={{
+                 fontSize: '16px',
+                 fontWeight: '500',
+                 color: 'var(--text-primary)',
+                 cursor: 'pointer'
+               }}>
+                 Mark as completed
+               </label>
+             </div>
+
+             {/* Detailed Score Inputs (only show if completed) */}
+             {match.is_completed && (
+               <div style={{
+                 padding: '20px',
+                 backgroundColor: '#f8f9fa',
+                 borderRadius: '8px',
+                 border: '1px solid #e0e0e0'
+               }}>
+                 <h3 style={{
+                   fontSize: '18px',
+                   fontWeight: '600',
+                   marginBottom: '16px',
+                   color: 'var(--text-primary)'
+                 }}>
+                   Set Scores
+                 </h3>
+                 
+                 <div style={{ marginBottom: '16px' }}>
+                   <div style={{
+                     display: 'grid',
+                     gridTemplateColumns: '2fr repeat(' + match.match_format.sets + ', 1fr)',
+                     gap: '8px',
+                     alignItems: 'center',
+                     marginBottom: '8px'
+                   }}>
+                     <div style={{ fontWeight: '600', color: 'var(--text-primary)' }}>Player</div>
+                     {Array.from({ length: match.match_format.sets }, (_, i) => (
+                       <div key={i} style={{ 
+                         fontWeight: '600', 
+                         color: 'var(--text-primary)', 
+                         textAlign: 'center' 
+                       }}>
+                         Set {i + 1}
+                       </div>
+                     ))}
+                   </div>
+                   
+                   {/* Player 1 Score Row */}
+                   <div style={{
+                     display: 'grid',
+                     gridTemplateColumns: '2fr repeat(' + match.match_format.sets + ', 1fr)',
+                     gap: '8px',
+                     alignItems: 'center',
+                     marginBottom: '8px'
+                   }}>
+                     <div style={{ 
+                       fontWeight: '500', 
+                       color: 'var(--text-primary)',
+                       fontSize: '14px'
+                     }}>
+                       {players?.find(p => p.id === match.player1_id)?.full_name || 'Player 1'}
+                     </div>
+                     {Array.from({ length: match.match_format.sets }, (_, setIndex) => (
+                       <input
+                         key={setIndex}
+                         type="number"
+                         min="0"
+                         max="20"
+                         value={match.detailed_score.player1_sets[setIndex] || ''}
+                         onChange={(e) => handleSetScoreChange(setIndex, 'player1', parseInt(e.target.value) || 0)}
+                         style={{
+                           width: '100%',
+                           padding: '8px',
+                           border: '2px solid #e0e0e0',
+                           borderRadius: '6px',
+                           fontSize: '14px',
+                           textAlign: 'center',
+                           transition: 'border-color 0.2s ease'
+                         }}
+                         onFocus={(e) => e.target.style.borderColor = 'var(--primary-color)'}
+                         onBlur={(e) => e.target.style.borderColor = '#e0e0e0'}
+                         placeholder="0"
+                       />
+                     ))}
+                   </div>
+                   
+                   {/* Player 2 Score Row */}
+                   <div style={{
+                     display: 'grid',
+                     gridTemplateColumns: '2fr repeat(' + match.match_format.sets + ', 1fr)',
+                     gap: '8px',
+                     alignItems: 'center'
+                   }}>
+                     <div style={{ 
+                       fontWeight: '500', 
+                       color: 'var(--text-primary)',
+                       fontSize: '14px'
+                     }}>
+                       {players?.find(p => p.id === match.player2_id)?.full_name || 'Player 2'}
+                     </div>
+                     {Array.from({ length: match.match_format.sets }, (_, setIndex) => (
+                       <input
+                         key={setIndex}
+                         type="number"
+                         min="0"
+                         max="20"
+                         value={match.detailed_score.player2_sets[setIndex] || ''}
+                         onChange={(e) => handleSetScoreChange(setIndex, 'player2', parseInt(e.target.value) || 0)}
+                         style={{
+                           width: '100%',
+                           padding: '8px',
+                           border: '2px solid #e0e0e0',
+                           borderRadius: '6px',
+                           fontSize: '14px',
+                           textAlign: 'center',
+                           transition: 'border-color 0.2s ease'
+                         }}
+                         onFocus={(e) => e.target.style.borderColor = 'var(--primary-color)'}
+                         onBlur={(e) => e.target.style.borderColor = '#e0e0e0'}
+                         placeholder="0"
+                       />
+                     ))}
+                   </div>
+                 </div>
+                 
+                 {/* Match Summary */}
+                 <div style={{
+                   padding: '12px',
+                   backgroundColor: 'white',
+                   borderRadius: '6px',
+                   border: '1px solid #e0e0e0'
+                 }}>
+                   <div style={{
+                     fontSize: '14px',
+                     color: 'var(--text-secondary)',
+                     marginBottom: '4px'
+                   }}>
+                     Match Score (Sets Won):
+                   </div>
+                   <div style={{
+                     fontSize: '18px',
+                     fontWeight: '600',
+                     color: 'var(--text-primary)'
+                   }}>
+                     {players?.find(p => p.id === match.player1_id)?.full_name || 'Player 1'}: {match.player1_score} - {players?.find(p => p.id === match.player2_id)?.full_name || 'Player 2'}: {match.player2_score}
+                   </div>
+                 </div>
+               </div>
+             )}
 
             {/* Submit Button */}
             <div style={{
