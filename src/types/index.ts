@@ -24,12 +24,13 @@ export interface Match {
   tournament_id: string
   player1_id: string
   player2_id: string
-  start_time: string
+  games_per_set?: number
+  sets_per_match?: number
   court: string
-  games_per_set: number
-  sets_per_match: number
+  scheduled_time: string
   player1_score: number
   player2_score: number
+  winner_id?: string
   status: 'scheduled' | 'in_progress' | 'completed'
   created_at: string
   updated_at: string
@@ -70,10 +71,10 @@ export interface CreateMatchDTO {
   tournament_id: string
   player1_id: string
   player2_id: string
-  start_time: string
+  games_per_set?: number
+  sets_per_match?: number
   court: string
-  games_per_set: number
-  sets_per_match: number
+  scheduled_time: string
   player1_score?: number
   player2_score?: number
 }

@@ -17,10 +17,6 @@ ADD COLUMN IF NOT EXISTS player1_score INTEGER DEFAULT 0;
 ALTER TABLE matches 
 ADD COLUMN IF NOT EXISTS player2_score INTEGER DEFAULT 0;
 
--- Add start_time column (timestamp)
-ALTER TABLE matches 
-ADD COLUMN IF NOT EXISTS start_time TIMESTAMP WITH TIME ZONE;
-
 -- Add court column (text)
 ALTER TABLE matches 
 ADD COLUMN IF NOT EXISTS court TEXT;
@@ -57,7 +53,7 @@ SELECT
   games_per_set,
   sets_per_match,
   court,
-  start_time,
+  scheduled_time,
   player1_score,
   player2_score,
   winner_id,

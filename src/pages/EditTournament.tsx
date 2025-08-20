@@ -79,7 +79,7 @@ const EditTournament: React.FC = () => {
         games_per_set: match.games_per_set || 6,
         sets_per_match: match.sets_per_match || 3,
         court: match.court,
-        start_time: match.start_time.split('T')[0] + 'T' + match.start_time.split('T')[1].substring(0, 5), // Convert to datetime-local format
+        start_time: match.scheduled_time.split('T')[0] + 'T' + match.scheduled_time.split('T')[1].substring(0, 5), // Convert to datetime-local format
         player1_score: match.player1_score,
         player2_score: match.player2_score
       })))
@@ -128,7 +128,7 @@ const EditTournament: React.FC = () => {
             games_per_set: match.games_per_set || 6,
             sets_per_match: match.sets_per_match || 3,
             court: match.court,
-            start_time: match.start_time,
+            scheduled_time: match.start_time,
             player1_score: match.player1_score,
             player2_score: match.player2_score
           })
