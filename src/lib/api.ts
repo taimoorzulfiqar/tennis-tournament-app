@@ -320,12 +320,67 @@ export const matchAPI = {
   },
 
   deleteMatch: async (id: string): Promise<void> => {
+    console.log('deleteMatch called with id:', id)
+    
+    // First, let's check if the match exists
+    const { data: match, error: fetchError } = await supabase
+      .from('matches')
+      .select('*')
+      .eq('id', id)
+      .single()
+    
+    if (fetchError) {
+      console.error('Error fetching match:', fetchError)
+      throw new Error(`Match not found: ${fetchError.message}`)
+    }
+    
+    console.log('Match found:', match)
+    
+    // Check current user
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      console.error('No authenticated user')
+      throw new Error('Authentication required')
+    }
+    
+    console.log('Current user:', user.id)
+    
+    // Check user profile
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('role, verification_status')
+      .eq('id', user.id)
+      .single()
+    
+    if (profileError) {
+      console.error('Error fetching user profile:', profileError)
+      throw new Error('User profile not found')
+    }
+    
+    console.log('User profile:', profile)
+    
+    // Check if user has permission to delete
+    const canDelete = (profile.role === 'master' || 
+                      (profile.role === 'admin' && profile.verification_status === 'approved'))
+    
+    console.log('User can delete:', canDelete)
+    
+    if (!canDelete) {
+      throw new Error('Insufficient permissions to delete matches')
+    }
+    
+    // Attempt to delete the match
     const { error } = await supabase
       .from('matches')
       .delete()
       .eq('id', id)
 
-    if (error) throw new Error(error.message)
+    if (error) {
+      console.error('Error deleting match:', error)
+      throw new Error(error.message)
+    }
+    
+    console.log('Match deleted successfully')
   },
 }
 

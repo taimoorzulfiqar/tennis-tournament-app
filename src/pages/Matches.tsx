@@ -26,16 +26,20 @@ const Matches: React.FC = () => {
 
   const deleteMatchMutation = useMutation({
     mutationFn: async (matchId: string) => {
+      console.log('deleteMatchMutation called with matchId:', matchId)
       await matchAPI.deleteMatch(matchId)
     },
     onSuccess: () => {
+      console.log('deleteMatchMutation onSuccess called')
       queryClient.invalidateQueries({ queryKey: ['matches'] })
       queryClient.invalidateQueries({ queryKey: ['tournament'] })
+      queryClient.invalidateQueries({ queryKey: ['leaderboard'] })
       alert('Match deleted successfully!')
     },
     onError: (error) => {
-      console.error('Error deleting match:', error)
-      alert('Failed to delete match. Please try again.')
+      console.error('deleteMatchMutation onError called:', error)
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
+      alert(`Failed to delete match: ${errorMessage}`)
     },
   })
 
