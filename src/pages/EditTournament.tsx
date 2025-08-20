@@ -100,25 +100,33 @@ const EditTournament: React.FC = () => {
       // Update existing matches and create new ones
       for (const match of matches) {
         if (match.id) {
-          // Update existing match
-          await matchAPI.updateMatch(match.id, {
+          // Update existing match - only include defined values
+          const matchUpdates: any = {
             player1_id: match.player1_id,
             player2_id: match.player2_id,
-            games_per_set: match.games_per_set,
-            sets_per_match: match.sets_per_match,
             court: match.court,
             start_time: match.start_time,
             player1_score: match.player1_score,
             player2_score: match.player2_score
-          })
+          }
+          
+          // Only add games_per_set and sets_per_match if they exist
+          if (match.games_per_set !== undefined) {
+            matchUpdates.games_per_set = match.games_per_set
+          }
+          if (match.sets_per_match !== undefined) {
+            matchUpdates.sets_per_match = match.sets_per_match
+          }
+          
+          await matchAPI.updateMatch(match.id, matchUpdates)
         } else {
           // Create new match
           await matchAPI.createMatch({
             tournament_id: id!,
             player1_id: match.player1_id,
             player2_id: match.player2_id,
-            games_per_set: match.games_per_set,
-            sets_per_match: match.sets_per_match,
+            games_per_set: match.games_per_set || 6,
+            sets_per_match: match.sets_per_match || 3,
             court: match.court,
             start_time: match.start_time,
             player1_score: match.player1_score,

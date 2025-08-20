@@ -239,16 +239,21 @@ export const matchAPI = {
   updateMatch: async (id: string, updates: {
     player1_id: string
     player2_id: string
-    games_per_set: number
-    sets_per_match: number
+    games_per_set?: number
+    sets_per_match?: number
     court: string
     start_time: string
     player1_score: number
     player2_score: number
   }): Promise<Match> => {
+    // Filter out undefined values to avoid SQL errors
+    const cleanUpdates = Object.fromEntries(
+      Object.entries(updates).filter(([_, value]) => value !== undefined)
+    )
+    
     const { data, error } = await supabase
       .from('matches')
-      .update(updates)
+      .update(cleanUpdates)
       .eq('id', id)
       .select()
       .single()
