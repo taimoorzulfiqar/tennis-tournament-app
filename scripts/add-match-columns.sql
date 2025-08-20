@@ -17,6 +17,14 @@ ADD COLUMN IF NOT EXISTS player1_score INTEGER DEFAULT 0;
 ALTER TABLE matches 
 ADD COLUMN IF NOT EXISTS player2_score INTEGER DEFAULT 0;
 
+-- Add start_time column (timestamp)
+ALTER TABLE matches 
+ADD COLUMN IF NOT EXISTS start_time TIMESTAMP WITH TIME ZONE;
+
+-- Add court column (text)
+ALTER TABLE matches 
+ADD COLUMN IF NOT EXISTS court TEXT;
+
 -- Add winner_id column (nullable)
 ALTER TABLE matches 
 ADD COLUMN IF NOT EXISTS winner_id UUID REFERENCES profiles(id);
