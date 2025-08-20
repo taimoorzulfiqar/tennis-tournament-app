@@ -19,6 +19,8 @@ const Admin: React.FC = () => {
   const { data: users, isLoading, refetch } = useQuery({
     queryKey: ['users'],
     queryFn: userAPI.getUsers,
+    refetchOnWindowFocus: false,
+    staleTime: 0, // Always consider data stale to ensure fresh data
   })
 
   const createUserMutation = useMutation({
@@ -36,10 +38,19 @@ const Admin: React.FC = () => {
 
   const deleteUserMutation = useMutation({
     mutationFn: userAPI.deleteUser,
-    onSuccess: () => {
-      // Force refetch the users data
+    onSuccess: (_, userId) => {
+      // Optimistically remove the user from the cache
+      queryClient.setQueryData(['users'], (oldData: User[] | undefined) => {
+        if (!oldData) return oldData
+        return oldData.filter(user => user.id !== userId)
+      })
+      
+      // Force refetch to ensure data is in sync
       refetch()
+      
+      // Also invalidate the cache
       queryClient.invalidateQueries({ queryKey: ['users'] })
+      
       alert('User deleted successfully!')
     },
     onError: (error) => {
@@ -50,10 +61,19 @@ const Admin: React.FC = () => {
   const updateVerificationMutation = useMutation({
     mutationFn: ({ userId, status }: { userId: string; status: 'pending' | 'approved' | 'rejected' }) =>
       userAPI.updateVerificationStatus(userId, { verification_status: status }),
-    onSuccess: () => {
-      // Force refetch the users data
+    onSuccess: (updatedUser) => {
+      // Optimistically update the user in the cache
+      queryClient.setQueryData(['users'], (oldData: User[] | undefined) => {
+        if (!oldData) return oldData
+        return oldData.map(user => user.id === updatedUser.id ? updatedUser : user)
+      })
+      
+      // Force refetch to ensure data is in sync
       refetch()
+      
+      // Also invalidate the cache
       queryClient.invalidateQueries({ queryKey: ['users'] })
+      
       alert('Verification status updated successfully!')
     },
     onError: (error) => {
@@ -80,6 +100,7 @@ const Admin: React.FC = () => {
       return
     }
     if (confirm(`Are you sure you want to delete ${userEmail}? This action cannot be undone.`)) {
+      console.log('Deleting user:', userId, userEmail)
       deleteUserMutation.mutate(userId)
     }
   }
@@ -99,6 +120,16 @@ const Admin: React.FC = () => {
     
     if (confirm(`Are you sure you want to ${action} ${userEmail}?`)) {
       updateVerificationMutation.mutate({ userId, status: newStatus })
+    }
+  }
+
+  const handleRefresh = async () => {
+    try {
+      await refetch()
+      console.log('Data refreshed successfully')
+    } catch (error) {
+      console.error('Error refreshing data:', error)
+      alert('Error refreshing data. Please try again.')
     }
   }
 
@@ -152,7 +183,7 @@ const Admin: React.FC = () => {
           </h1>
           <div style={{ display: 'flex', gap: '12px' }}>
             <button
-              onClick={() => refetch()}
+              onClick={handleRefresh}
               className="btn btn-secondary"
               disabled={isLoading}
             >
@@ -334,7 +365,7 @@ const Admin: React.FC = () => {
                           style={{ padding: '6px 10px', fontSize: '11px' }}
                           disabled={deleteUserMutation.isPending}
                         >
-                          🗑️
+                          {deleteUserMutation.isPending ? '🗑️...' : '🗑️'}
                         </button>
                       </div>
                     )}

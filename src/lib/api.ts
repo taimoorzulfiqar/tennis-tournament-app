@@ -431,35 +431,45 @@ export const userAPI = {
   deleteUser: async (userId: string): Promise<void> => {
     console.log('API: Deleting user:', userId)
     
-    // First, get the user's email from the profile
-    const { data: profile, error: profileError } = await supabase
-      .from('profiles')
-      .select('email')
-      .eq('id', userId)
-      .single()
+    try {
+      // First, get the user's email from the profile
+      console.log('API: Fetching user profile...')
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('email')
+        .eq('id', userId)
+        .single()
 
-    if (profileError) {
-      console.error('API: Error fetching profile for deletion:', profileError)
-      throw new Error(profileError.message)
+      if (profileError) {
+        console.error('API: Error fetching profile for deletion:', profileError)
+        throw new Error(profileError.message)
+      }
+
+      console.log('API: Found profile for:', profile.email)
+
+      // Delete from profiles table first
+      console.log('API: Deleting from profiles table...')
+      const { error: deleteProfileError } = await supabase
+        .from('profiles')
+        .delete()
+        .eq('id', userId)
+
+      if (deleteProfileError) {
+        console.error('API: Error deleting profile:', deleteProfileError)
+        throw new Error(deleteProfileError.message)
+      }
+
+      console.log('API: Profile deleted successfully from database')
+      
+      // Note: Auth user deletion requires service role access
+      // For now, we'll just delete the profile and let the user know they need to delete from auth manually
+      // The profile deletion is sufficient for UI updates
+      console.log('API: Note: Auth user deletion requires service role access')
+      console.log('API: You can use the delete-user script to delete from auth: npm run delete-user <email>')
+      
+    } catch (error) {
+      console.error('API: Delete user operation failed:', error)
+      throw error
     }
-
-    // Delete from profiles table first
-    const { error: deleteProfileError } = await supabase
-      .from('profiles')
-      .delete()
-      .eq('id', userId)
-
-    if (deleteProfileError) {
-      console.error('API: Error deleting profile:', deleteProfileError)
-      throw new Error(deleteProfileError.message)
-    }
-
-    console.log('API: Profile deleted successfully')
-    
-    // Note: Auth user deletion requires service role access
-    // For now, we'll just delete the profile and let the user know they need to delete from auth manually
-    // The profile deletion is sufficient for UI updates
-    console.log('API: Note: Auth user deletion requires service role access')
-    console.log('API: You can use the delete-user script to delete from auth: npm run delete-user <email>')
   },
 }
