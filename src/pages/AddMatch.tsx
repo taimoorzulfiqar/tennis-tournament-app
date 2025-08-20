@@ -18,8 +18,8 @@ interface Match {
     tiebreak_at: number
   }
   detailed_score: {
-    player1_sets: number[]
-    player2_sets: number[]
+    player1_sets: (number | null)[]
+    player2_sets: (number | null)[]
   }
 }
 
@@ -131,8 +131,8 @@ const AddMatch: React.FC = () => {
     // If match is completed, validate scores
     if (match.is_completed) {
       // Check if any set scores are entered
-      const hasSetScores = match.detailed_score.player1_sets.some(score => score > 0) || 
-                          match.detailed_score.player2_sets.some(score => score > 0)
+      const hasSetScores = match.detailed_score.player1_sets.some(score => score && score > 0) || 
+                          match.detailed_score.player2_sets.some(score => score && score > 0)
       
       if (!hasSetScores) {
         alert('Please enter set scores for completed matches.')
@@ -168,17 +168,17 @@ const AddMatch: React.FC = () => {
     }))
   }
 
-  const handleSetScoreChange = (setIndex: number, player: 'player1' | 'player2', games: number) => {
+  const handleSetScoreChange = (setIndex: number, player: 'player1' | 'player2', games: number | null) => {
     setMatch(prev => {
       const newDetailedScore = { ...prev.detailed_score }
       const playerKey = player === 'player1' ? 'player1_sets' : 'player2_sets'
       
       // Ensure arrays are long enough
       while (newDetailedScore.player1_sets.length <= setIndex) {
-        newDetailedScore.player1_sets.push(0)
+        newDetailedScore.player1_sets.push(null)
       }
       while (newDetailedScore.player2_sets.length <= setIndex) {
-        newDetailedScore.player2_sets.push(0)
+        newDetailedScore.player2_sets.push(null)
       }
       
       newDetailedScore[playerKey][setIndex] = games
@@ -553,7 +553,7 @@ const AddMatch: React.FC = () => {
                        value={match.detailed_score.player1_sets[setIndex] || ''}
                        onChange={(e) => {
                          const value = e.target.value.replace(/[^0-9]/g, '')
-                         handleSetScoreChange(setIndex, 'player1', parseInt(value) || 0)
+                         handleSetScoreChange(setIndex, 'player1', value === '' ? null : parseInt(value))
                        }}
                        style={{
                          width: '100%',
@@ -594,7 +594,7 @@ const AddMatch: React.FC = () => {
                        value={match.detailed_score.player2_sets[setIndex] || ''}
                        onChange={(e) => {
                          const value = e.target.value.replace(/[^0-9]/g, '')
-                         handleSetScoreChange(setIndex, 'player2', parseInt(value) || 0)
+                         handleSetScoreChange(setIndex, 'player2', value === '' ? null : parseInt(value))
                        }}
                        style={{
                          width: '100%',
