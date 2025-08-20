@@ -296,41 +296,7 @@ const Players: React.FC = () => {
              </div>
           </div>
 
-          {/* Summary Stats */}
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-            gap: '16px',
-            padding: '16px',
-            backgroundColor: '#f8f9fa',
-            borderRadius: '8px',
-            border: '1px solid #e9ecef'
-          }}>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '24px', fontWeight: '700', color: '#32cd32' }}>
-                {playerStats.length}
-              </div>
-              <div style={{ fontSize: '14px', color: '#666' }}>Total Players</div>
-            </div>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '24px', fontWeight: '700', color: '#007bff' }}>
-                {playerStats.reduce((sum, stats) => sum + stats.matchesPlayed, 0)}
-              </div>
-              <div style={{ fontSize: '14px', color: '#666' }}>Total Matches</div>
-            </div>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '24px', fontWeight: '700', color: '#28a745' }}>
-                {playerStats.reduce((sum, stats) => sum + stats.wins, 0)}
-              </div>
-              <div style={{ fontSize: '14px', color: '#666' }}>Total Wins</div>
-            </div>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '24px', fontWeight: '700', color: '#dc3545' }}>
-                {playerStats.reduce((sum, stats) => sum + stats.losses, 0)}
-              </div>
-              <div style={{ fontSize: '14px', color: '#666' }}>Total Losses</div>
-            </div>
-          </div>
+          
         </div>
 
         {/* Players Table */}
