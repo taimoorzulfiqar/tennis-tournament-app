@@ -65,8 +65,8 @@ const Matches: React.FC = () => {
         {matches && matches.length > 0 ? (
           <div style={{ 
             display: 'grid', 
-            gap: '16px', 
-            gridTemplateColumns: '1fr',
+            gap: '20px', 
+            gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))',
             maxWidth: '100%'
           }}>
             {matches.map((match, index) => (
@@ -76,13 +76,12 @@ const Matches: React.FC = () => {
                     fontSize: '18px', 
                     fontWeight: 'bold', 
                     color: '#2E7D32', 
-                    margin: 0,
-                    textAlign: 'center'
+                    margin: 0
                   }}>
                     Match {index + 1}
                   </h3>
                   <span style={{
-                    padding: '6px 12px',
+                    padding: '4px 12px',
                     borderRadius: '20px',
                     fontSize: '12px',
                     fontWeight: '600',
@@ -97,11 +96,11 @@ const Matches: React.FC = () => {
                   </span>
                 </div>
 
-                <div style={{ marginBottom: '16px' }}>
-                  <p style={{ fontSize: '14px', color: '#666', margin: '8px 0', textAlign: 'center' }}>
+                <div style={{ marginBottom: '12px' }}>
+                  <p style={{ fontSize: '14px', color: '#666', margin: '4px 0' }}>
                     <strong>Court:</strong> {match.court}
                   </p>
-                  <p style={{ fontSize: '14px', color: '#666', margin: '8px 0', textAlign: 'center' }}>
+                  <p style={{ fontSize: '14px', color: '#666', margin: '4px 0' }}>
                     <strong>Time:</strong> {new Date(match.scheduled_time).toLocaleString()}
                   </p>
                 </div>
@@ -110,7 +109,7 @@ const Matches: React.FC = () => {
                   display: 'flex', 
                   justifyContent: 'space-between', 
                   alignItems: 'center',
-                  padding: '16px',
+                  padding: '12px',
                   backgroundColor: '#f5f5f5',
                   borderRadius: '8px',
                   marginBottom: '12px'
@@ -118,14 +117,14 @@ const Matches: React.FC = () => {
                   <div style={{ textAlign: 'center', flex: 1 }}>
                     <p style={{ 
                       fontWeight: 'bold', 
-                      margin: '0 0 8px 0',
-                      fontSize: '14px',
+                      margin: '0 0 6px 0',
+                      fontSize: '13px',
                       wordBreak: 'break-word'
                     }}>
                       {getPlayerName(match.player1_id)}
                     </p>
                     <p style={{ 
-                      fontSize: '28px', 
+                      fontSize: '24px', 
                       fontWeight: 'bold', 
                       color: '#2E7D32', 
                       margin: 0 
@@ -134,24 +133,24 @@ const Matches: React.FC = () => {
                     </p>
                   </div>
                   <div style={{ 
-                    fontSize: '18px', 
+                    fontSize: '16px', 
                     fontWeight: 'bold', 
                     color: '#666',
-                    padding: '0 12px'
+                    padding: '0 8px'
                   }}>
                     VS
                   </div>
                   <div style={{ textAlign: 'center', flex: 1 }}>
                     <p style={{ 
                       fontWeight: 'bold', 
-                      margin: '0 0 8px 0',
-                      fontSize: '14px',
+                      margin: '0 0 6px 0',
+                      fontSize: '13px',
                       wordBreak: 'break-word'
                     }}>
                       {getPlayerName(match.player2_id)}
                     </p>
                     <p style={{ 
-                      fontSize: '28px', 
+                      fontSize: '24px', 
                       fontWeight: 'bold', 
                       color: '#2E7D32', 
                       margin: 0 
@@ -164,10 +163,10 @@ const Matches: React.FC = () => {
                 {match.winner_id && (
                   <p style={{ 
                     textAlign: 'center', 
-                    marginBottom: '16px', 
+                    marginBottom: '12px', 
                     fontWeight: 'bold', 
                     color: '#4caf50',
-                    fontSize: '16px'
+                    fontSize: '14px'
                   }}>
                     🏆 Winner: {getPlayerName(match.winner_id)}
                   </p>
@@ -179,10 +178,9 @@ const Matches: React.FC = () => {
                       onClick={() => handleEditMatch(match)}
                       className="btn btn-secondary"
                       style={{ 
-                        padding: '12px 20px', 
-                        fontSize: '16px',
-                        width: '100%',
-                        maxWidth: '200px'
+                        padding: '8px 16px', 
+                        fontSize: '14px',
+                        width: '100%'
                       }}
                     >
                       ✏️ Edit Match
@@ -220,13 +218,13 @@ const Matches: React.FC = () => {
       <style jsx>{`
         @media (max-width: 768px) {
           .match-card {
-            margin: 8px 0;
+            margin: 0;
             padding: 16px;
           }
           
           .card-header {
             flex-direction: column;
-            gap: 12px;
+            gap: 8px;
             text-align: center;
           }
         }
