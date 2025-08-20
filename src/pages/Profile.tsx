@@ -7,28 +7,9 @@ import { userAPI } from '../lib/api'
 const Profile: React.FC = () => {
   const { user } = useAuth()
   const queryClient = useQueryClient()
-  const [showPasswordModal, setShowPasswordModal] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
-  const [passwordData, setPasswordData] = useState({
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: ''
-  })
   const [editData, setEditData] = useState({
     full_name: user?.full_name || ''
-  })
-
-  const updatePasswordMutation = useMutation({
-    mutationFn: ({ currentPassword, newPassword }: { currentPassword: string; newPassword: string }) =>
-      userAPI.updatePassword(currentPassword, newPassword),
-    onSuccess: () => {
-      setShowPasswordModal(false)
-      setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' })
-      alert('Password updated successfully!')
-    },
-    onError: (error) => {
-      alert(error instanceof Error ? error.message : 'Failed to update password')
-    },
   })
 
   const updateProfileMutation = useMutation({
@@ -43,22 +24,6 @@ const Profile: React.FC = () => {
       alert(error instanceof Error ? error.message : 'Failed to update profile')
     },
   })
-
-  const handlePasswordUpdate = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (passwordData.newPassword !== passwordData.confirmPassword) {
-      alert('New passwords do not match')
-      return
-    }
-    if (passwordData.newPassword.length < 6) {
-      alert('New password must be at least 6 characters long')
-      return
-    }
-    updatePasswordMutation.mutate({
-      currentPassword: passwordData.currentPassword,
-      newPassword: passwordData.newPassword
-    })
-  }
 
   const handleProfileUpdate = (e: React.FormEvent) => {
     e.preventDefault()
@@ -82,7 +47,7 @@ const Profile: React.FC = () => {
   return (
     <Layout>
       <div>
-        <h1 style={{ fontSize: '32px', fontWeight: 'bold', color: '#2E7D32', marginBottom: '24px' }}>
+        <h1 style={{ fontSize: '32px', fontWeight: 'bold', color: 'var(--primary-color)', marginBottom: '24px' }}>
           Profile
         </h1>
 
@@ -102,7 +67,7 @@ const Profile: React.FC = () => {
               👤
             </div>
             <div>
-              <h2 style={{ fontSize: '24px', fontWeight: 'bold', color: '#2E7D32', margin: '0 0 8px 0' }}>
+              <h2 style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--primary-color)', margin: '0 0 8px 0' }}>
                 {user.full_name || 'No name set'}
               </h2>
               <p style={{ color: '#666', margin: '0 0 4px 0' }}>{user.email}</p>
@@ -111,8 +76,8 @@ const Profile: React.FC = () => {
                 borderRadius: '20px',
                 fontSize: '12px',
                 fontWeight: '600',
-                backgroundColor: '#2E7D3220',
-                color: '#2E7D32',
+                backgroundColor: 'var(--primary-color)20',
+                color: 'var(--primary-color)',
                 textTransform: 'capitalize'
               }}>
                 {user.role}
@@ -149,12 +114,6 @@ const Profile: React.FC = () => {
                 >
                   ✏️ Edit Profile
                 </button>
-                <button
-                  onClick={() => setShowPasswordModal(true)}
-                  className="btn btn-secondary"
-                >
-                  🔒 Change Password
-                </button>
               </div>
             </div>
           </div>
@@ -182,7 +141,7 @@ const Profile: React.FC = () => {
             width: '90%',
             maxWidth: '400px'
           }}>
-            <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '24px', color: '#2E7D32' }}>
+            <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '24px', color: 'var(--primary-color)' }}>
               Edit Profile
             </h2>
 
@@ -215,91 +174,6 @@ const Profile: React.FC = () => {
                   disabled={updateProfileMutation.isPending}
                 >
                   {updateProfileMutation.isPending ? 'Updating...' : 'Update Profile'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Change Password Modal */}
-      {showPasswordModal && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.5)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000
-        }}>
-          <div style={{
-            background: 'white',
-            borderRadius: '12px',
-            padding: '32px',
-            width: '90%',
-            maxWidth: '400px'
-          }}>
-            <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '24px', color: '#2E7D32' }}>
-              Change Password
-            </h2>
-
-            <form onSubmit={handlePasswordUpdate}>
-              <div className="form-group">
-                <label className="form-label">Current Password</label>
-                <input
-                  type="password"
-                  className="form-input"
-                  value={passwordData.currentPassword}
-                  onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
-                  placeholder="Enter current password"
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">New Password</label>
-                <input
-                  type="password"
-                  className="form-input"
-                  value={passwordData.newPassword}
-                  onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
-                  placeholder="Enter new password"
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">Confirm New Password</label>
-                <input
-                  type="password"
-                  className="form-input"
-                  value={passwordData.confirmPassword}
-                  onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
-                  placeholder="Confirm new password"
-                  required
-                />
-              </div>
-
-              <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
-                <button
-                  type="button"
-                  onClick={() => setShowPasswordModal(false)}
-                  className="btn btn-secondary"
-                  style={{ flex: 1 }}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="btn btn-primary"
-                  style={{ flex: 1 }}
-                  disabled={updatePasswordMutation.isPending}
-                >
-                  {updatePasswordMutation.isPending ? 'Updating...' : 'Update Password'}
                 </button>
               </div>
             </form>

@@ -1,121 +1,82 @@
 import { supabase } from './supabase'
-import { User, Tournament, Match, LeaderboardEntry, CreateUserDTO, UpdateProfileDTO, UpdatePasswordDTO, CreateTournamentDTO, CreateMatchDTO, UpdateMatchScoreDTO } from '../types'
+import { User, Tournament, Match, LeaderboardEntry, CreateUserDTO, UpdateProfileDTO, CreateTournamentDTO, CreateMatchDTO, UpdateMatchScoreDTO } from '../types'
 
 // Auth API
 export const authAPI = {
   signUp: async (email: string, password: string, full_name: string, role: 'admin' | 'player'): Promise<User> => {
-    console.log('API: Signing up user:', { email, full_name, role })
-    
-    const { data: authData, error: authError } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
     })
 
-    if (authError) {
-      console.error('API: Auth signup error:', authError)
-      throw new Error(authError.message)
-    }
+    if (error) throw error
 
-    if (!authData.user) {
-      throw new Error('No user data returned from signup')
-    }
-
-    console.log('API: Auth user created:', authData.user.id)
+    if (!data.user) throw new Error('Failed to create user')
 
     // Create profile
-    const { data: profileData, error: profileError } = await supabase
+    const { error: profileError } = await supabase
       .from('profiles')
       .insert({
-        id: authData.user.id,
+        id: data.user.id,
         email,
         full_name,
         role,
+        verification_status: role === 'admin' ? 'pending' : 'approved'
       })
-      .select()
-      .single()
 
-    if (profileError) {
-      console.error('API: Profile creation error:', profileError)
-      throw new Error(profileError.message)
+    if (profileError) throw profileError
+
+    return {
+      id: data.user.id,
+      email,
+      full_name,
+      role,
+      verification_status: role === 'admin' ? 'pending' : 'approved',
+      created_at: data.user.created_at,
+      updated_at: data.user.updated_at
     }
-
-    console.log('API: Profile created:', profileData)
-    return profileData
   },
 
   signIn: async (email: string, password: string): Promise<User> => {
-    console.log('API: Signing in user:', email)
-    
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     })
 
-    if (error) {
-      console.error('API: Sign in error:', error)
-      throw new Error(error.message)
-    }
+    if (error) throw error
 
-    if (!data.user) {
-      throw new Error('No user data returned from sign in')
-    }
+    if (!data.user) throw new Error('Failed to sign in')
 
-    console.log('API: Auth user signed in:', data.user.id)
-
-    // Get profile
+    // Get user profile
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
       .select('*')
       .eq('id', data.user.id)
       .single()
 
-    if (profileError) {
-      console.error('API: Profile fetch error:', profileError)
-      throw new Error(profileError.message)
-    }
+    if (profileError) throw profileError
 
-    console.log('API: Profile fetched:', profile)
     return profile
   },
 
   signOut: async (): Promise<void> => {
     const { error } = await supabase.auth.signOut()
-    if (error) {
-      throw new Error(error.message)
-    }
+    if (error) throw error
   },
 
   getCurrentUser: async (): Promise<User | null> => {
-    console.log('API: Getting current user...')
-    
-    const { data: { user: authUser }, error: authError } = await supabase.auth.getUser()
-    
-    if (authError) {
-      console.error('API: Auth user fetch error:', authError)
-      return null
-    }
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return null
 
-    if (!authUser) {
-      console.log('API: No auth user found')
-      return null
-    }
-
-    console.log('API: Auth user:', authUser)
-
-    const { data: profile, error: profileError } = await supabase
+    const { data: profile, error } = await supabase
       .from('profiles')
       .select('*')
-      .eq('id', authUser.id)
+      .eq('id', user.id)
       .single()
 
-    if (profileError) {
-      console.error('API: Profile fetch error:', profileError)
-      return null
-    }
-
-    console.log('API: Profile fetched:', profile)
+    if (error) throw error
     return profile
-  },
+  }
 }
 
 // Tournament API
@@ -316,63 +277,43 @@ export const userAPI = {
       .select('*')
       .order('created_at', { ascending: false })
 
-    if (error) throw new Error(error.message)
-    return data
-  },
-
-  getPlayers: async (): Promise<User[]> => {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('role', 'player')
-      .order('created_at', { ascending: false })
-
-    if (error) throw new Error(error.message)
+    if (error) throw error
     return data
   },
 
   createUser: async (userData: CreateUserDTO): Promise<User> => {
-    console.log('API: Creating user:', userData)
-    
-    const { data: authData, error: authError } = await supabase.auth.signUp({
+    // Create auth user
+    const { data, error } = await supabase.auth.signUp({
       email: userData.email,
       password: userData.password,
     })
 
-    if (authError) {
-      console.error('API: Auth signup error:', authError)
-      throw new Error(authError.message)
-    }
+    if (error) throw error
 
-    if (!authData.user) {
-      throw new Error('No user data returned from signup')
-    }
-
-    console.log('API: Auth user created:', authData.user.id)
-
-    // Set verification status based on role
-    const verificationStatus = userData.role === 'admin' ? 'pending' : 'approved'
+    if (!data.user) throw new Error('Failed to create user')
 
     // Create profile
-    const { data: profileData, error: profileError } = await supabase
+    const { error: profileError } = await supabase
       .from('profiles')
       .insert({
-        id: authData.user.id,
+        id: data.user.id,
         email: userData.email,
         full_name: userData.full_name,
         role: userData.role,
-        verification_status: verificationStatus,
+        verification_status: userData.role === 'admin' ? 'pending' : 'approved'
       })
-      .select()
-      .single()
 
-    if (profileError) {
-      console.error('API: Profile creation error:', profileError)
-      throw new Error(profileError.message)
+    if (profileError) throw profileError
+
+    return {
+      id: data.user.id,
+      email: userData.email,
+      full_name: userData.full_name,
+      role: userData.role,
+      verification_status: userData.role === 'admin' ? 'pending' : 'approved',
+      created_at: data.user.created_at,
+      updated_at: data.user.updated_at
     }
-
-    console.log('API: Profile created:', profileData)
-    return profileData
   },
 
   updateProfile: async (userId: string, updates: UpdateProfileDTO): Promise<User> => {
@@ -383,49 +324,20 @@ export const userAPI = {
       .select()
       .single()
 
-    if (error) throw new Error(error.message)
+    if (error) throw error
     return data
   },
 
-  updateVerificationStatus: async (userId: string, status: UpdateVerificationStatusDTO): Promise<User> => {
-    console.log('API: Updating verification status for user:', userId, 'to:', status)
-    
+  updateVerificationStatus: async (userId: string, updates: { verification_status: 'pending' | 'approved' | 'rejected' }): Promise<User> => {
     const { data, error } = await supabase
       .from('profiles')
-      .update(status)
+      .update(updates)
       .eq('id', userId)
       .select()
       .single()
 
-    if (error) {
-      console.error('API: Error updating verification status:', error)
-      throw new Error(error.message)
-    }
-
-    console.log('API: Verification status updated successfully:', data)
+    if (error) throw error
     return data
-  },
-
-  updatePassword: async (currentPassword: string, newPassword: string): Promise<void> => {
-    // First verify current password
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) throw new Error('No authenticated user')
-
-    const { error: signInError } = await supabase.auth.signInWithPassword({
-      email: user.email!,
-      password: currentPassword,
-    })
-
-    if (signInError) {
-      throw new Error('Current password is incorrect')
-    }
-
-    // Update password
-    const { error } = await supabase.auth.updateUser({
-      password: newPassword,
-    })
-
-    if (error) throw new Error(error.message)
   },
 
   deleteUser: async (userId: string): Promise<void> => {
