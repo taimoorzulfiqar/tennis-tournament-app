@@ -32,44 +32,39 @@ const Leaderboard: React.FC = () => {
     return player?.full_name || player?.email || 'Unknown Player'
   }
 
-  // Calculate leaderboard based on total games won from completed matches only
+  // Calculate leaderboard based on games_won from profiles table
   const calculateLeaderboard = () => {
-    if (!allMatches || !players) return []
+    if (!players) return []
 
-    const playerStats: { [key: string]: { gamesWon: number, matchesPlayed: number } } = {}
-
-    // Initialize player stats
-    players.forEach(player => {
-      playerStats[player.id] = { gamesWon: 0, matchesPlayed: 0 }
+    // Get players who have played matches
+    const playersWithMatches = players.filter(player => {
+      return allMatches?.some(match => 
+        match.status === 'completed' && 
+        (match.player1_id === player.id || match.player2_id === player.id)
+      )
     })
 
-    // Calculate total games won from completed matches only
-    allMatches.forEach(match => {
-      if (match.status === 'completed' && (match.player1_score > 0 || match.player2_score > 0)) {
-        // player1_score and player2_score now represent total games won
-        const player1GamesWon = match.player1_score
-        const player2GamesWon = match.player2_score
-
-        // Add games won by each player
-        if (playerStats[match.player1_id]) {
-          playerStats[match.player1_id].gamesWon += player1GamesWon
-          playerStats[match.player1_id].matchesPlayed += 1
+    // Calculate matches played for each player
+    const playerMatchesPlayed: { [key: string]: number } = {}
+    allMatches?.forEach(match => {
+      if (match.status === 'completed') {
+        if (match.player1_id) {
+          playerMatchesPlayed[match.player1_id] = (playerMatchesPlayed[match.player1_id] || 0) + 1
         }
-        if (playerStats[match.player2_id]) {
-          playerStats[match.player2_id].gamesWon += player2GamesWon
-          playerStats[match.player2_id].matchesPlayed += 1
+        if (match.player2_id) {
+          playerMatchesPlayed[match.player2_id] = (playerMatchesPlayed[match.player2_id] || 0) + 1
         }
       }
     })
 
     // Convert to array and sort by games won
-    return Object.entries(playerStats)
-      .map(([playerId, stats]) => ({
-        player_id: playerId,
-        player_name: getPlayerName(playerId),
-        player_email: players.find(p => p.id === playerId)?.email || '',
-        games_won: stats.gamesWon,
-        matches_played: stats.matchesPlayed
+    return playersWithMatches
+      .map(player => ({
+        player_id: player.id,
+        player_name: getPlayerName(player.id),
+        player_email: player.email || '',
+        games_won: player.games_won || 0,
+        matches_played: playerMatchesPlayed[player.id] || 0
       }))
       .filter(entry => entry.matches_played > 0) // Only show players who have played matches
       .sort((a, b) => b.games_won - a.games_won) // Sort by games won (descending)

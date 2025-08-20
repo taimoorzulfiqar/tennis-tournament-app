@@ -248,6 +248,64 @@ export const matchAPI = {
       .single()
 
     if (error) throw new Error(error.message)
+    
+    // If match is completed, update player games_won totals
+    if (status === 'completed' && data) {
+      if (match.player1_id) {
+        const { data: p1Games, error: p1Error } = await supabase
+          .from('matches')
+          .select('player1_score, player2_score')
+          .eq('status', 'completed')
+          .or(`player1_id.eq.${match.player1_id},player2_id.eq.${match.player1_id}`)
+        
+        if (!p1Error && p1Games) {
+          const totalGames = p1Games.reduce((total, m) => {
+            if (m.player1_id === match.player1_id) {
+              return total + m.player1_score
+            } else {
+              return total + m.player2_score
+            }
+          }, 0)
+          
+          const { error: updateError } = await supabase
+            .from('profiles')
+            .update({ games_won: totalGames })
+            .eq('id', match.player1_id)
+          
+          if (updateError) {
+            console.error('Error updating player1 games_won:', updateError)
+          }
+        }
+      }
+      
+      if (match.player2_id) {
+        const { data: p2Games, error: p2Error } = await supabase
+          .from('matches')
+          .select('player1_score, player2_score')
+          .eq('status', 'completed')
+          .or(`player1_id.eq.${match.player2_id},player2_id.eq.${match.player2_id}`)
+        
+        if (!p2Error && p2Games) {
+          const totalGames = p2Games.reduce((total, m) => {
+            if (m.player1_id === match.player2_id) {
+              return total + m.player1_score
+            } else {
+              return total + m.player2_score
+            }
+          }, 0)
+          
+          const { error: updateError } = await supabase
+            .from('profiles')
+            .update({ games_won: totalGames })
+            .eq('id', match.player2_id)
+          
+          if (updateError) {
+            console.error('Error updating player2 games_won:', updateError)
+          }
+        }
+      }
+    }
+    
     return data
   },
 
@@ -288,6 +346,61 @@ export const matchAPI = {
     if (error) {
       console.error('Error updating match:', error)
       throw new Error(error.message)
+    }
+    
+    // Update player games_won totals
+    if (match.player1_id) {
+      const { data: p1Games, error: p1Error } = await supabase
+        .from('matches')
+        .select('player1_score, player2_score')
+        .eq('status', 'completed')
+        .or(`player1_id.eq.${match.player1_id},player2_id.eq.${match.player1_id}`)
+      
+      if (!p1Error && p1Games) {
+        const totalGames = p1Games.reduce((total, m) => {
+          if (m.player1_id === match.player1_id) {
+            return total + m.player1_score
+          } else {
+            return total + m.player2_score
+          }
+        }, 0)
+        
+        const { error: updateError } = await supabase
+          .from('profiles')
+          .update({ games_won: totalGames })
+          .eq('id', match.player1_id)
+        
+        if (updateError) {
+          console.error('Error updating player1 games_won:', updateError)
+        }
+      }
+    }
+    
+    if (match.player2_id) {
+      const { data: p2Games, error: p2Error } = await supabase
+        .from('matches')
+        .select('player1_score, player2_score')
+        .eq('status', 'completed')
+        .or(`player1_id.eq.${match.player2_id},player2_id.eq.${match.player2_id}`)
+      
+      if (!p2Error && p2Games) {
+        const totalGames = p2Games.reduce((total, m) => {
+          if (m.player1_id === match.player2_id) {
+            return total + m.player1_score
+          } else {
+            return total + m.player2_score
+          }
+        }, 0)
+        
+        const { error: updateError } = await supabase
+          .from('profiles')
+          .update({ games_won: totalGames })
+          .eq('id', match.player2_id)
+        
+        if (updateError) {
+          console.error('Error updating player2 games_won:', updateError)
+        }
+      }
     }
     
     console.log('Match updated successfully:', data)

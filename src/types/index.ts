@@ -5,6 +5,7 @@ export interface User {
   phone?: string
   role: 'master' | 'admin' | 'player'
   verification_status: 'pending' | 'approved' | 'rejected'
+  games_won?: number
   created_at: string
   updated_at: string
 }

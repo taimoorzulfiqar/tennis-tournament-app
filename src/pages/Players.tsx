@@ -49,7 +49,7 @@ const Players: React.FC = () => {
           losses: 0,
           winPercentage: 0,
           totalGames: 0,
-          gamesWon: 0,
+          gamesWon: user.games_won || 0,
           gamesLost: 0
         })
       }
@@ -69,7 +69,6 @@ const Players: React.FC = () => {
         if (player1Stats) {
           player1Stats.matchesPlayed++
           player1Stats.totalGames += match.player1_score + match.player2_score
-          player1Stats.gamesWon += match.player1_score
           player1Stats.gamesLost += match.player2_score
 
           if (match.winner_id === match.player1_id) {
@@ -82,7 +81,6 @@ const Players: React.FC = () => {
         if (player2Stats) {
           player2Stats.matchesPlayed++
           player2Stats.totalGames += match.player1_score + match.player2_score
-          player2Stats.gamesWon += match.player2_score
           player2Stats.gamesLost += match.player1_score
 
           if (match.winner_id === match.player2_id) {
