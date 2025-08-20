@@ -250,10 +250,13 @@ export const matchAPI = {
     // Set winner based on scores
     if (score.player1_score > score.player2_score) {
       winnerId = match.player1_id
+      console.log('Player 1 wins with score:', score.player1_score, 'vs', score.player2_score)
     } else if (score.player2_score > score.player1_score) {
       winnerId = match.player2_id
+      console.log('Player 2 wins with score:', score.player2_score, 'vs', score.player1_score)
     } else {
-      // If scores are equal, default to player1 (or you could set to null)
+      // If scores are equal, this shouldn't happen due to validation, but handle it gracefully
+      console.warn('Scores are equal, defaulting to player1 as winner')
       winnerId = match.player1_id
     }
     console.log('Winner determined:', winnerId, 'Player1 score:', score.player1_score, 'Player2 score:', score.player2_score)

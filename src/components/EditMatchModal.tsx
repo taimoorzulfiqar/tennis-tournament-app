@@ -49,6 +49,8 @@ const EditMatchModal: React.FC<EditMatchModalProps> = ({ match, isOpen, onClose,
 
   const updateMatchMutation = useMutation({
     mutationFn: async () => {
+      console.log('EditMatchModal: Starting match update with formData:', formData)
+      
       // Update court and other basic fields
       await matchAPI.updateMatch(match.id, {
         court: formData.court,
@@ -60,6 +62,9 @@ const EditMatchModal: React.FC<EditMatchModalProps> = ({ match, isOpen, onClose,
 
       // If status is being set to completed, update score and determine winner
       if (formData.status === 'completed') {
+        console.log('EditMatchModal: Match is being set to completed, updating score...')
+        console.log('Scores:', { player1_score: formData.player1_score, player2_score: formData.player2_score })
+        
         await matchAPI.updateMatchScore(match.id, {
           player1_score: formData.player1_score,
           player2_score: formData.player2_score
@@ -72,6 +77,7 @@ const EditMatchModal: React.FC<EditMatchModalProps> = ({ match, isOpen, onClose,
       }
     },
     onSuccess: () => {
+      console.log('EditMatchModal: Match updated successfully')
       queryClient.invalidateQueries({ queryKey: ['matches'] })
       queryClient.invalidateQueries({ queryKey: ['leaderboard'] })
       queryClient.invalidateQueries({ queryKey: ['users'] })
@@ -91,6 +97,12 @@ const EditMatchModal: React.FC<EditMatchModalProps> = ({ match, isOpen, onClose,
     if (formData.status === 'completed') {
       if (formData.player1_score === 0 && formData.player2_score === 0) {
         alert('Please enter scores for completed matches.')
+        return
+      }
+      
+      // Ensure there's a clear winner (no ties)
+      if (formData.player1_score === formData.player2_score) {
+        alert('Please enter different scores for completed matches. Ties are not allowed.')
         return
       }
     }

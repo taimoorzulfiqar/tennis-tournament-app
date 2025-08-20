@@ -70,6 +70,7 @@ const AddMatch: React.FC = () => {
       // If match is marked as completed, update its score and determine winner
       if (matchData.is_completed) {
         console.log('Match is marked as completed, updating score...')
+        console.log('Scores:', { player1_score: matchData.player1_score, player2_score: matchData.player2_score })
         
         const updatedMatch = await matchAPI.updateMatchScore(createdMatch.id!, {
           player1_score: matchData.player1_score,
@@ -113,6 +114,12 @@ const AddMatch: React.FC = () => {
     if (match.is_completed) {
       if (match.player1_score === 0 && match.player2_score === 0) {
         alert('Please enter scores for completed matches.')
+        return
+      }
+      
+      // Ensure there's a clear winner (no ties)
+      if (match.player1_score === match.player2_score) {
+        alert('Please enter different scores for completed matches. Ties are not allowed.')
         return
       }
     }
