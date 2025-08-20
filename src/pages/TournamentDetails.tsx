@@ -147,13 +147,13 @@ const TournamentDetails: React.FC = () => {
             </h3>
             <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
               <button 
-                onClick={() => navigate(`/tournament/${id}/matches`)}
+                onClick={() => navigate('/matches')}
                 className="btn btn-primary"
               >
                 🎾 View Matches
               </button>
               <button 
-                onClick={() => navigate(`/tournament/${id}/leaderboard`)}
+                onClick={() => navigate('/leaderboard')}
                 className="btn btn-secondary"
               >
                 📊 View Leaderboard

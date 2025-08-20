@@ -8,8 +8,6 @@ import TournamentDetails from './pages/TournamentDetails'
 import EditTournament from './pages/EditTournament'
 import Leaderboard from './pages/Leaderboard'
 import Matches from './pages/Matches'
-import TournamentMatches from './pages/TournamentMatches'
-import TournamentLeaderboard from './pages/TournamentLeaderboard'
 import Profile from './pages/Profile'
 import Admin from './pages/Admin'
 import LoadingScreen from './components/LoadingScreen'
@@ -36,8 +34,6 @@ function App() {
       <Route path="/" element={<Dashboard />} />
       <Route path="/create-tournament" element={<CreateTournament />} />
       <Route path="/tournament/:id" element={<TournamentDetails />} />
-      <Route path="/tournament/:id/matches" element={<TournamentMatches />} />
-      <Route path="/tournament/:id/leaderboard" element={<TournamentLeaderboard />} />
       <Route path="/edit-tournament/:id" element={<EditTournament />} />
       <Route path="/leaderboard" element={<Leaderboard />} />
       <Route path="/matches" element={<Matches />} />
