@@ -76,8 +76,13 @@ const EditMatchModal: React.FC<EditMatchModalProps> = ({ match, isOpen, onClose,
       }
     },
     onSuccess: () => {
+      // Invalidate all match-related queries
       queryClient.invalidateQueries({ queryKey: ['matches'] })
       queryClient.invalidateQueries({ queryKey: ['leaderboard'] })
+      // Also invalidate tournament-specific match queries
+      if (match.tournament_id) {
+        queryClient.invalidateQueries({ queryKey: ['tournament', match.tournament_id, 'matches'] })
+      }
       onSuccess()
       onClose()
     },

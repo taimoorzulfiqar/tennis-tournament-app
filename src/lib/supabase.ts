@@ -97,8 +97,7 @@ export interface Database {
           tournament_id: string
           player1_id: string
           player2_id: string
-          court: string
-          start_time: string
+          court: string | null
           player1_score: number
           player2_score: number
           winner_id: string | null
@@ -111,8 +110,7 @@ export interface Database {
           tournament_id: string
           player1_id: string
           player2_id: string
-          court: string
-          start_time: string
+          court?: string | null
           player1_score?: number
           player2_score?: number
           winner_id?: string | null
@@ -125,8 +123,7 @@ export interface Database {
           tournament_id?: string
           player1_id?: string
           player2_id?: string
-          court?: string
-          start_time?: string
+          court?: string | null
           player1_score?: number
           player2_score?: number
           winner_id?: string | null

@@ -80,8 +80,12 @@ const AddMatch: React.FC = () => {
 
       return createdMatch
     },
-    onSuccess: () => {
+    onSuccess: (createdMatch) => {
+      console.log('Match created successfully:', createdMatch)
+      // Invalidate all match-related queries
       queryClient.invalidateQueries({ queryKey: ['matches'] })
+      queryClient.invalidateQueries({ queryKey: ['tournament', tournamentId, 'matches'] })
+      console.log('Cache invalidated for all matches queries')
       alert('Match added successfully!')
       navigate(`/tournament/${tournamentId}`)
     },
