@@ -17,6 +17,8 @@
     "fix-user": "node scripts/fix-user-profile.js",
     "delete-user-server": "node scripts/delete-user-server.js",
     "verify-domain": "node scripts/verify-domain.js",
+    "fix-signup": "node scripts/apply-signup-fix.js",
+    "test-signup": "node scripts/test-signup.js",
     "check-matches-table": "echo 'Run scripts/check-matches-table.sql in Supabase SQL Editor'"
   },
   "dependencies": {

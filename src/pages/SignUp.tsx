@@ -8,12 +8,15 @@ const SignUp: React.FC = () => {
   const [password, setPassword] = useState('')
   const [fullName, setFullName] = useState('')
   const [role, setRole] = useState<'admin' | 'player'>('player')
+  const [error, setError] = useState<string | null>(null)
   const { signUpMutation } = useAuth()
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault()
+    setError(null)
+    
     if (!email || !password || !fullName) {
-      alert('Please fill in all fields.')
+      setError('Please fill in all fields.')
       return
     }
 
@@ -21,7 +24,8 @@ const SignUp: React.FC = () => {
       await signUpMutation.mutateAsync({ email, password, full_name: fullName, role })
     } catch (error) {
       console.error('Sign up error:', error)
-      alert(error instanceof Error ? error.message : 'Sign up failed')
+      const errorMessage = error instanceof Error ? error.message : 'Sign up failed'
+      setError(errorMessage)
     }
   }
 
@@ -110,6 +114,31 @@ const SignUp: React.FC = () => {
               <option value="admin">Admin</option>
             </select>
           </div>
+
+          {error && (
+            <div style={{ 
+              color: '#dc3545', 
+              backgroundColor: '#f8d7da', 
+              border: '1px solid #f5c6cb',
+              borderRadius: '4px',
+              padding: '12px',
+              marginBottom: '16px',
+              fontSize: '14px'
+            }}>
+              {error}
+              {error.includes('already exists') && (
+                <div style={{ marginTop: '8px' }}>
+                  <Link to="/sign-in" style={{
+                    color: '#721c24',
+                    textDecoration: 'underline',
+                    fontWeight: '600'
+                  }}>
+                    Click here to sign in instead
+                  </Link>
+                </div>
+              )}
+            </div>
+          )}
 
           <button
             type="submit"

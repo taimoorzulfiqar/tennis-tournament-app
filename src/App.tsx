@@ -6,6 +6,7 @@ import Dashboard from './pages/Dashboard'
 import CreateTournament from './pages/CreateTournament'
 import TournamentDetails from './pages/TournamentDetails'
 import EditTournament from './pages/EditTournament'
+import AddMatch from './pages/AddMatch'
 import Leaderboard from './pages/Leaderboard'
 import Matches from './pages/Matches'
 import Players from './pages/Players'
@@ -36,6 +37,7 @@ function App() {
       <Route path="/create-tournament" element={<CreateTournament />} />
       <Route path="/tournament/:id" element={<TournamentDetails />} />
       <Route path="/edit-tournament/:id" element={<EditTournament />} />
+      <Route path="/add-match/:tournamentId" element={<AddMatch />} />
       <Route path="/players" element={<Players />} />
       <Route path="/leaderboard" element={<Leaderboard />} />
       <Route path="/matches" element={<Matches />} />

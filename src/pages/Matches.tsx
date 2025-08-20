@@ -1,12 +1,13 @@
 import React, { useState } from 'react'
 import Layout from '../components/Layout'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { matchAPI, userAPI } from '../lib/api'
 import EditMatchModal from '../components/EditMatchModal'
 import { useAuth } from '../hooks/useAuth'
 
 const Matches: React.FC = () => {
   const { user } = useAuth()
+  const queryClient = useQueryClient()
   const [selectedMatch, setSelectedMatch] = useState<any>(null)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
 
@@ -23,6 +24,19 @@ const Matches: React.FC = () => {
     },
   })
 
+  const deleteMatchMutation = useMutation({
+    mutationFn: async (matchId: string) => {
+      await matchAPI.deleteMatch(matchId)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['matches'] })
+      alert('Match deleted successfully!')
+    },
+    onError: (error) => {
+      alert(error instanceof Error ? error.message : 'Failed to delete match')
+    },
+  })
+
   const getPlayerName = (playerId: string) => {
     const player = players?.find(p => p.id === playerId)
     return player?.full_name || player?.email || 'Unknown Player'
@@ -36,6 +50,12 @@ const Matches: React.FC = () => {
   const handleCloseEditModal = () => {
     setIsEditModalOpen(false)
     setSelectedMatch(null)
+  }
+
+  const handleDeleteMatch = (matchId: string) => {
+    if (window.confirm('Are you sure you want to delete this match? This action cannot be undone.')) {
+      deleteMatchMutation.mutate(matchId)
+    }
   }
 
   if (matchesLoading || playersLoading) {
@@ -173,17 +193,31 @@ const Matches: React.FC = () => {
                 )}
 
                 {(user?.role === 'master' || (user?.role === 'admin' && user?.verification_status === 'approved')) && (
-                  <div style={{ textAlign: 'center' }}>
+                  <div style={{ display: 'flex', gap: '8px' }}>
                     <button
                       onClick={() => handleEditMatch(match)}
                       className="btn btn-secondary"
                       style={{ 
                         padding: '8px 16px', 
                         fontSize: '14px',
-                        width: '100%'
+                        flex: 1
                       }}
                     >
                       ✏️ Edit Match
+                    </button>
+                    <button
+                      onClick={() => handleDeleteMatch(match.id!)}
+                      className="btn btn-secondary"
+                      style={{ 
+                        padding: '8px 16px', 
+                        fontSize: '14px',
+                        backgroundColor: '#dc3545',
+                        color: 'white',
+                        border: 'none'
+                      }}
+                      disabled={deleteMatchMutation.isPending}
+                    >
+                      {deleteMatchMutation.isPending ? '🗑️ Deleting...' : '🗑️ Delete'}
                     </button>
                   </div>
                 )}

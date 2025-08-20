@@ -9,7 +9,18 @@ export const authAPI = {
       password,
     })
 
-    if (error) throw error
+    if (error) {
+      // Provide user-friendly error messages
+      if (error.message.includes('already registered') || error.message.includes('already been registered')) {
+        throw new Error('An account with this email address already exists. Please try signing in instead.')
+      } else if (error.message.includes('password')) {
+        throw new Error('Password must be at least 6 characters long.')
+      } else if (error.message.includes('email')) {
+        throw new Error('Please enter a valid email address.')
+      } else {
+        throw new Error(`Sign up failed: ${error.message}`)
+      }
+    }
 
     if (!data.user) throw new Error('Failed to create user')
 
@@ -28,7 +39,11 @@ export const authAPI = {
       console.error('Profile creation error:', profileError)
       // If profile creation fails, we should clean up the auth user
       // However, this requires admin privileges, so we'll just throw the error
-      throw new Error(`Failed to create profile: ${profileError.message}`)
+      if (profileError.message.includes('duplicate key') || profileError.message.includes('already exists')) {
+        throw new Error('An account with this email address already exists. Please try signing in instead.')
+      } else {
+        throw new Error(`Failed to create profile: ${profileError.message}`)
+      }
     }
 
     return {
@@ -328,7 +343,18 @@ export const userAPI = {
       password: userData.password,
     })
 
-    if (error) throw error
+    if (error) {
+      // Provide user-friendly error messages
+      if (error.message.includes('already registered') || error.message.includes('already been registered')) {
+        throw new Error('An account with this email address already exists.')
+      } else if (error.message.includes('password')) {
+        throw new Error('Password must be at least 6 characters long.')
+      } else if (error.message.includes('email')) {
+        throw new Error('Please enter a valid email address.')
+      } else {
+        throw new Error(`Failed to create user: ${error.message}`)
+      }
+    }
 
     if (!data.user) throw new Error('Failed to create user')
 
@@ -343,7 +369,13 @@ export const userAPI = {
         verification_status: userData.role === 'admin' ? 'pending' : 'approved'
       })
 
-    if (profileError) throw profileError
+    if (profileError) {
+      if (profileError.message.includes('duplicate key') || profileError.message.includes('already exists')) {
+        throw new Error('An account with this email address already exists.')
+      } else {
+        throw new Error(`Failed to create profile: ${profileError.message}`)
+      }
+    }
 
     return {
       id: data.user.id,

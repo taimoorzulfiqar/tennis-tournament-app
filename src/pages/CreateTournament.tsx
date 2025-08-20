@@ -32,12 +32,16 @@ const CreateTournament: React.FC = () => {
       alert('Access denied. Only approved admins and master users can create tournaments.')
     }
   }, [user, navigate])
+  
   const [tournament, setTournament] = useState({
     name: '',
     description: '',
     start_date: '',
     end_date: ''
   })
+  
+  const [createWithoutMatches, setCreateWithoutMatches] = useState(false)
+  
   const [matches, setMatches] = useState<Match[]>([
     {
       player1_id: '',
@@ -76,30 +80,33 @@ const CreateTournament: React.FC = () => {
       // First create the tournament
       const createdTournament = await tournamentAPI.createTournament(tournamentCreate, user!.id)
       
-             // Then create all matches for the tournament
-       for (const match of matches) {
-         // Ensure scheduled_time is properly formatted
-         const scheduledTime = new Date(match.start_time).toISOString()
-         
-         await matchAPI.createMatch({
-           tournament_id: createdTournament.id,
-           player1_id: match.player1_id,
-           player2_id: match.player2_id,
-           games_per_set: match.games_per_set || 6,
-           sets_per_match: match.sets_per_match || 3,
-           court: match.court,
-           scheduled_time: scheduledTime,
-           player1_score: match.player1_score === '' ? 0 : Number(match.player1_score) || 0,
-           player2_score: match.player2_score === '' ? 0 : Number(match.player2_score) || 0
-         })
+      // Only create matches if not creating without matches
+      if (!createWithoutMatches) {
+        // Then create all matches for the tournament
+        for (const match of matches) {
+          // Ensure scheduled_time is properly formatted
+          const scheduledTime = new Date(match.start_time).toISOString()
+          
+          await matchAPI.createMatch({
+            tournament_id: createdTournament.id,
+            player1_id: match.player1_id,
+            player2_id: match.player2_id,
+            games_per_set: match.games_per_set || 6,
+            sets_per_match: match.sets_per_match || 3,
+            court: match.court,
+            scheduled_time: scheduledTime,
+            player1_score: match.player1_score === '' ? 0 : Number(match.player1_score) || 0,
+            player2_score: match.player2_score === '' ? 0 : Number(match.player2_score) || 0
+          })
 
-        // If match is marked as completed, update its status
-        if (match.is_completed) {
-          // We need to get the created match and update its status
-          const createdMatches = await matchAPI.getMatches(createdTournament.id)
-          const lastCreatedMatch = createdMatches[createdMatches.length - 1]
-          if (lastCreatedMatch) {
-            await matchAPI.updateMatchStatus(lastCreatedMatch.id!, 'completed')
+          // If match is marked as completed, update its status
+          if (match.is_completed) {
+            // We need to get the created match and update its status
+            const createdMatches = await matchAPI.getMatches(createdTournament.id)
+            const lastCreatedMatch = createdMatches[createdMatches.length - 1]
+            if (lastCreatedMatch) {
+              await matchAPI.updateMatchStatus(lastCreatedMatch.id!, 'completed')
+            }
           }
         }
       }
@@ -123,16 +130,19 @@ const CreateTournament: React.FC = () => {
       return
     }
 
-    // Validate matches
-    for (let i = 0; i < matches.length; i++) {
-      const match = matches[i]
-      if (!match.player1_id || !match.player2_id || !match.court || !match.start_time) {
-        alert(`Please fill in all fields for match ${i + 1}`)
-        return
-      }
-      if (match.player1_id === match.player2_id) {
-        alert(`Match ${i + 1}: Player 1 and Player 2 cannot be the same`)
-        return
+    // Only validate matches if not creating without matches
+    if (!createWithoutMatches) {
+      // Validate matches
+      for (let i = 0; i < matches.length; i++) {
+        const match = matches[i]
+        if (!match.player1_id || !match.player2_id || !match.court || !match.start_time) {
+          alert(`Please fill in all fields for match ${i + 1}`)
+          return
+        }
+        if (match.player1_id === match.player2_id) {
+          alert(`Match ${i + 1}: Player 1 and Player 2 cannot be the same`)
+          return
+        }
       }
     }
 
@@ -244,171 +254,188 @@ const CreateTournament: React.FC = () => {
                 />
               </div>
             </div>
-          </div>
 
-          {/* Matches */}
-          <div className="card">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-              <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: 'var(--primary-color)', margin: 0 }}>
-                Tournament Matches
-              </h2>
-              <button
-                type="button"
-                onClick={addMatch}
-                className="btn btn-secondary"
-                style={{ padding: '8px 16px', fontSize: '14px' }}
-              >
-                ➕ Add Match
-              </button>
+            {/* Option to create without matches */}
+            <div style={{ marginTop: '20px', padding: '16px', backgroundColor: '#f8f9fa', borderRadius: '8px' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                <input
+                  type="checkbox"
+                  checked={createWithoutMatches}
+                  onChange={(e) => setCreateWithoutMatches(e.target.checked)}
+                  style={{ width: '16px', height: '16px' }}
+                />
+                <span style={{ fontSize: '14px', color: '#666' }}>
+                  Create tournament without initial matches (you can add matches later)
+                </span>
+              </label>
             </div>
-
-            {matches.map((match, index) => (
-              <div key={index} className="card" style={{ marginBottom: '16px', backgroundColor: '#f8f9fa' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                  <h3 style={{ fontSize: '16px', fontWeight: 'bold', color: '#333', margin: 0 }}>
-                    Match {index + 1}
-                  </h3>
-                  {matches.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => removeMatch(index)}
-                      className="btn btn-secondary"
-                      style={{ padding: '6px 12px', fontSize: '12px' }}
-                    >
-                      🗑️ Remove
-                    </button>
-                  )}
-                </div>
-
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                  <div className="form-group">
-                    <label className="form-label">Player 1 *</label>
-                    <select
-                      className="form-input"
-                      value={match.player1_id}
-                      onChange={(e) => updateMatch(index, 'player1_id', e.target.value)}
-                      required
-                    >
-                      <option value="">Select Player 1</option>
-                      {players?.map((player) => (
-                        <option key={player.id} value={player.id}>
-                          {player.full_name || player.email}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="form-group">
-                    <label className="form-label">Player 2 *</label>
-                    <select
-                      className="form-input"
-                      value={match.player2_id}
-                      onChange={(e) => updateMatch(index, 'player2_id', e.target.value)}
-                      required
-                    >
-                      <option value="">Select Player 2</option>
-                      {players?.map((player) => (
-                        <option key={player.id} value={player.id}>
-                          {player.full_name || player.email}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                  <div className="form-group">
-                    <label className="form-label">Games per Set</label>
-                    <input
-                      type="number"
-                      className="form-input"
-                      value={match.games_per_set}
-                      onChange={(e) => updateMatch(index, 'games_per_set', parseInt(e.target.value))}
-                      min="1"
-                      max="10"
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label className="form-label">Sets per Match</label>
-                    <input
-                      type="number"
-                      className="form-input"
-                      value={match.sets_per_match}
-                      onChange={(e) => updateMatch(index, 'sets_per_match', parseInt(e.target.value))}
-                      min="1"
-                      max="5"
-                    />
-                  </div>
-                </div>
-
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                  <div className="form-group">
-                    <label className="form-label">Court *</label>
-                    <input
-                      type="text"
-                      className="form-input"
-                      value={match.court}
-                      onChange={(e) => updateMatch(index, 'court', e.target.value)}
-                      placeholder="e.g., Court 1, Center Court"
-                      required
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label className="form-label">Start Time *</label>
-                    <input
-                      type="datetime-local"
-                      className="form-input"
-                      value={match.start_time}
-                      onChange={(e) => updateMatch(index, 'start_time', e.target.value)}
-                      required
-                    />
-                  </div>
-                </div>
-
-                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                   <div className="form-group">
-                     <label className="form-label">Player 1 Score</label>
-                     <input
-                       type="number"
-                       className="form-input"
-                       value={match.player1_score}
-                       onChange={(e) => updateMatch(index, 'player1_score', e.target.value === '' ? '' : parseInt(e.target.value) || 0)}
-                       min="0"
-                       placeholder="Enter score"
-                     />
-                   </div>
-
-                   <div className="form-group">
-                     <label className="form-label">Player 2 Score</label>
-                     <input
-                       type="number"
-                       className="form-input"
-                       value={match.player2_score}
-                       onChange={(e) => updateMatch(index, 'player2_score', e.target.value === '' ? '' : parseInt(e.target.value) || 0)}
-                       min="0"
-                       placeholder="Enter score"
-                     />
-                   </div>
-                 </div>
-
-                <div style={{ marginTop: '16px' }}>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-                    <input
-                      type="checkbox"
-                      checked={match.is_completed}
-                      onChange={(e) => updateMatch(index, 'is_completed', e.target.checked)}
-                      style={{ width: '16px', height: '16px' }}
-                    />
-                    <span style={{ fontSize: '14px', color: '#666' }}>
-                      Mark this match as completed
-                    </span>
-                  </label>
-                </div>
-              </div>
-            ))}
           </div>
+
+          {/* Matches - only show if not creating without matches */}
+          {!createWithoutMatches && (
+            <div className="card">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: 'var(--primary-color)', margin: 0 }}>
+                  Tournament Matches
+                </h2>
+                <button
+                  type="button"
+                  onClick={addMatch}
+                  className="btn btn-secondary"
+                  style={{ padding: '8px 16px', fontSize: '14px' }}
+                >
+                  ➕ Add Match
+                </button>
+              </div>
+
+              {matches.map((match, index) => (
+                <div key={index} className="card" style={{ marginBottom: '16px', backgroundColor: '#f8f9fa' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                    <h3 style={{ fontSize: '16px', fontWeight: 'bold', color: '#333', margin: 0 }}>
+                      Match {index + 1}
+                    </h3>
+                    {matches.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => removeMatch(index)}
+                        className="btn btn-secondary"
+                        style={{ padding: '6px 12px', fontSize: '12px' }}
+                      >
+                        🗑️ Remove
+                      </button>
+                    )}
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                    <div className="form-group">
+                      <label className="form-label">Player 1 *</label>
+                      <select
+                        className="form-input"
+                        value={match.player1_id}
+                        onChange={(e) => updateMatch(index, 'player1_id', e.target.value)}
+                        required
+                      >
+                        <option value="">Select Player 1</option>
+                        {players?.map((player) => (
+                          <option key={player.id} value={player.id}>
+                            {player.full_name || player.email}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="form-group">
+                      <label className="form-label">Player 2 *</label>
+                      <select
+                        className="form-input"
+                        value={match.player2_id}
+                        onChange={(e) => updateMatch(index, 'player2_id', e.target.value)}
+                        required
+                      >
+                        <option value="">Select Player 2</option>
+                        {players?.map((player) => (
+                          <option key={player.id} value={player.id}>
+                            {player.full_name || player.email}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                    <div className="form-group">
+                      <label className="form-label">Games per Set</label>
+                      <input
+                        type="number"
+                        className="form-input"
+                        value={match.games_per_set}
+                        onChange={(e) => updateMatch(index, 'games_per_set', parseInt(e.target.value))}
+                        min="1"
+                        max="10"
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label className="form-label">Sets per Match</label>
+                      <input
+                        type="number"
+                        className="form-input"
+                        value={match.sets_per_match}
+                        onChange={(e) => updateMatch(index, 'sets_per_match', parseInt(e.target.value))}
+                        min="1"
+                        max="5"
+                      />
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                    <div className="form-group">
+                      <label className="form-label">Court *</label>
+                      <input
+                        type="text"
+                        className="form-input"
+                        value={match.court}
+                        onChange={(e) => updateMatch(index, 'court', e.target.value)}
+                        placeholder="e.g., Court 1, Center Court"
+                        required
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label className="form-label">Start Time *</label>
+                      <input
+                        type="datetime-local"
+                        className="form-input"
+                        value={match.start_time}
+                        onChange={(e) => updateMatch(index, 'start_time', e.target.value)}
+                        required
+                      />
+                    </div>
+                  </div>
+
+                                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                     <div className="form-group">
+                       <label className="form-label">Player 1 Score</label>
+                       <input
+                         type="number"
+                         className="form-input"
+                         value={match.player1_score}
+                         onChange={(e) => updateMatch(index, 'player1_score', e.target.value === '' ? '' : parseInt(e.target.value) || 0)}
+                         min="0"
+                         placeholder="Enter score"
+                       />
+                     </div>
+
+                                           <div className="form-group">
+                        <label className="form-label">Player 2 Score</label>
+                        <input
+                          type="number"
+                          className="form-input"
+                          value={match.player2_score}
+                          onChange={(e) => updateMatch(index, 'player2_score', e.target.value === '' ? '' : parseInt(e.target.value) || 0)}
+                          min="0"
+                          placeholder="Enter score"
+                        />
+                      </div>
+                   </div>
+
+                  <div style={{ marginTop: '16px' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                      <input
+                        type="checkbox"
+                        checked={match.is_completed}
+                        onChange={(e) => updateMatch(index, 'is_completed', e.target.checked)}
+                        style={{ width: '16px', height: '16px' }}
+                      />
+                      <span style={{ fontSize: '14px', color: '#666' }}>
+                        Mark this match as completed
+                      </span>
+                    </label>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
 
           <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
             <button

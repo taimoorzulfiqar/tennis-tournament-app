@@ -152,6 +152,14 @@ const TournamentDetails: React.FC = () => {
               >
                 🎾 View Matches
               </button>
+              {(user?.role === 'master' || (user?.role === 'admin' && user?.verification_status === 'approved')) && (
+                <button 
+                  onClick={() => navigate(`/add-match/${id}`)}
+                  className="btn btn-secondary"
+                >
+                  ➕ Add Match
+                </button>
+              )}
               <button 
                 onClick={() => navigate('/leaderboard')}
                 className="btn btn-secondary"

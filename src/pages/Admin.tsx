@@ -42,7 +42,12 @@ const Admin: React.FC = () => {
       alert('User created successfully!')
     },
     onError: (error) => {
-      alert(error instanceof Error ? error.message : 'Failed to create user')
+      const errorMessage = error instanceof Error ? error.message : 'Failed to create user'
+      if (errorMessage.includes('already exists')) {
+        alert('An account with this email address already exists. Please use a different email address.')
+      } else {
+        alert(errorMessage)
+      }
     },
   })
 
