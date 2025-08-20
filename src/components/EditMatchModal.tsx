@@ -122,7 +122,7 @@ const EditMatchModal: React.FC<EditMatchModalProps> = ({ match, isOpen, onClose,
       // Validate that the match is actually complete based on the format
       const setsToWin = Math.ceil(formData.match_format.sets / 2)
       if (formData.player1_score < setsToWin && formData.player2_score < setsToWin) {
-        alert(`Match is not complete. A player needs to win ${setsToWin} sets in a best of ${formData.match_format.sets} format.`)
+        alert(`Match is not complete. A player needs to win ${setsToWin} sets in a ${formData.match_format.sets} set format.`)
         return
       }
     }
@@ -425,9 +425,9 @@ const EditMatchModal: React.FC<EditMatchModalProps> = ({ match, isOpen, onClose,
                   onFocus={(e) => e.target.style.borderColor = 'var(--primary-color)'}
                   onBlur={(e) => e.target.style.borderColor = '#e0e0e0'}
                 >
-                  <option value={1}>Best of 1</option>
-                  <option value={3}>Best of 3</option>
-                  <option value={5}>Best of 5</option>
+                  <option value={1}>1</option>
+                  <option value={3}>3</option>
+                  <option value={5}>5</option>
                 </select>
               </div>
               
@@ -456,42 +456,13 @@ const EditMatchModal: React.FC<EditMatchModalProps> = ({ match, isOpen, onClose,
                   onFocus={(e) => e.target.style.borderColor = 'var(--primary-color)'}
                   onBlur={(e) => e.target.style.borderColor = '#e0e0e0'}
                 >
-                  <option value={4}>First to 4</option>
-                  <option value={6}>First to 6</option>
-                  <option value={8}>First to 8</option>
+                  <option value={4}>4</option>
+                  <option value={6}>6</option>
+                  <option value={8}>8</option>
                 </select>
               </div>
               
-              <div>
-                <label style={{
-                  display: 'block',
-                  fontSize: '14px',
-                  fontWeight: '600',
-                  marginBottom: '8px',
-                  color: 'var(--text-primary)'
-                }}>
-                  Tiebreak at
-                </label>
-                <select
-                  value={formData.match_format.tiebreak_at}
-                  onChange={(e) => handleFormatChange('tiebreak_at', parseInt(e.target.value))}
-                  style={{
-                    width: '100%',
-                    padding: '12px 16px',
-                    border: '2px solid #e0e0e0',
-                    borderRadius: '8px',
-                    fontSize: '16px',
-                    backgroundColor: 'white',
-                    transition: 'border-color 0.2s ease'
-                  }}
-                  onFocus={(e) => e.target.style.borderColor = 'var(--primary-color)'}
-                  onBlur={(e) => e.target.style.borderColor = '#e0e0e0'}
-                >
-                  <option value={6}>6-6</option>
-                  <option value={7}>7-7</option>
-                  <option value={8}>8-8</option>
-                </select>
-              </div>
+
             </div>
           </div>
 
