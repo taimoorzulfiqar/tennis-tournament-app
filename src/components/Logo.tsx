@@ -39,15 +39,12 @@ const Logo: React.FC<LogoProps> = ({ size = 'medium', showText = true }) => {
         <div 
           className="logo-text"
           style={{
-            background: 'linear-gradient(135deg, #32CD32 0%, #8A2BE2 100%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text',
             fontWeight: 'bold',
             whiteSpace: 'nowrap'
           }}
         >
-          Expert Tennis Academy
+          <span style={{ color: '#228B22' }}>Expert</span>{' '}
+          <span style={{ color: '#4B0082' }}>Tennis Academy</span>
         </div>
       )}
     </div>
