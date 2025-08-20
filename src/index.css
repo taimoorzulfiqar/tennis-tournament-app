@@ -8,7 +8,7 @@
   --accent-color: #FFD700; /* Gold for highlights */
   --text-primary: #333;
   --text-secondary: #666;
-  --background: #f8f9fa;
+  --background: #ffffff;
   --white: #fff;
   --error: #f44336;
   --success: #4caf50;
@@ -442,23 +442,4 @@ body {
   }
 }
 
-/* Dark mode support */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #1a1a1a;
-    --white: #2c2c2c;
-    --text-primary: #ffffff;
-    --text-secondary: #cccccc;
-  }
-  
-  .card {
-    background: var(--white);
-    color: var(--text-primary);
-  }
-  
-  .form-input {
-    background: var(--white);
-    color: var(--text-primary);
-    border-color: #444;
-  }
-}
+

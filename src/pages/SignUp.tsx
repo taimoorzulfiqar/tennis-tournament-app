@@ -32,7 +32,7 @@ const SignUp: React.FC = () => {
       alignItems: 'center',
       justifyContent: 'center',
       padding: '20px',
-      background: 'linear-gradient(135deg, var(--dark-bg) 0%, #1a1a1a 100%)'
+      background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)'
     }}>
       <div style={{
         background: 'white',
@@ -72,7 +72,6 @@ const SignUp: React.FC = () => {
               onChange={(e) => setFullName(e.target.value)}
               placeholder="Enter your full name"
               required
-              style={{ backgroundColor: '#e8e8e8' }}
             />
           </div>
 
@@ -85,7 +84,6 @@ const SignUp: React.FC = () => {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter your email"
               required
-              style={{ backgroundColor: '#e8e8e8' }}
             />
           </div>
 
@@ -98,7 +96,6 @@ const SignUp: React.FC = () => {
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Enter your password"
               required
-              style={{ backgroundColor: '#e8e8e8' }}
             />
           </div>
 
@@ -108,7 +105,6 @@ const SignUp: React.FC = () => {
               className="form-input"
               value={role}
               onChange={(e) => setRole(e.target.value as 'admin' | 'player')}
-              style={{ backgroundColor: '#e8e8e8' }}
             >
               <option value="player">Player</option>
               <option value="admin">Admin</option>

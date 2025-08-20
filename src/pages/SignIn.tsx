@@ -30,7 +30,7 @@ const SignIn: React.FC = () => {
       alignItems: 'center',
       justifyContent: 'center',
       padding: '20px',
-      background: 'linear-gradient(135deg, var(--dark-bg) 0%, #1a1a1a 100%)'
+      background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)'
     }}>
       <div style={{
         background: 'white',
