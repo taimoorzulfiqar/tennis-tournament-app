@@ -1,7 +1,6 @@
 {
   "buildCommand": "npm run build:web",
   "outputDirectory": "web-build",
-  "framework": "expo",
   "rewrites": [
     {
       "source": "/(.*)",
