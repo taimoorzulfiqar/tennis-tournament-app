@@ -146,13 +146,22 @@ const TournamentDetails: React.FC = () => {
               Tournament Actions
             </h3>
             <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-              <button className="btn btn-primary">
+              <button 
+                onClick={() => navigate(`/tournament/${id}/matches`)}
+                className="btn btn-primary"
+              >
                 🎾 View Matches
               </button>
-              <button className="btn btn-secondary">
+              <button 
+                onClick={() => navigate(`/tournament/${id}/leaderboard`)}
+                className="btn btn-secondary"
+              >
                 📊 View Leaderboard
               </button>
-              <button className="btn btn-secondary">
+              <button 
+                onClick={() => navigate('/admin')}
+                className="btn btn-secondary"
+              >
                 👥 Manage Players
               </button>
             </div>
