@@ -20,7 +20,7 @@ const Players: React.FC = () => {
   const { users, isLoading: usersLoading } = useUsers()
   const queryClient = useQueryClient()
   const [searchTerm, setSearchTerm] = useState('')
-  const [sortBy, setSortBy] = useState<'name' | 'matches' | 'wins' | 'winPercentage'>('name')
+  const [sortBy, setSortBy] = useState<'name' | 'matches' | 'wins' | 'winPercentage' | 'gamesWon'>('name')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
 
   // Fetch all matches to calculate player stats
@@ -135,6 +135,10 @@ const Players: React.FC = () => {
           aValue = a.winPercentage
           bValue = b.winPercentage
           break
+        case 'gamesWon':
+          aValue = a.gamesWon
+          bValue = b.gamesWon
+          break
         default:
           aValue = a.player.full_name || a.player.email
           bValue = b.player.full_name || b.player.email
@@ -240,22 +244,39 @@ const Players: React.FC = () => {
                alignItems: 'center'
              }}>
                <span style={{ fontSize: '14px', color: '#666' }}>Sort by:</span>
-               <select
-                 value={sortBy}
-                 onChange={(e) => handleSort(e.target.value as typeof sortBy)}
-                 style={{
-                   padding: '8px 12px',
-                   border: '1px solid #ddd',
-                   borderRadius: '6px',
-                   fontSize: '14px',
-                   outline: 'none'
-                 }}
-               >
-                 <option value="name">Name</option>
-                 <option value="matches">Matches Played</option>
-                 <option value="wins">Wins</option>
-                 <option value="winPercentage">Win %</option>
-               </select>
+               <div style={{ position: 'relative' }}>
+                 <select
+                   value={sortBy}
+                   onChange={(e) => handleSort(e.target.value as typeof sortBy)}
+                   style={{
+                     padding: '8px 12px',
+                     paddingRight: '32px',
+                     border: '1px solid #ddd',
+                     borderRadius: '6px',
+                     fontSize: '14px',
+                     outline: 'none',
+                     appearance: 'none',
+                     backgroundColor: 'white'
+                   }}
+                 >
+                   <option value="name">Name</option>
+                   <option value="matches">Matches Played</option>
+                   <option value="wins">Wins</option>
+                   <option value="gamesWon">Games Won</option>
+                   <option value="winPercentage">Win %</option>
+                 </select>
+                 <div style={{
+                   position: 'absolute',
+                   right: '8px',
+                   top: '50%',
+                   transform: 'translateY(-50%)',
+                   pointerEvents: 'none',
+                   fontSize: '12px',
+                   color: '#666'
+                 }}>
+                   ▼
+                 </div>
+               </div>
                                <button
                   onClick={handleRefresh}
                   style={{
@@ -321,7 +342,7 @@ const Players: React.FC = () => {
         }}>
           <div style={{
             display: 'grid',
-            gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 1fr',
+            gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 1fr 1fr',
             gap: '16px',
             padding: '16px',
             backgroundColor: '#f8f9fa',
@@ -351,6 +372,12 @@ const Players: React.FC = () => {
             <div style={{ textAlign: 'center' }}>Losses</div>
             <div 
               style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'center' }}
+              onClick={() => handleSort('gamesWon')}
+            >
+              Games Won {getSortIcon('gamesWon')}
+            </div>
+            <div 
+              style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'center' }}
               onClick={() => handleSort('winPercentage')}
             >
               Win % {getSortIcon('winPercentage')}
@@ -373,7 +400,7 @@ const Players: React.FC = () => {
                 key={stats.player.id}
                 style={{
                   display: 'grid',
-                  gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 1fr',
+                  gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 1fr 1fr',
                   gap: '16px',
                   padding: '16px',
                   borderBottom: index < filteredAndSortedStats.length - 1 ? '1px solid #f0f0f0' : 'none',
@@ -404,6 +431,9 @@ const Players: React.FC = () => {
                 </div>
                 <div style={{ fontWeight: '500', color: '#dc3545', textAlign: 'center' }}>
                   {stats.losses}
+                </div>
+                <div style={{ fontWeight: '500', color: '#007bff', textAlign: 'center' }}>
+                  {stats.gamesWon}
                 </div>
                 <div style={{ 
                   fontWeight: '600', 
