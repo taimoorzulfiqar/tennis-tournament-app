@@ -22,6 +22,12 @@
   box-sizing: border-box;
 }
 
+html {
+  font-size: 16px; /* Base font size for mobile */
+  -webkit-text-size-adjust: 100%; /* Prevent font scaling in landscape */
+  -ms-text-size-adjust: 100%;
+}
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
@@ -30,20 +36,27 @@ body {
   -moz-osx-font-smoothing: grayscale;
   background-color: var(--background);
   color: var(--text-primary);
+  line-height: 1.6;
+  /* Prevent horizontal scrolling on mobile */
+  overflow-x: hidden;
+  /* Improve touch scrolling */
+  -webkit-overflow-scrolling: touch;
 }
 
 #root {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  /* Prevent zoom on input focus on iOS */
+  touch-action: manipulation;
 }
 
 /* Common button styles */
 .btn {
-  padding: 12px 24px;
+  padding: 14px 20px; /* Increased touch target size */
   border: none;
   border-radius: 8px;
-  font-size: 16px;
+  font-size: 16px; /* Minimum 16px for iOS */
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -52,6 +65,16 @@ body {
   align-items: center;
   justify-content: center;
   gap: 8px;
+  /* Ensure minimum touch target size */
+  min-height: 44px;
+  min-width: 44px;
+  /* Prevent text selection on mobile */
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  /* Improve touch feedback */
+  -webkit-tap-highlight-color: transparent;
 }
 
 .btn-primary {
@@ -59,7 +82,8 @@ body {
   color: var(--white);
 }
 
-.btn-primary:hover {
+.btn-primary:hover,
+.btn-primary:active {
   background-color: var(--primary-dark);
 }
 
@@ -68,7 +92,8 @@ body {
   color: var(--white);
 }
 
-.btn-secondary:hover {
+.btn-secondary:hover,
+.btn-secondary:active {
   background-color: var(--secondary-dark);
 }
 
@@ -79,7 +104,7 @@ body {
 
 /* Form styles */
 .form-group {
-  margin-bottom: 16px;
+  margin-bottom: 20px; /* Increased spacing for mobile */
 }
 
 .form-label {
@@ -87,20 +112,28 @@ body {
   margin-bottom: 8px;
   font-weight: 600;
   color: var(--text-primary);
+  font-size: 16px; /* Minimum 16px for iOS */
 }
 
 .form-input {
   width: 100%;
-  padding: 12px 16px;
+  padding: 16px; /* Increased padding for better touch */
   border: 2px solid #e0e0e0;
   border-radius: 8px;
-  font-size: 16px;
+  font-size: 16px; /* Minimum 16px for iOS */
   transition: border-color 0.2s ease;
+  /* Prevent zoom on iOS */
+  -webkit-appearance: none;
+  appearance: none;
+  /* Improve mobile input experience */
+  -webkit-tap-highlight-color: transparent;
 }
 
 .form-input:focus {
   outline: none;
   border-color: var(--primary-color);
+  /* Prevent zoom on focus */
+  font-size: 16px;
 }
 
 .form-input.error {
@@ -111,9 +144,12 @@ body {
 .card {
   background: var(--white);
   border-radius: 12px;
-  padding: 24px;
+  padding: 20px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   margin-bottom: 16px;
+  /* Ensure cards don't overflow on mobile */
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .card-header {
@@ -121,6 +157,9 @@ body {
   align-items: center;
   justify-content: space-between;
   margin-bottom: 16px;
+  /* Allow wrapping on mobile */
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
 .card-title {
@@ -173,14 +212,223 @@ body {
   background-clip: text;
 }
 
-/* Responsive design */
+/* Mobile-first responsive design */
 @media (max-width: 768px) {
   .card {
     padding: 16px;
+    margin: 12px;
+    border-radius: 8px;
   }
   
   .btn {
-    padding: 10px 20px;
+    padding: 16px 20px; /* Larger touch targets on mobile */
+    font-size: 16px;
+    width: 100%; /* Full width buttons on mobile */
+    margin-bottom: 8px;
+  }
+  
+  .form-input {
+    padding: 16px;
+    font-size: 16px;
+  }
+  
+  .logo {
+    font-size: 18px;
+  }
+  
+  .logo-icon {
+    width: 36px;
+    height: 36px;
+    font-size: 18px;
+  }
+  
+  /* Improve mobile navigation */
+  .card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  /* Better mobile grid layouts */
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .grid-3 {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  /* Mobile-optimized text sizes */
+  h1 {
+    font-size: 24px !important;
+    line-height: 1.3;
+  }
+  
+  h2 {
+    font-size: 20px !important;
+    line-height: 1.3;
+  }
+  
+  h3 {
+    font-size: 18px !important;
+    line-height: 1.3;
+  }
+  
+  /* Improve mobile spacing */
+  .mobile-padding {
+    padding: 16px;
+  }
+  
+  .mobile-margin {
+    margin: 16px;
+  }
+  
+  /* Mobile-optimized buttons */
+  .btn-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+  }
+  
+  .btn-group .btn {
+    margin-bottom: 0;
+  }
+  
+  /* Better mobile form layouts */
+  .form-row {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  /* Mobile-optimized cards */
+  .match-card {
+    margin-bottom: 16px;
+    padding: 16px;
+  }
+  
+  /* Improve mobile table display */
+  table {
     font-size: 14px;
+  }
+  
+  th, td {
+    padding: 8px 4px;
+  }
+  
+  /* Mobile-optimized modals */
+  .modal-content {
+    margin: 20px;
+    max-height: calc(100vh - 40px);
+    overflow-y: auto;
+  }
+}
+
+/* Tablet styles */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .grid-2 {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+  
+  .grid-3 {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+  
+  .btn {
+    padding: 12px 24px;
+  }
+}
+
+/* Desktop styles */
+@media (min-width: 1025px) {
+  .grid-2 {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+  }
+  
+  .grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+  
+  .btn {
+    padding: 12px 24px;
+  }
+  
+  .card {
+    padding: 24px;
+  }
+}
+
+/* Landscape mobile optimization */
+@media (max-width: 768px) and (orientation: landscape) {
+  .card {
+    padding: 12px;
+  }
+  
+  .btn {
+    padding: 12px 16px;
+  }
+  
+  h1 {
+    font-size: 20px !important;
+  }
+  
+  h2 {
+    font-size: 18px !important;
+  }
+}
+
+/* High DPI displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .btn {
+    border-width: 0.5px;
+  }
+  
+  .form-input {
+    border-width: 0.5px;
+  }
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+  .btn {
+    transition: none;
+  }
+  
+  .spinner {
+    animation: none;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #1a1a1a;
+    --white: #2c2c2c;
+    --text-primary: #ffffff;
+    --text-secondary: #cccccc;
+  }
+  
+  .card {
+    background: var(--white);
+    color: var(--text-primary);
+  }
+  
+  .form-input {
+    background: var(--white);
+    color: var(--text-primary);
+    border-color: #444;
   }
 }

@@ -78,6 +78,26 @@ const EditMatchModal: React.FC<EditMatchModalProps> = ({ match, isOpen, onClose,
     updateMatchMutation.mutate()
   }
 
+  // Close modal on escape key
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose()
+      }
+    }
+
+    if (isOpen) {
+      document.addEventListener('keydown', handleEscape)
+      // Prevent body scroll when modal is open
+      document.body.style.overflow = 'hidden'
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscape)
+      document.body.style.overflow = 'unset'
+    }
+  }, [isOpen, onClose])
+
   if (!isOpen) return null
 
   return (
@@ -91,33 +111,59 @@ const EditMatchModal: React.FC<EditMatchModalProps> = ({ match, isOpen, onClose,
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      zIndex: 1000
+      zIndex: 1000,
+      padding: '16px'
     }}>
       <div style={{
         backgroundColor: 'white',
         borderRadius: '12px',
-        padding: '24px',
+        padding: '20px',
         maxWidth: '500px',
-        width: '90%',
+        width: '100%',
         maxHeight: '90vh',
-        overflow: 'auto'
+        overflow: 'auto',
+        position: 'relative'
       }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-          <h2 style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--primary-color)', margin: 0 }}>
+        {/* Close button */}
+        <button
+          onClick={onClose}
+          style={{
+            position: 'absolute',
+            top: '12px',
+            right: '12px',
+            background: 'none',
+            border: 'none',
+            fontSize: '24px',
+            cursor: 'pointer',
+            color: '#666',
+            width: '44px',
+            height: '44px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: '50%',
+            transition: 'background-color 0.2s'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = '#f0f0f0'
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = 'transparent'
+          }}
+        >
+          ×
+        </button>
+
+        <div style={{ marginBottom: '20px' }}>
+          <h2 style={{ 
+            fontSize: '24px', 
+            fontWeight: 'bold', 
+            color: 'var(--primary-color)', 
+            margin: '0 0 16px 0',
+            paddingRight: '40px' // Space for close button
+          }}>
             Edit Match
           </h2>
-          <button
-            onClick={onClose}
-            style={{
-              background: 'none',
-              border: 'none',
-              fontSize: '24px',
-              cursor: 'pointer',
-              color: '#666'
-            }}
-          >
-            ×
-          </button>
         </div>
 
         <form onSubmit={handleSubmit}>
@@ -125,10 +171,10 @@ const EditMatchModal: React.FC<EditMatchModalProps> = ({ match, isOpen, onClose,
             <h3 style={{ fontSize: '18px', fontWeight: 'bold', margin: '0 0 12px 0' }}>
               {getPlayerName(match.player1_id)} vs {getPlayerName(match.player2_id)}
             </h3>
-            <p style={{ color: '#666', margin: '0 0 8px 0' }}>
+            <p style={{ color: '#666', margin: '0 0 8px 0', fontSize: '14px' }}>
               <strong>Tournament:</strong> {match.tournament_id}
             </p>
-            <p style={{ color: '#666', margin: 0 }}>
+            <p style={{ color: '#666', margin: 0, fontSize: '14px' }}>
               <strong>Format:</strong> {match.sets_per_match} sets, {match.games_per_set} games per set
             </p>
           </div>
@@ -142,6 +188,7 @@ const EditMatchModal: React.FC<EditMatchModalProps> = ({ match, isOpen, onClose,
                 value={formData.court}
                 onChange={(e) => setFormData({ ...formData, court: e.target.value })}
                 required
+                placeholder="Enter court name"
               />
             </div>
 
@@ -156,7 +203,12 @@ const EditMatchModal: React.FC<EditMatchModalProps> = ({ match, isOpen, onClose,
               />
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+            <div style={{ 
+              display: 'grid', 
+              gridTemplateColumns: '1fr 1fr', 
+              gap: '16px',
+              gridTemplateColumns: '1fr' // Single column on mobile
+            }} className="mobile-grid">
               <div className="form-group">
                 <label className="form-label">{getPlayerName(match.player1_id)} Score</label>
                 <input
@@ -165,6 +217,7 @@ const EditMatchModal: React.FC<EditMatchModalProps> = ({ match, isOpen, onClose,
                   value={formData.player1_score}
                   onChange={(e) => setFormData({ ...formData, player1_score: parseInt(e.target.value) || 0 })}
                   min="0"
+                  placeholder="Enter score"
                 />
               </div>
 
@@ -176,6 +229,7 @@ const EditMatchModal: React.FC<EditMatchModalProps> = ({ match, isOpen, onClose,
                   value={formData.player2_score}
                   onChange={(e) => setFormData({ ...formData, player2_score: parseInt(e.target.value) || 0 })}
                   min="0"
+                  placeholder="Enter score"
                 />
               </div>
             </div>
@@ -186,6 +240,7 @@ const EditMatchModal: React.FC<EditMatchModalProps> = ({ match, isOpen, onClose,
                 className="form-input"
                 value={formData.status}
                 onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                style={{ fontSize: '16px' }} // Prevent zoom on iOS
               >
                 <option value="scheduled">Scheduled</option>
                 <option value="in_progress">In Progress</option>
@@ -194,25 +249,51 @@ const EditMatchModal: React.FC<EditMatchModalProps> = ({ match, isOpen, onClose,
             </div>
           </div>
 
-          <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
+          <div style={{ 
+            display: 'flex', 
+            gap: '12px', 
+            marginTop: '24px',
+            flexDirection: 'column' // Stack buttons on mobile
+          }} className="mobile-btn-group">
             <button
               type="button"
               onClick={onClose}
               className="btn btn-secondary"
-              style={{ flex: 1 }}
+              style={{ flex: 1, minHeight: '44px' }}
             >
               Cancel
             </button>
             <button
               type="submit"
               className="btn btn-primary"
-              style={{ flex: 1 }}
+              style={{ flex: 1, minHeight: '44px' }}
               disabled={updateMatchMutation.isPending}
             >
               {updateMatchMutation.isPending ? 'Updating...' : 'Update Match'}
             </button>
           </div>
         </form>
+
+        {/* Mobile-specific styles */}
+        <style jsx>{`
+          @media (max-width: 768px) {
+            .mobile-grid {
+              grid-template-columns: 1fr !important;
+            }
+            .mobile-btn-group {
+              flex-direction: column !important;
+            }
+          }
+          
+          @media (min-width: 769px) {
+            .mobile-grid {
+              grid-template-columns: 1fr 1fr !important;
+            }
+            .mobile-btn-group {
+              flex-direction: row !important;
+            }
+          }
+        `}</style>
       </div>
     </div>
   )
