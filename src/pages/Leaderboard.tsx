@@ -32,7 +32,7 @@ const Leaderboard: React.FC = () => {
     return player?.full_name || player?.email || 'Unknown Player'
   }
 
-  // Calculate leaderboard based on games won from completed matches only
+  // Calculate leaderboard based on total games won from completed matches only
   const calculateLeaderboard = () => {
     if (!allMatches || !players) return []
 
@@ -43,21 +43,12 @@ const Leaderboard: React.FC = () => {
       playerStats[player.id] = { gamesWon: 0, matchesPlayed: 0 }
     })
 
-    // Calculate games won from completed matches only
+    // Calculate total games won from completed matches only
     allMatches.forEach(match => {
       if (match.status === 'completed' && (match.player1_score > 0 || match.player2_score > 0)) {
-        let player1GamesWon = 0
-        let player2GamesWon = 0
-
-        // If detailed score is available, sum up individual set scores
-        if (match.detailed_score && match.detailed_score.player1_sets && match.detailed_score.player2_sets) {
-          player1GamesWon = match.detailed_score.player1_sets.reduce((sum, games) => sum + (games || 0), 0)
-          player2GamesWon = match.detailed_score.player2_sets.reduce((sum, games) => sum + (games || 0), 0)
-        } else {
-          // Fallback: use the player scores as games won (this assumes the scores represent games)
-          player1GamesWon = match.player1_score
-          player2GamesWon = match.player2_score
-        }
+        // player1_score and player2_score now represent total games won
+        const player1GamesWon = match.player1_score
+        const player2GamesWon = match.player2_score
 
         // Add games won by each player
         if (playerStats[match.player1_id]) {
