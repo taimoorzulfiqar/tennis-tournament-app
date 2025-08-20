@@ -77,7 +77,15 @@ const EditMatchModal: React.FC<EditMatchModalProps> = ({ match, isOpen, onClose,
 
         // Update status if changed
         if (formData.status !== match.status) {
-          await matchAPI.updateMatchStatus(match.id, formData.status as 'scheduled' | 'in_progress' | 'completed')
+          // If status is being set to completed, use updateMatchScore to set winner_id
+          if (formData.status === 'completed') {
+            await matchAPI.updateMatchScore(match.id, {
+              player1_score: formData.player1_score === '' ? 0 : Number(formData.player1_score) || 0,
+              player2_score: formData.player2_score === '' ? 0 : Number(formData.player2_score) || 0
+            })
+          } else {
+            await matchAPI.updateMatchStatus(match.id, formData.status as 'scheduled' | 'in_progress' | 'completed')
+          }
         }
       }
     },
@@ -99,6 +107,23 @@ const EditMatchModal: React.FC<EditMatchModalProps> = ({ match, isOpen, onClose,
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+    
+    // Validate that completed matches have valid scores
+    if (formData.status === 'completed') {
+      const player1Score = formData.player1_score === '' ? 0 : Number(formData.player1_score) || 0
+      const player2Score = formData.player2_score === '' ? 0 : Number(formData.player2_score) || 0
+      
+      if (player1Score === 0 && player2Score === 0) {
+        alert('Completed matches must have valid scores. Please enter scores for both players.')
+        return
+      }
+      
+      if (player1Score === player2Score) {
+        alert('Completed matches cannot have tied scores. Please enter different scores for the players.')
+        return
+      }
+    }
+    
     updateMatchMutation.mutate()
   }
 

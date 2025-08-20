@@ -93,13 +93,20 @@ const CreateTournament: React.FC = () => {
             player2_score: match.player2_score === '' ? 0 : Number(match.player2_score) || 0
           })
 
-          // If match is marked as completed, update its status
+          // If match is marked as completed, update its status and set winner
           if (match.is_completed) {
             // We need to get the created match and update its status
             const createdMatches = await matchAPI.getMatches(createdTournament.id)
             const lastCreatedMatch = createdMatches[createdMatches.length - 1]
             if (lastCreatedMatch) {
-              await matchAPI.updateMatchStatus(lastCreatedMatch.id!, 'completed')
+              const player1Score = match.player1_score === '' ? 0 : Number(match.player1_score) || 0
+              const player2Score = match.player2_score === '' ? 0 : Number(match.player2_score) || 0
+              
+              // Use updateMatchScore to properly set winner_id and status
+              await matchAPI.updateMatchScore(lastCreatedMatch.id!, {
+                player1_score: player1Score,
+                player2_score: player2Score
+              })
             }
           }
         }
@@ -136,6 +143,22 @@ const CreateTournament: React.FC = () => {
         if (match.player1_id === match.player2_id) {
           alert(`Match ${i + 1}: Player 1 and Player 2 cannot be the same`)
           return
+        }
+        
+        // Validate that completed matches have valid scores
+        if (match.is_completed) {
+          const player1Score = match.player1_score === '' ? 0 : Number(match.player1_score) || 0
+          const player2Score = match.player2_score === '' ? 0 : Number(match.player2_score) || 0
+          
+          if (player1Score === 0 && player2Score === 0) {
+            alert(`Match ${i + 1}: Completed matches must have valid scores. Please enter scores for both players.`)
+            return
+          }
+          
+          if (player1Score === player2Score) {
+            alert(`Match ${i + 1}: Completed matches cannot have tied scores. Please enter different scores for the players.`)
+            return
+          }
         }
       }
     }

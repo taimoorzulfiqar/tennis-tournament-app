@@ -245,9 +245,15 @@ export const matchAPI = {
   },
 
   updateMatchScore: async (id: string, score: UpdateMatchScoreDTO): Promise<Match> => {
-    const winnerId = score.player1_score > score.player2_score 
-      ? (await matchAPI.getMatch(id)).player1_id 
-      : (await matchAPI.getMatch(id)).player2_id
+    const match = await matchAPI.getMatch(id)
+    let winnerId = null
+    
+    // Only set winner if there are actual scores (not both 0)
+    if (score.player1_score > 0 || score.player2_score > 0) {
+      winnerId = score.player1_score > score.player2_score 
+        ? match.player1_id 
+        : match.player2_id
+    }
 
     const { data, error } = await supabase
       .from('matches')

@@ -73,9 +73,16 @@ const AddMatch: React.FC = () => {
         player2_score: matchData.player2_score === '' ? 0 : Number(matchData.player2_score) || 0
       })
 
-      // If match is marked as completed, update its status
+      // If match is marked as completed, update its status and set winner
       if (matchData.is_completed) {
-        await matchAPI.updateMatchStatus(createdMatch.id!, 'completed')
+        const player1Score = matchData.player1_score === '' ? 0 : Number(matchData.player1_score) || 0
+        const player2Score = matchData.player2_score === '' ? 0 : Number(matchData.player2_score) || 0
+        
+        // Use updateMatchScore to properly set winner_id and status
+        await matchAPI.updateMatchScore(createdMatch.id!, {
+          player1_score: player1Score,
+          player2_score: player2Score
+        })
       }
 
       return createdMatch
@@ -101,6 +108,22 @@ const AddMatch: React.FC = () => {
     if (match.player1_id === match.player2_id) {
       alert('Player 1 and Player 2 cannot be the same')
       return
+    }
+    
+    // Validate that completed matches have valid scores
+    if (match.is_completed) {
+      const player1Score = match.player1_score === '' ? 0 : Number(match.player1_score) || 0
+      const player2Score = match.player2_score === '' ? 0 : Number(match.player2_score) || 0
+      
+      if (player1Score === 0 && player2Score === 0) {
+        alert('Completed matches must have valid scores. Please enter scores for both players.')
+        return
+      }
+      
+      if (player1Score === player2Score) {
+        alert('Completed matches cannot have tied scores. Please enter different scores for the players.')
+        return
+      }
     }
 
     createMatchMutation.mutate(match)
