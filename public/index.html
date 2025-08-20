@@ -51,6 +51,14 @@
         0% { transform: rotate(0deg); }
         100% { transform: rotate(360deg); }
       }
+      .error {
+        display: none;
+        text-align: center;
+        margin-top: 20px;
+        padding: 10px;
+        background: rgba(255,255,255,0.1);
+        border-radius: 8px;
+      }
     </style>
   </head>
 
@@ -61,6 +69,10 @@
         <div class="spinner" style="margin: 0 auto 20px;"></div>
         <h1 style="margin: 0 0 10px; font-size: 24px;">Tennis Tournament App</h1>
         <p style="margin: 0; opacity: 0.8;">Loading...</p>
+        <div id="error" class="error">
+          <p style="margin: 0; font-size: 14px;">Loading is taking longer than expected...</p>
+          <button onclick="location.reload()" style="margin-top: 10px; padding: 8px 16px; background: white; color: #2E7D32; border: none; border-radius: 4px; cursor: pointer;">Retry</button>
+        </div>
       </div>
     </div>
 
@@ -78,15 +90,50 @@
     <div id="root"></div>
     
     <script>
+      // Global error handler
+      window.addEventListener('error', function(e) {
+        console.error('Global error:', e.error);
+        if (e.error && e.error.message && e.error.message.includes('message channel')) {
+          console.log('Message channel error detected, continuing...');
+          return;
+        }
+      });
+
+      // Handle unhandled promise rejections
+      window.addEventListener('unhandledrejection', function(e) {
+        console.error('Unhandled promise rejection:', e.reason);
+        if (e.reason && e.reason.message && e.reason.message.includes('message channel')) {
+          console.log('Message channel rejection detected, continuing...');
+          e.preventDefault();
+          return;
+        }
+      });
+
       // Hide loading screen when app loads
+      let loadTimeout = setTimeout(function() {
+        const error = document.getElementById('error');
+        if (error) {
+          error.style.display = 'block';
+        }
+      }, 10000); // Show error after 10 seconds
+
       window.addEventListener('load', function() {
+        clearTimeout(loadTimeout);
         setTimeout(function() {
           const loading = document.getElementById('loading');
           if (loading) {
             loading.style.display = 'none';
           }
-        }, 1000);
+        }, 2000); // Give app more time to initialize
       });
+
+      // Fallback: hide loading if app doesn't load within 15 seconds
+      setTimeout(function() {
+        const loading = document.getElementById('loading');
+        if (loading && loading.style.display !== 'none') {
+          loading.style.display = 'none';
+        }
+      }, 15000);
     </script>
   </body>
 </html>
