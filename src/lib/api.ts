@@ -379,9 +379,10 @@ export const userAPI = {
 
       console.log('API: Profile deleted successfully from database')
       
-      // Note: Auth user deletion requires server-side admin privileges
-      // The profile deletion is sufficient for removing user access
-      console.log('API: User profile deleted. Auth user will be handled by server-side cleanup.')
+      // Note: Auth user deletion requires service role key and admin privileges
+      // The profile deletion prevents the user from accessing the app
+      // The auth user will remain in Supabase but cannot log in
+      console.log('API: User profile deleted. Auth user remains but cannot access the app.')
       
     } catch (error) {
       console.error('API: Delete user operation failed:', error)

@@ -14,7 +14,8 @@
     "test-master": "node scripts/test-master-user.js",
     "fix-master": "node scripts/fix-master-profile.js",
     "check-profiles": "node scripts/check-profiles.js",
-    "fix-user": "node scripts/fix-user-profile.js"
+    "fix-user": "node scripts/fix-user-profile.js",
+    "delete-user-server": "node scripts/delete-user-server.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.39.0",
