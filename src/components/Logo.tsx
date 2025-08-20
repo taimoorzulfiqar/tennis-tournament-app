@@ -7,9 +7,9 @@ interface LogoProps {
 
 const Logo: React.FC<LogoProps> = ({ size = 'medium', showText = true }) => {
   const sizeMap = {
-    small: { icon: 32, text: 16 },
-    medium: { icon: 44, text: 20 },
-    large: { icon: 64, text: 28 }
+    small: { icon: 32, text: 14 },
+    medium: { icon: 44, text: 18 },
+    large: { icon: 64, text: 24 }
   }
 
   const { icon, text } = sizeMap[size]
@@ -29,7 +29,8 @@ const Logo: React.FC<LogoProps> = ({ size = 'medium', showText = true }) => {
           color: 'white',
           boxShadow: '0 3px 10px rgba(50, 205, 50, 0.25)',
           fontSize: icon * 0.6,
-          fontWeight: 'bold'
+          fontWeight: 'bold',
+          flexShrink: 0
         }}
       >
         🎾
@@ -43,7 +44,10 @@ const Logo: React.FC<LogoProps> = ({ size = 'medium', showText = true }) => {
             WebkitTextFillColor: 'transparent',
             backgroundClip: 'text',
             fontWeight: 'bold',
-            whiteSpace: 'nowrap'
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            maxWidth: size === 'small' ? '120px' : size === 'medium' ? '180px' : '250px'
           }}
         >
           Expert Tennis Academy
