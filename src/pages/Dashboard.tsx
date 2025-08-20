@@ -75,7 +75,7 @@ const Dashboard: React.FC = () => {
           <h1 style={{ fontSize: '32px', fontWeight: 'bold', color: 'var(--primary-color)', margin: 0 }}>
             Academy Tournaments
           </h1>
-          {(user?.role === 'admin' || user?.role === 'master') && (
+          {(user?.role === 'master' || (user?.role === 'admin' && user?.verification_status === 'approved')) && (
             <button
               onClick={() => navigate('/create-tournament')}
               className="btn btn-primary"
@@ -140,12 +140,12 @@ const Dashboard: React.FC = () => {
               No tournaments yet
             </h2>
             <p style={{ color: '#999', marginBottom: '24px' }}>
-              {user?.role === 'admin' || user?.role === 'master' 
+              {user?.role === 'master' || (user?.role === 'admin' && user?.verification_status === 'approved')
                 ? 'Create your first academy tournament to get started!'
                 : 'Check back later for upcoming tournaments.'
               }
             </p>
-            {(user?.role === 'admin' || user?.role === 'master') && (
+            {(user?.role === 'master' || (user?.role === 'admin' && user?.verification_status === 'approved')) && (
               <button
                 onClick={() => navigate('/create-tournament')}
                 className="btn btn-primary"

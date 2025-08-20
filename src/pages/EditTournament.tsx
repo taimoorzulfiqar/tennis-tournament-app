@@ -23,6 +23,17 @@ const EditTournament: React.FC = () => {
   const navigate = useNavigate()
   const { user } = useAuth()
   const queryClient = useQueryClient()
+
+  // Redirect if user is not authorized to edit tournaments
+  React.useEffect(() => {
+    if (user && !(
+      user.role === 'master' || 
+      (user.role === 'admin' && user.verification_status === 'approved')
+    )) {
+      navigate('/')
+      alert('Access denied. Only approved admins and master users can edit tournaments.')
+    }
+  }, [user, navigate])
   
   const [tournament, setTournament] = useState({
     name: '',

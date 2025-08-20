@@ -76,7 +76,7 @@ const TournamentDetails: React.FC = () => {
               Tournament Details
             </h1>
           </div>
-          {(user?.role === 'admin' || user?.role === 'master') && (
+          {(user?.role === 'master' || (user?.role === 'admin' && user?.verification_status === 'approved')) && (
             <button
               onClick={() => navigate(`/edit-tournament/${id}`)}
               className="btn btn-primary"

@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import Layout from '../components/Layout'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { userAPI } from '../lib/api'
@@ -8,7 +9,19 @@ import { User } from '../types'
 const Admin: React.FC = () => {
   const { user } = useAuth()
   const queryClient = useQueryClient()
+  const navigate = useNavigate()
   const [showCreateModal, setShowCreateModal] = useState(false)
+
+  // Redirect if user is not authorized to access admin panel
+  React.useEffect(() => {
+    if (user && !(
+      user.role === 'master' || 
+      (user.role === 'admin' && user.verification_status === 'approved')
+    )) {
+      navigate('/')
+      alert('Access denied. Only approved admins and master users can access the admin panel.')
+    }
+  }, [user, navigate])
   const [newUser, setNewUser] = useState({
     email: '',
     password: '',

@@ -29,8 +29,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     { path: '/profile', label: 'Profile', icon: '👤' },
   ]
 
-  // Add admin nav item for admin and master users
-  if (user && (user.role === 'admin' || user.role === 'master')) {
+  // Add admin nav item only for approved admins and master users
+  if (user && (
+    user.role === 'master' || 
+    (user.role === 'admin' && user.verification_status === 'approved')
+  )) {
     navItems.push({ path: '/admin', label: 'Admin', icon: '⚙️' })
   }
 
@@ -66,9 +69,24 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             gap: '16px',
             display: 'none' // Hidden on mobile
           }} className="desktop-only">
-            <span style={{ fontSize: '14px' }}>
-              Welcome, {user?.full_name || user?.email}
-            </span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ fontSize: '14px' }}>
+                Welcome, {user?.full_name || user?.email}
+              </span>
+              {user?.role === 'admin' && user?.verification_status === 'pending' && (
+                <span style={{
+                  padding: '2px 8px',
+                  borderRadius: '12px',
+                  fontSize: '11px',
+                  fontWeight: '600',
+                  backgroundColor: '#ff980020',
+                  color: '#ff9800',
+                  textTransform: 'uppercase'
+                }}>
+                  Pending Approval
+                </span>
+              )}
+            </div>
             <button
               onClick={handleSignOut}
               className="btn btn-secondary"
@@ -111,9 +129,25 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               flexDirection: 'column',
               gap: '12px'
             }}>
-              <span style={{ fontSize: '14px', color: 'rgba(255, 255, 255, 0.8)' }}>
-                Welcome, {user?.full_name || user?.email}
-              </span>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                <span style={{ fontSize: '14px', color: 'rgba(255, 255, 255, 0.8)' }}>
+                  Welcome, {user?.full_name || user?.email}
+                </span>
+                {user?.role === 'admin' && user?.verification_status === 'pending' && (
+                  <span style={{
+                    padding: '2px 8px',
+                    borderRadius: '12px',
+                    fontSize: '11px',
+                    fontWeight: '600',
+                    backgroundColor: '#ff980020',
+                    color: '#ff9800',
+                    textTransform: 'uppercase',
+                    alignSelf: 'flex-start'
+                  }}>
+                    Pending Approval
+                  </span>
+                )}
+              </div>
               <button
                 onClick={handleSignOut}
                 className="btn btn-secondary"

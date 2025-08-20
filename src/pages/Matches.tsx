@@ -172,7 +172,7 @@ const Matches: React.FC = () => {
                   </p>
                 )}
 
-                {(user?.role === 'admin' || user?.role === 'master') && (
+                {(user?.role === 'master' || (user?.role === 'admin' && user?.verification_status === 'approved')) && (
                   <div style={{ textAlign: 'center' }}>
                     <button
                       onClick={() => handleEditMatch(match)}
