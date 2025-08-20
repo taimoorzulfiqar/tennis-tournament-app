@@ -47,7 +47,7 @@ const SignUp: React.FC = () => {
             <Logo size="large" />
           </div>
           <h1 style={{
-            fontSize: '28px',
+            fontSize: '22px',
             fontWeight: 'bold',
             color: 'var(--primary-color)',
             marginBottom: '8px'
@@ -72,6 +72,7 @@ const SignUp: React.FC = () => {
               onChange={(e) => setFullName(e.target.value)}
               placeholder="Enter your full name"
               required
+              style={{ backgroundColor: '#e8e8e8' }}
             />
           </div>
 
@@ -84,6 +85,7 @@ const SignUp: React.FC = () => {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter your email"
               required
+              style={{ backgroundColor: '#e8e8e8' }}
             />
           </div>
 
@@ -96,6 +98,7 @@ const SignUp: React.FC = () => {
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Enter your password"
               required
+              style={{ backgroundColor: '#e8e8e8' }}
             />
           </div>
 
@@ -105,6 +108,7 @@ const SignUp: React.FC = () => {
               className="form-input"
               value={role}
               onChange={(e) => setRole(e.target.value as 'admin' | 'player')}
+              style={{ backgroundColor: '#e8e8e8' }}
             >
               <option value="player">Player</option>
               <option value="admin">Admin</option>
