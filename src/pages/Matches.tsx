@@ -1,15 +1,28 @@
 import React from 'react'
 import Layout from '../components/Layout'
 import { useQuery } from '@tanstack/react-query'
-import { matchAPI } from '../lib/api'
+import { matchAPI, userAPI } from '../lib/api'
 
 const Matches: React.FC = () => {
-  const { data: matches, isLoading } = useQuery({
+  const { data: matches, isLoading: matchesLoading } = useQuery({
     queryKey: ['matches'],
     queryFn: () => matchAPI.getMatches(),
   })
 
-  if (isLoading) {
+  const { data: players, isLoading: playersLoading } = useQuery({
+    queryKey: ['players'],
+    queryFn: async () => {
+      const allUsers = await userAPI.getUsers()
+      return allUsers.filter(u => u.role === 'player')
+    },
+  })
+
+  const getPlayerName = (playerId: string) => {
+    const player = players?.find(p => p.id === playerId)
+    return player?.full_name || player?.email || 'Unknown Player'
+  }
+
+  if (matchesLoading || playersLoading) {
     return (
       <Layout>
         <div style={{ textAlign: 'center', padding: '40px' }}>
@@ -54,7 +67,7 @@ const Matches: React.FC = () => {
                     <strong>Court:</strong> {match.court}
                   </p>
                   <p style={{ fontSize: '14px', color: '#666', margin: '4px 0' }}>
-                    <strong>Time:</strong> {new Date(match.start_time).toLocaleString()}
+                    <strong>Time:</strong> {new Date(match.scheduled_time).toLocaleString()}
                   </p>
                 </div>
 
@@ -67,14 +80,14 @@ const Matches: React.FC = () => {
                   borderRadius: '8px'
                 }}>
                   <div style={{ textAlign: 'center', flex: 1 }}>
-                    <p style={{ fontWeight: 'bold', margin: '0 0 4px 0' }}>Player 1</p>
+                    <p style={{ fontWeight: 'bold', margin: '0 0 4px 0' }}>{getPlayerName(match.player1_id)}</p>
                     <p style={{ fontSize: '24px', fontWeight: 'bold', color: '#2E7D32', margin: 0 }}>
                       {match.player1_score}
                     </p>
                   </div>
                   <div style={{ fontSize: '20px', fontWeight: 'bold', color: '#666' }}>VS</div>
                   <div style={{ textAlign: 'center', flex: 1 }}>
-                    <p style={{ fontWeight: 'bold', margin: '0 0 4px 0' }}>Player 2</p>
+                    <p style={{ fontWeight: 'bold', margin: '0 0 4px 0' }}>{getPlayerName(match.player2_id)}</p>
                     <p style={{ fontSize: '24px', fontWeight: 'bold', color: '#2E7D32', margin: 0 }}>
                       {match.player2_score}
                     </p>
@@ -88,7 +101,7 @@ const Matches: React.FC = () => {
                     fontWeight: 'bold', 
                     color: '#4caf50' 
                   }}>
-                    🏆 Winner: Player {match.winner_id === match.player1_id ? '1' : '2'}
+                    🏆 Winner: {getPlayerName(match.winner_id)}
                   </p>
                 )}
               </div>
