@@ -3,10 +3,12 @@ import { useParams, useNavigate } from 'react-router-dom'
 import Layout from '../components/Layout'
 import { useQuery } from '@tanstack/react-query'
 import { tournamentAPI } from '../lib/api'
+import { useAuth } from '../hooks/useAuth'
 
 const TournamentDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const { user } = useAuth()
 
   const { data: tournament, isLoading } = useQuery({
     queryKey: ['tournament', id],
@@ -61,17 +63,27 @@ const TournamentDetails: React.FC = () => {
   return (
     <Layout>
       <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-        <div style={{ display: 'flex', alignItems: 'center', marginBottom: '24px' }}>
-          <button
-            onClick={() => navigate('/')}
-            className="btn btn-secondary"
-            style={{ marginRight: '16px' }}
-          >
-            ← Back
-          </button>
-          <h1 style={{ fontSize: '32px', fontWeight: 'bold', color: 'var(--primary-color)', margin: 0 }}>
-            Tournament Details
-          </h1>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <button
+              onClick={() => navigate('/')}
+              className="btn btn-secondary"
+              style={{ marginRight: '16px' }}
+            >
+              ← Back
+            </button>
+            <h1 style={{ fontSize: '32px', fontWeight: 'bold', color: 'var(--primary-color)', margin: 0 }}>
+              Tournament Details
+            </h1>
+          </div>
+          {(user?.role === 'admin' || user?.role === 'master') && (
+            <button
+              onClick={() => navigate(`/edit-tournament/${id}`)}
+              className="btn btn-primary"
+            >
+              ✏️ Edit Tournament
+            </button>
+          )}
         </div>
 
         <div className="card">

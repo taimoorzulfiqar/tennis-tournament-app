@@ -5,6 +5,7 @@ import SignUp from './pages/SignUp'
 import Dashboard from './pages/Dashboard'
 import CreateTournament from './pages/CreateTournament'
 import TournamentDetails from './pages/TournamentDetails'
+import EditTournament from './pages/EditTournament'
 import Leaderboard from './pages/Leaderboard'
 import Matches from './pages/Matches'
 import Profile from './pages/Profile'
@@ -33,6 +34,7 @@ function App() {
       <Route path="/" element={<Dashboard />} />
       <Route path="/create-tournament" element={<CreateTournament />} />
       <Route path="/tournament/:id" element={<TournamentDetails />} />
+      <Route path="/edit-tournament/:id" element={<EditTournament />} />
       <Route path="/leaderboard" element={<Leaderboard />} />
       <Route path="/matches" element={<Matches />} />
       <Route path="/profile" element={<Profile />} />

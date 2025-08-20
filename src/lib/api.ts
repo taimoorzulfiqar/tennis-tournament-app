@@ -236,6 +236,27 @@ export const matchAPI = {
     return data
   },
 
+  updateMatch: async (id: string, updates: {
+    player1_id: string
+    player2_id: string
+    games_per_set: number
+    sets_per_match: number
+    court: string
+    start_time: string
+    player1_score: number
+    player2_score: number
+  }): Promise<Match> => {
+    const { data, error } = await supabase
+      .from('matches')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single()
+
+    if (error) throw new Error(error.message)
+    return data
+  },
+
   updateMatchStatus: async (id: string, status: 'scheduled' | 'in_progress' | 'completed'): Promise<Match> => {
     const { data, error } = await supabase
       .from('matches')
