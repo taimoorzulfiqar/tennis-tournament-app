@@ -23,8 +23,10 @@ export interface Tournament {
 export interface Match {
   id: string
   tournament_id: string
-  player1_id: string
-  player2_id: string
+  player1_id?: string
+  player2_id?: string
+  player1_name?: string
+  player2_name?: string
   court?: string
   player1_score: number
   player2_score: number
@@ -67,8 +69,10 @@ export interface CreateTournamentDTO {
 
 export interface CreateMatchDTO {
   tournament_id: string
-  player1_id: string
-  player2_id: string
+  player1_id?: string
+  player2_id?: string
+  player1_name?: string
+  player2_name?: string
   court?: string
   player1_score?: number
   player2_score?: number

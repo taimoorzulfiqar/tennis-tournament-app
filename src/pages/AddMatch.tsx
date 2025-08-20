@@ -371,284 +371,282 @@ const AddMatch: React.FC = () => {
               />
             </div>
 
-                         {/* Match Format */}
-             <div style={{
-               padding: '20px',
-               backgroundColor: '#f8f9fa',
-               borderRadius: '8px',
-               border: '1px solid #e0e0e0'
-             }}>
-               <h3 style={{
-                 fontSize: '18px',
-                 fontWeight: '600',
-                 marginBottom: '16px',
-                 color: 'var(--text-primary)'
-               }}>
-                 Match Format
-               </h3>
-               <div style={{
-                 display: 'grid',
-                 gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
-                 gap: '16px'
-               }}>
-                 <div>
-                   <label style={{
-                     display: 'block',
-                     fontSize: '14px',
-                     fontWeight: '600',
-                     marginBottom: '8px',
-                     color: 'var(--text-primary)'
-                   }}>
-                     Number of Sets
-                   </label>
-                   <select
-                     value={match.match_format.sets}
-                     onChange={(e) => handleFormatChange('sets', parseInt(e.target.value))}
-                     style={{
-                       width: '100%',
-                       padding: '12px 16px',
-                       border: '2px solid #e0e0e0',
-                       borderRadius: '8px',
-                       fontSize: '16px',
-                       backgroundColor: 'white',
-                       transition: 'border-color 0.2s ease'
-                     }}
-                     onFocus={(e) => e.target.style.borderColor = 'var(--primary-color)'}
-                     onBlur={(e) => e.target.style.borderColor = '#e0e0e0'}
-                   >
-                     <option value={1}>Best of 1</option>
-                     <option value={3}>Best of 3</option>
-                     <option value={5}>Best of 5</option>
-                   </select>
-                 </div>
-                 
-                 <div>
-                   <label style={{
-                     display: 'block',
-                     fontSize: '14px',
-                     fontWeight: '600',
-                     marginBottom: '8px',
-                     color: 'var(--text-primary)'
-                   }}>
-                     Games per Set
-                   </label>
-                   <select
-                     value={match.match_format.games_per_set}
-                     onChange={(e) => handleFormatChange('games_per_set', parseInt(e.target.value))}
-                     style={{
-                       width: '100%',
-                       padding: '12px 16px',
-                       border: '2px solid #e0e0e0',
-                       borderRadius: '8px',
-                       fontSize: '16px',
-                       backgroundColor: 'white',
-                       transition: 'border-color 0.2s ease'
-                     }}
-                     onFocus={(e) => e.target.style.borderColor = 'var(--primary-color)'}
-                     onBlur={(e) => e.target.style.borderColor = '#e0e0e0'}
-                   >
-                     <option value={4}>First to 4</option>
-                     <option value={6}>First to 6</option>
-                     <option value={8}>First to 8</option>
-                   </select>
-                 </div>
-                 
-                 <div>
-                   <label style={{
-                     display: 'block',
-                     fontSize: '14px',
-                     fontWeight: '600',
-                     marginBottom: '8px',
-                     color: 'var(--text-primary)'
-                   }}>
-                     Tiebreak at
-                   </label>
-                   <select
-                     value={match.match_format.tiebreak_at}
-                     onChange={(e) => handleFormatChange('tiebreak_at', parseInt(e.target.value))}
-                     style={{
-                       width: '100%',
-                       padding: '12px 16px',
-                       border: '2px solid #e0e0e0',
-                       borderRadius: '8px',
-                       fontSize: '16px',
-                       backgroundColor: 'white',
-                       transition: 'border-color 0.2s ease'
-                     }}
-                     onFocus={(e) => e.target.style.borderColor = 'var(--primary-color)'}
-                     onBlur={(e) => e.target.style.borderColor = '#e0e0e0'}
-                   >
-                     <option value={6}>6-6</option>
-                     <option value={7}>7-7</option>
-                     <option value={8}>8-8</option>
-                   </select>
-                 </div>
-               </div>
-             </div>
+            {/* Match Format */}
+            <div style={{
+              padding: '20px',
+              backgroundColor: '#f8f9fa',
+              borderRadius: '8px',
+              border: '1px solid #e0e0e0'
+            }}>
+              <h3 style={{
+                fontSize: '18px',
+                fontWeight: '600',
+                marginBottom: '16px',
+                color: 'var(--text-primary)'
+              }}>
+                Match Format
+              </h3>
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+                gap: '16px'
+              }}>
+                <div>
+                  <label style={{
+                    display: 'block',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    marginBottom: '8px',
+                    color: 'var(--text-primary)'
+                  }}>
+                    Number of Sets
+                  </label>
+                  <select
+                    value={match.match_format.sets}
+                    onChange={(e) => handleFormatChange('sets', parseInt(e.target.value))}
+                    style={{
+                      width: '100%',
+                      padding: '12px 16px',
+                      border: '2px solid #e0e0e0',
+                      borderRadius: '8px',
+                      fontSize: '16px',
+                      backgroundColor: 'white',
+                      transition: 'border-color 0.2s ease'
+                    }}
+                    onFocus={(e) => e.target.style.borderColor = 'var(--primary-color)'}
+                    onBlur={(e) => e.target.style.borderColor = '#e0e0e0'}
+                  >
+                    <option value={1}>Best of 1</option>
+                    <option value={3}>Best of 3</option>
+                    <option value={5}>Best of 5</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label style={{
+                    display: 'block',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    marginBottom: '8px',
+                    color: 'var(--text-primary)'
+                  }}>
+                    Games per Set
+                  </label>
+                  <select
+                    value={match.match_format.games_per_set}
+                    onChange={(e) => handleFormatChange('games_per_set', parseInt(e.target.value))}
+                    style={{
+                      width: '100%',
+                      padding: '12px 16px',
+                      border: '2px solid #e0e0e0',
+                      borderRadius: '8px',
+                      fontSize: '16px',
+                      backgroundColor: 'white',
+                      transition: 'border-color 0.2s ease'
+                    }}
+                    onFocus={(e) => e.target.style.borderColor = 'var(--primary-color)'}
+                    onBlur={(e) => e.target.style.borderColor = '#e0e0e0'}
+                  >
+                    <option value={4}>First to 4</option>
+                    <option value={6}>First to 6</option>
+                    <option value={8}>First to 8</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label style={{
+                    display: 'block',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    marginBottom: '8px',
+                    color: 'var(--text-primary)'
+                  }}>
+                    Tiebreak at
+                  </label>
+                  <select
+                    value={match.match_format.tiebreak_at}
+                    onChange={(e) => handleFormatChange('tiebreak_at', parseInt(e.target.value))}
+                    style={{
+                      width: '100%',
+                      padding: '12px 16px',
+                      border: '2px solid #e0e0e0',
+                      borderRadius: '8px',
+                      fontSize: '16px',
+                      backgroundColor: 'white',
+                      transition: 'border-color 0.2s ease'
+                    }}
+                    onFocus={(e) => e.target.style.borderColor = 'var(--primary-color)'}
+                    onBlur={(e) => e.target.style.borderColor = '#e0e0e0'}
+                  >
+                    <option value={6}>6-6</option>
+                    <option value={7}>7-7</option>
+                    <option value={8}>8-8</option>
+                  </select>
+                </div>
+              </div>
+            </div>
 
-             {/* Match Completion */}
-             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-               <input
-                 type="checkbox"
-                 id="is_completed"
-                 checked={match.is_completed}
-                 onChange={(e) => handleInputChange('is_completed', e.target.checked)}
-                 style={{
-                   width: '20px',
-                   height: '20px',
-                   accentColor: 'var(--primary-color)',
-                   cursor: 'pointer'
-                 }}
-               />
-               <label htmlFor="is_completed" style={{
-                 fontSize: '16px',
-                 fontWeight: '500',
-                 color: 'var(--text-primary)',
-                 cursor: 'pointer'
-               }}>
-                 Mark as completed
-               </label>
-             </div>
+            {/* Match Completion */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <input
+                type="checkbox"
+                id="is_completed"
+                checked={match.is_completed}
+                onChange={(e) => handleInputChange('is_completed', e.target.checked)}
+                style={{
+                  width: '20px',
+                  height: '20px',
+                  accentColor: 'var(--primary-color)',
+                  cursor: 'pointer'
+                }}
+              />
+              <label htmlFor="is_completed" style={{
+                fontSize: '16px',
+                fontWeight: '500',
+                color: 'var(--text-primary)',
+                cursor: 'pointer'
+              }}>
+                Mark as completed
+              </label>
+            </div>
 
-             {/* Detailed Score Inputs (only show if completed) */}
-             {match.is_completed && (
-               <div style={{
-                 padding: '20px',
-                 backgroundColor: '#f8f9fa',
-                 borderRadius: '8px',
-                 border: '1px solid #e0e0e0'
-               }}>
-                 <h3 style={{
-                   fontSize: '18px',
-                   fontWeight: '600',
-                   marginBottom: '16px',
-                   color: 'var(--text-primary)'
-                 }}>
-                   Set Scores
-                 </h3>
-                 
-                 <div style={{ marginBottom: '16px' }}>
-                   <div style={{
-                     display: 'grid',
-                     gridTemplateColumns: '2fr repeat(' + match.match_format.sets + ', 1fr)',
-                     gap: '8px',
-                     alignItems: 'center',
-                     marginBottom: '8px'
-                   }}>
-                     <div style={{ fontWeight: '600', color: 'var(--text-primary)' }}>Player</div>
-                     {Array.from({ length: match.match_format.sets }, (_, i) => (
-                       <div key={i} style={{ 
-                         fontWeight: '600', 
-                         color: 'var(--text-primary)', 
-                         textAlign: 'center' 
-                       }}>
-                         Set {i + 1}
-                       </div>
-                     ))}
-                   </div>
-                   
-                   {/* Player 1 Score Row */}
-                   <div style={{
-                     display: 'grid',
-                     gridTemplateColumns: '2fr repeat(' + match.match_format.sets + ', 1fr)',
-                     gap: '8px',
-                     alignItems: 'center',
-                     marginBottom: '8px'
-                   }}>
-                     <div style={{ 
-                       fontWeight: '500', 
-                       color: 'var(--text-primary)',
-                       fontSize: '14px'
-                     }}>
-                       {players?.find(p => p.id === match.player1_id)?.full_name || 'Player 1'}
-                     </div>
-                     {Array.from({ length: match.match_format.sets }, (_, setIndex) => (
-                       <input
-                         key={setIndex}
-                         type="number"
-                         min="0"
-                         max="20"
-                         value={match.detailed_score.player1_sets[setIndex] || ''}
-                         onChange={(e) => handleSetScoreChange(setIndex, 'player1', parseInt(e.target.value) || 0)}
-                         style={{
-                           width: '100%',
-                           padding: '8px',
-                           border: '2px solid #e0e0e0',
-                           borderRadius: '6px',
-                           fontSize: '14px',
-                           textAlign: 'center',
-                           transition: 'border-color 0.2s ease'
-                         }}
-                         onFocus={(e) => e.target.style.borderColor = 'var(--primary-color)'}
-                         onBlur={(e) => e.target.style.borderColor = '#e0e0e0'}
-                         placeholder="0"
-                       />
-                     ))}
-                   </div>
-                   
-                   {/* Player 2 Score Row */}
-                   <div style={{
-                     display: 'grid',
-                     gridTemplateColumns: '2fr repeat(' + match.match_format.sets + ', 1fr)',
-                     gap: '8px',
-                     alignItems: 'center'
-                   }}>
-                     <div style={{ 
-                       fontWeight: '500', 
-                       color: 'var(--text-primary)',
-                       fontSize: '14px'
-                     }}>
-                       {players?.find(p => p.id === match.player2_id)?.full_name || 'Player 2'}
-                     </div>
-                     {Array.from({ length: match.match_format.sets }, (_, setIndex) => (
-                       <input
-                         key={setIndex}
-                         type="number"
-                         min="0"
-                         max="20"
-                         value={match.detailed_score.player2_sets[setIndex] || ''}
-                         onChange={(e) => handleSetScoreChange(setIndex, 'player2', parseInt(e.target.value) || 0)}
-                         style={{
-                           width: '100%',
-                           padding: '8px',
-                           border: '2px solid #e0e0e0',
-                           borderRadius: '6px',
-                           fontSize: '14px',
-                           textAlign: 'center',
-                           transition: 'border-color 0.2s ease'
-                         }}
-                         onFocus={(e) => e.target.style.borderColor = 'var(--primary-color)'}
-                         onBlur={(e) => e.target.style.borderColor = '#e0e0e0'}
-                         placeholder="0"
-                       />
-                     ))}
-                   </div>
-                 </div>
-                 
-                 {/* Match Summary */}
-                 <div style={{
-                   padding: '12px',
-                   backgroundColor: 'white',
-                   borderRadius: '6px',
-                   border: '1px solid #e0e0e0'
-                 }}>
-                   <div style={{
-                     fontSize: '14px',
-                     color: 'var(--text-secondary)',
-                     marginBottom: '4px'
-                   }}>
-                     Match Score (Sets Won):
-                   </div>
-                   <div style={{
-                     fontSize: '18px',
-                     fontWeight: '600',
-                     color: 'var(--text-primary)'
-                   }}>
-                     {players?.find(p => p.id === match.player1_id)?.full_name || 'Player 1'}: {match.player1_score} - {players?.find(p => p.id === match.player2_id)?.full_name || 'Player 2'}: {match.player2_score}
-                   </div>
-                 </div>
-               </div>
-             )}
+            {/* Score Inputs (always visible) */}
+            <div style={{
+              padding: '20px',
+              backgroundColor: '#f8f9fa',
+              borderRadius: '8px',
+              border: '1px solid #e0e0e0'
+            }}>
+              <h3 style={{
+                fontSize: '18px',
+                fontWeight: '600',
+                marginBottom: '16px',
+                color: 'var(--text-primary)'
+              }}>
+                Set Scores
+              </h3>
+              
+              <div style={{ marginBottom: '16px' }}>
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: '2fr repeat(' + match.match_format.sets + ', 1fr)',
+                  gap: '8px',
+                  alignItems: 'center',
+                  marginBottom: '8px'
+                }}>
+                  <div style={{ fontWeight: '600', color: 'var(--text-primary)' }}>Player</div>
+                  {Array.from({ length: match.match_format.sets }, (_, i) => (
+                    <div key={i} style={{ 
+                      fontWeight: '600', 
+                      color: 'var(--text-primary)', 
+                      textAlign: 'center' 
+                    }}>
+                      Set {i + 1}
+                    </div>
+                  ))}
+                </div>
+                
+                {/* Player 1 Score Row */}
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: '2fr repeat(' + match.match_format.sets + ', 1fr)',
+                  gap: '8px',
+                  alignItems: 'center',
+                  marginBottom: '8px'
+                }}>
+                  <div style={{ 
+                    fontWeight: '500', 
+                    color: 'var(--text-primary)',
+                    fontSize: '14px'
+                  }}>
+                    {players?.find(p => p.id === match.player1_id)?.full_name || 'Player 1'}
+                  </div>
+                  {Array.from({ length: match.match_format.sets }, (_, setIndex) => (
+                    <input
+                      key={setIndex}
+                      type="number"
+                      min="0"
+                      max="20"
+                      value={match.detailed_score.player1_sets[setIndex] || ''}
+                      onChange={(e) => handleSetScoreChange(setIndex, 'player1', parseInt(e.target.value) || 0)}
+                      style={{
+                        width: '100%',
+                        padding: '8px',
+                        border: '2px solid #e0e0e0',
+                        borderRadius: '6px',
+                        fontSize: '14px',
+                        textAlign: 'center',
+                        transition: 'border-color 0.2s ease'
+                      }}
+                      onFocus={(e) => e.target.style.borderColor = 'var(--primary-color)'}
+                      onBlur={(e) => e.target.style.borderColor = '#e0e0e0'}
+                      placeholder="0"
+                    />
+                  ))}
+                </div>
+                
+                {/* Player 2 Score Row */}
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: '2fr repeat(' + match.match_format.sets + ', 1fr)',
+                  gap: '8px',
+                  alignItems: 'center'
+                }}>
+                  <div style={{ 
+                    fontWeight: '500', 
+                    color: 'var(--text-primary)',
+                    fontSize: '14px'
+                  }}>
+                    {players?.find(p => p.id === match.player2_id)?.full_name || 'Player 2'}
+                  </div>
+                  {Array.from({ length: match.match_format.sets }, (_, setIndex) => (
+                    <input
+                      key={setIndex}
+                      type="number"
+                      min="0"
+                      max="20"
+                      value={match.detailed_score.player2_sets[setIndex] || ''}
+                      onChange={(e) => handleSetScoreChange(setIndex, 'player2', parseInt(e.target.value) || 0)}
+                      style={{
+                        width: '100%',
+                        padding: '8px',
+                        border: '2px solid #e0e0e0',
+                        borderRadius: '6px',
+                        fontSize: '14px',
+                        textAlign: 'center',
+                        transition: 'border-color 0.2s ease'
+                      }}
+                      onFocus={(e) => e.target.style.borderColor = 'var(--primary-color)'}
+                      onBlur={(e) => e.target.style.borderColor = '#e0e0e0'}
+                      placeholder="0"
+                    />
+                  ))}
+                </div>
+              </div>
+              
+              {/* Match Summary */}
+              <div style={{
+                padding: '12px',
+                backgroundColor: 'white',
+                borderRadius: '6px',
+                border: '1px solid #e0e0e0'
+              }}>
+                <div style={{
+                  fontSize: '14px',
+                  color: 'var(--text-secondary)',
+                  marginBottom: '4px'
+                }}>
+                  Match Score (Sets Won):
+                </div>
+                <div style={{
+                  fontSize: '18px',
+                  fontWeight: '600',
+                  color: 'var(--text-primary)'
+                }}>
+                  {players?.find(p => p.id === match.player1_id)?.full_name || 'Player 1'}: {match.player1_score} - {players?.find(p => p.id === match.player2_id)?.full_name || 'Player 2'}: {match.player2_score}
+                </div>
+              </div>
+            </div>
 
             {/* Submit Button */}
             <div style={{
