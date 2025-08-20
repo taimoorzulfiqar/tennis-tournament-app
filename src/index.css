@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 :root {
   --primary-color: #32CD32; /* Lime Green */
   --primary-light: #90EE90; /* Light Green */

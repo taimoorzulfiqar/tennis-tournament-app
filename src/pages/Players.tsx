@@ -180,8 +180,17 @@ const Players: React.FC = () => {
   if (usersLoading || matchesLoading) {
     return (
       <Layout>
-        <div className="flex justify-center items-center h-64">
-          <div className="text-lg">Loading players...</div>
+        <div className="max-w-7xl mx-auto p-6">
+          <div className="mb-6">
+            <h1 className="text-3xl font-bold mb-2 text-gray-900">Players</h1>
+            <p className="text-gray-600 text-lg">View all registered players and their tournament statistics</p>
+          </div>
+          <div className="flex justify-center items-center h-64">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
+              <div className="text-lg text-gray-600">Loading players...</div>
+            </div>
+          </div>
         </div>
       </Layout>
     )
@@ -200,35 +209,40 @@ const Players: React.FC = () => {
         </div>
 
         {/* Search and Controls */}
-        <div className="mb-6 space-y-4">
-          <div className="flex flex-col sm:flex-row gap-4 items-center">
+        <div className="mb-8 bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+          <div className="flex flex-col lg:flex-row gap-6 items-start lg:items-center">
             <div className="flex-1 min-w-0">
+              <label className="block text-sm font-medium text-gray-700 mb-2">Search Players</label>
               <input
                 type="text"
-                placeholder="Search players by name or email..."
+                placeholder="Search by name or email..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
               />
             </div>
-            <div className="flex gap-2 items-center">
-              <span className="text-sm text-gray-600">Sort by:</span>
-              <select
-                value={sortBy}
-                onChange={(e) => handleSort(e.target.value as typeof sortBy)}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="name">Name</option>
-                <option value="matches">Matches Played</option>
-                <option value="wins">Wins</option>
-                <option value="gamesWon">Games Won</option>
-                <option value="winPercentage">Win %</option>
-              </select>
+            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center w-full lg:w-auto">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full sm:w-auto">
+                <label className="text-sm font-medium text-gray-700 whitespace-nowrap">Sort by:</label>
+                <select
+                  value={sortBy}
+                  onChange={(e) => handleSort(e.target.value as typeof sortBy)}
+                  className="w-full sm:w-auto px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-white"
+                >
+                  <option value="name">Name</option>
+                  <option value="matches">Matches Played</option>
+                  <option value="wins">Wins</option>
+                  <option value="gamesWon">Games Won</option>
+                  <option value="winPercentage">Win %</option>
+                </select>
+              </div>
               <button
                 onClick={handleRefresh}
-                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 flex items-center gap-2"
+                className="w-full sm:w-auto px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 transition-all duration-200 flex items-center justify-center gap-2 font-medium"
               >
-                <span>🔄</span>
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
                 Refresh
               </button>
             </div>
@@ -236,36 +250,36 @@ const Players: React.FC = () => {
         </div>
 
         {/* Players Table */}
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          {/* Table Header */}
-          <div className="grid grid-cols-7 gap-4 p-4 bg-gray-50 border-b border-gray-200 font-semibold text-sm text-gray-700">
+        <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100">
+          {/* Desktop Table Header */}
+          <div className="hidden md:grid grid-cols-7 gap-4 p-6 bg-gradient-to-r from-green-50 to-green-100 border-b border-green-200 font-semibold text-sm text-gray-700">
             <div 
-              className="cursor-pointer flex items-center gap-1 hover:text-blue-600"
+              className="cursor-pointer flex items-center gap-1 hover:text-green-600 transition-colors duration-200"
               onClick={() => handleSort('name')}
             >
               Player {getSortIcon('name')}
             </div>
             <div 
-              className="cursor-pointer flex items-center gap-1 hover:text-blue-600"
+              className="cursor-pointer flex items-center gap-1 hover:text-green-600 transition-colors duration-200"
               onClick={() => handleSort('matches')}
             >
               Matches {getSortIcon('matches')}
             </div>
             <div 
-              className="cursor-pointer flex items-center gap-1 hover:text-blue-600"
+              className="cursor-pointer flex items-center gap-1 hover:text-green-600 transition-colors duration-200"
               onClick={() => handleSort('wins')}
             >
               Wins {getSortIcon('wins')}
             </div>
             <div className="text-center">Losses</div>
             <div 
-              className="cursor-pointer flex items-center gap-1 justify-center hover:text-blue-600"
+              className="cursor-pointer flex items-center gap-1 justify-center hover:text-green-600 transition-colors duration-200"
               onClick={() => handleSort('gamesWon')}
             >
               Games Won {getSortIcon('gamesWon')}
             </div>
             <div 
-              className="cursor-pointer flex items-center gap-1 justify-center hover:text-blue-600"
+              className="cursor-pointer flex items-center gap-1 justify-center hover:text-green-600 transition-colors duration-200"
               onClick={() => handleSort('winPercentage')}
             >
               Win % {getSortIcon('winPercentage')}
@@ -275,45 +289,131 @@ const Players: React.FC = () => {
 
           {/* Table Body */}
           {filteredAndSortedStats.length === 0 ? (
-            <div className="p-12 text-center text-gray-600">
-              {searchTerm ? 'No players found matching your search.' : 'No players registered yet.'}
+            <div className="p-16 text-center">
+              <div className="text-gray-400 mb-4">
+                <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+              </div>
+              <p className="text-gray-600 text-lg font-medium">
+                {searchTerm ? 'No players found matching your search.' : 'No players registered yet.'}
+              </p>
             </div>
           ) : (
-            filteredAndSortedStats.map((stats, index) => (
-              <div
-                key={stats.player.id}
-                className="grid grid-cols-7 gap-4 p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors"
-              >
+            <>
+              {/* Desktop Table Rows */}
+              <div className="hidden md:block">
+                {filteredAndSortedStats.map((stats, index) => (
+                  <div
+                    key={stats.player.id}
+                    className="grid grid-cols-7 gap-4 p-6 border-b border-gray-100 hover:bg-green-50 transition-all duration-200"
+                  >
                 <div>
-                  <div className="font-semibold text-gray-900">
+                  <div className="font-semibold text-gray-900 text-lg">
                     {stats.player.full_name || 'Unnamed Player'}
                   </div>
-                  <div className="text-sm text-gray-600 mt-1">
+                  <div className="text-sm text-gray-500 mt-1">
                     {stats.player.email}
                   </div>
                 </div>
-                <div className="font-medium text-gray-700">
-                  {stats.matchesPlayed}
+                <div className="font-medium text-gray-700 flex items-center">
+                  <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold">
+                    {stats.matchesPlayed}
+                  </span>
                 </div>
-                <div className="font-medium text-green-600">
-                  {stats.wins}
+                <div className="font-medium text-green-600 flex items-center">
+                  <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold">
+                    {stats.wins}
+                  </span>
                 </div>
-                <div className="font-medium text-red-600 text-center">
-                  {stats.losses}
+                <div className="font-medium text-red-600 text-center flex items-center justify-center">
+                  <span className="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm font-semibold">
+                    {stats.losses}
+                  </span>
                 </div>
-                <div className="font-medium text-blue-600 text-center">
-                  {stats.gamesWon}
+                <div className="font-medium text-blue-600 text-center flex items-center justify-center">
+                  <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold">
+                    {stats.gamesWon}
+                  </span>
                 </div>
-                <div className={`font-semibold text-center ${
+                <div className={`font-semibold text-center flex items-center justify-center ${
                   stats.winPercentage >= 50 ? 'text-green-600' : 'text-red-600'
                 }`}>
-                  {stats.matchesPlayed > 0 ? `${stats.winPercentage}%` : '-'}
+                  <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
+                    stats.winPercentage >= 50 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                  }`}>
+                    {stats.matchesPlayed > 0 ? `${stats.winPercentage}%` : '-'}
+                  </span>
                 </div>
-                <div className="text-center text-sm text-gray-600">
-                  {stats.totalGames > 0 ? `${stats.gamesWon}/${stats.gamesLost}` : '-'}
+                <div className="text-center text-sm text-gray-600 flex items-center justify-center">
+                  <span className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm font-semibold">
+                    {stats.totalGames > 0 ? `${stats.gamesWon}/${stats.gamesLost}` : '-'}
+                  </span>
                 </div>
               </div>
-            ))
+            ))}
+              </div>
+
+              {/* Mobile Card Layout */}
+              <div className="md:hidden">
+                {filteredAndSortedStats.map((stats, index) => (
+                  <div
+                    key={stats.player.id}
+                    className="p-6 border-b border-gray-100 hover:bg-green-50 transition-all duration-200"
+                  >
+                    <div className="mb-4">
+                      <div className="font-semibold text-gray-900 text-lg mb-1">
+                        {stats.player.full_name || 'Unnamed Player'}
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        {stats.player.email}
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="text-center">
+                        <div className="text-sm text-gray-600 mb-1">Matches</div>
+                        <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold">
+                          {stats.matchesPlayed}
+                        </span>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-sm text-gray-600 mb-1">Wins</div>
+                        <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold">
+                          {stats.wins}
+                        </span>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-sm text-gray-600 mb-1">Losses</div>
+                        <span className="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm font-semibold">
+                          {stats.losses}
+                        </span>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-sm text-gray-600 mb-1">Games Won</div>
+                        <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold">
+                          {stats.gamesWon}
+                        </span>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-sm text-gray-600 mb-1">Win %</div>
+                        <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
+                          stats.winPercentage >= 50 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        }`}>
+                          {stats.matchesPlayed > 0 ? `${stats.winPercentage}%` : '-'}
+                        </span>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-sm text-gray-600 mb-1">Games W/L</div>
+                        <span className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm font-semibold">
+                          {stats.totalGames > 0 ? `${stats.gamesWon}/${stats.gamesLost}` : '-'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
           )}
         </div>
       </div>
