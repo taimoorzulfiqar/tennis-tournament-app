@@ -62,10 +62,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           
           {/* Desktop User Info */}
           <div style={{ 
-            display: 'flex', 
+            display: 'none', // Hidden on mobile
             alignItems: 'center', 
-            gap: '16px',
-            display: 'none' // Hidden on mobile
+            gap: '16px'
           }} className="desktop-only">
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <span style={{ fontSize: '14px' }}>
@@ -175,11 +174,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         <div style={{
           maxWidth: '1200px',
           margin: '0 auto',
-          display: 'flex',
+          display: 'none', // Hidden on mobile
           gap: '8px',
           overflowX: 'auto',
-          padding: '0 16px',
-          display: 'none' // Hidden on mobile
+          padding: '0 16px'
         }} className="desktop-only">
           {navItems.map((item) => (
             <Link
@@ -206,9 +204,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
         {/* Mobile Navigation */}
         <div style={{
-          display: 'flex',
-          flexDirection: 'column',
-          display: 'block' // Show on mobile
+          display: 'block', // Show on mobile
+          flexDirection: 'column'
         }} className="mobile-only">
           {navItems.map((item) => (
             <Link
