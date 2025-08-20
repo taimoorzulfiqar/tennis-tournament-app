@@ -76,13 +76,22 @@ const AddMatch: React.FC = () => {
 
   const createMatchMutation = useMutation({
     mutationFn: async (matchData: Match) => {
+      // Determine status based on whether scores are provided or match is completed
+      let status: 'scheduled' | 'in_progress' | 'completed' = 'scheduled'
+      if (matchData.is_completed) {
+        status = 'completed'
+      } else if ((matchData.player1_score && matchData.player1_score > 0) || (matchData.player2_score && matchData.player2_score > 0)) {
+        status = 'in_progress'
+      }
+
       const createdMatch = await matchAPI.createMatch({
         tournament_id: tournamentId!,
         player1_id: matchData.player1_id,
         player2_id: matchData.player2_id,
         court: matchData.court,
         player1_score: matchData.player1_score,
-        player2_score: matchData.player2_score
+        player2_score: matchData.player2_score,
+        status: status
       })
 
       // If match is marked as completed, update its score and determine winner
@@ -130,25 +139,15 @@ const AddMatch: React.FC = () => {
 
     // If match is completed, validate scores
     if (match.is_completed) {
-      // Check if any set scores are entered
-      const hasSetScores = match.detailed_score.player1_sets.some(score => score && score > 0) || 
-                          match.detailed_score.player2_sets.some(score => score && score > 0)
-      
-      if (!hasSetScores) {
-        alert('Please enter set scores for completed matches.')
+      // Check if scores are entered
+      if (!match.player1_score && !match.player2_score) {
+        alert('Please enter scores for completed matches.')
         return
       }
       
-      // Ensure there's a clear winner (no ties in sets won)
+      // Ensure there's a clear winner (no ties in total games won)
       if (match.player1_score === match.player2_score) {
         alert('Please enter scores that result in a clear winner. Match cannot end in a tie.')
-        return
-      }
-      
-      // Validate that the match is actually complete based on the format
-      const setsToWin = Math.ceil(match.match_format.sets / 2)
-      if (match.player1_score < setsToWin && match.player2_score < setsToWin) {
-        alert(`Match is not complete. A player needs to win ${setsToWin} sets in a ${match.match_format.sets} set format.`)
         return
       }
     }
@@ -195,19 +194,17 @@ const AddMatch: React.FC = () => {
       
       newDetailedScore[playerKey][setIndex] = games
       
-      // Calculate overall match score (sets won)
+      // Calculate overall match score (total games won)
       let player1Score = 0
       let player2Score = 0
       
+      // Sum up all individual games won across all sets
       for (let i = 0; i < Math.max(newDetailedScore.player1_sets.length, newDetailedScore.player2_sets.length); i++) {
         const p1Games = newDetailedScore.player1_sets[i] || 0
         const p2Games = newDetailedScore.player2_sets[i] || 0
         
-        if (p1Games > p2Games && p1Games >= prev.match_format.games_per_set) {
-          player1Score++
-        } else if (p2Games > p1Games && p2Games >= prev.match_format.games_per_set) {
-          player2Score++
-        }
+        player1Score += p1Games
+        player2Score += p2Games
       }
       
       return {
@@ -635,7 +632,7 @@ const AddMatch: React.FC = () => {
                   color: 'var(--text-secondary)',
                   marginBottom: '4px'
                 }}>
-                  Match Score (Sets Won):
+                  Match Score (Total Games Won):
                 </div>
                 <div style={{
                   fontSize: '18px',

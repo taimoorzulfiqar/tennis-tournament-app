@@ -221,6 +221,14 @@ export const matchAPI = {
   },
 
   createMatch: async (match: CreateMatchDTO): Promise<Match> => {
+    // Determine status based on whether scores are provided
+    let status: 'scheduled' | 'in_progress' | 'completed' = 'scheduled'
+    if (match.status) {
+      status = match.status
+    } else if ((match.player1_score && match.player1_score > 0) || (match.player2_score && match.player2_score > 0)) {
+      status = 'in_progress'
+    }
+
     const matchData = {
       tournament_id: match.tournament_id,
       player1_id: match.player1_id,
@@ -230,7 +238,7 @@ export const matchAPI = {
       court: match.court,
       player1_score: match.player1_score || 0,
       player2_score: match.player2_score || 0,
-      status: 'scheduled'
+      status: status
     }
     
     const { data, error } = await supabase

@@ -80,6 +80,7 @@ export interface CreateMatchDTO {
   court?: string
   player1_score?: number
   player2_score?: number
+  status?: 'scheduled' | 'in_progress' | 'completed'
 }
 
 export interface UpdateMatchScoreDTO {

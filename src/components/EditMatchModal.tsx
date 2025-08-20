@@ -104,25 +104,15 @@ const EditMatchModal: React.FC<EditMatchModalProps> = ({ match, isOpen, onClose,
     
     // Validation
     if (formData.status === 'completed') {
-             // Check if any set scores are entered
-       const hasSetScores = formData.detailed_score.player1_sets.some(score => score && score > 0) || 
-                           formData.detailed_score.player2_sets.some(score => score && score > 0)
-      
-      if (!hasSetScores) {
-        alert('Please enter set scores for completed matches.')
+      // Check if scores are entered
+      if (!formData.player1_score && !formData.player2_score) {
+        alert('Please enter scores for completed matches.')
         return
       }
       
-      // Ensure there's a clear winner (no ties in sets won)
+      // Ensure there's a clear winner (no ties in total games won)
       if (formData.player1_score === formData.player2_score) {
         alert('Please enter scores that result in a clear winner. Match cannot end in a tie.')
-        return
-      }
-      
-      // Validate that the match is actually complete based on the format
-      const setsToWin = Math.ceil(formData.match_format.sets / 2)
-      if (formData.player1_score < setsToWin && formData.player2_score < setsToWin) {
-        alert(`Match is not complete. A player needs to win ${setsToWin} sets in a ${formData.match_format.sets} set format.`)
         return
       }
     }
@@ -160,19 +150,17 @@ const EditMatchModal: React.FC<EditMatchModalProps> = ({ match, isOpen, onClose,
       
       newDetailedScore[playerKey][setIndex] = games
       
-      // Calculate overall match score (sets won)
+      // Calculate overall match score (total games won)
       let player1Score = 0
       let player2Score = 0
       
+      // Sum up all individual games won across all sets
       for (let i = 0; i < Math.max(newDetailedScore.player1_sets.length, newDetailedScore.player2_sets.length); i++) {
         const p1Games = newDetailedScore.player1_sets[i] || 0
         const p2Games = newDetailedScore.player2_sets[i] || 0
         
-        if (p1Games > p2Games && p1Games >= prev.match_format.games_per_set) {
-          player1Score++
-        } else if (p2Games > p1Games && p2Games >= prev.match_format.games_per_set) {
-          player2Score++
-        }
+        player1Score += p1Games
+        player2Score += p2Games
       }
       
       return {
@@ -616,13 +604,13 @@ const EditMatchModal: React.FC<EditMatchModalProps> = ({ match, isOpen, onClose,
                 borderRadius: '6px',
                 border: '1px solid #e0e0e0'
               }}>
-                <div style={{
-                  fontSize: '14px',
-                  color: 'var(--text-secondary)',
-                  marginBottom: '4px'
-                }}>
-                  Match Score (Sets Won):
-                </div>
+                                 <div style={{
+                   fontSize: '14px',
+                   color: 'var(--text-secondary)',
+                   marginBottom: '4px'
+                 }}>
+                   Match Score (Total Games Won):
+                 </div>
                 <div style={{
                   fontSize: '18px',
                   fontWeight: '600',

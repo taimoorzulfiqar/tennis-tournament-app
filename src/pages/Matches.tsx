@@ -155,7 +155,7 @@ const Matches: React.FC = () => {
         
         {matches && matches.length > 0 ? (
           <div style={{ display: 'grid', gap: '20px', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))' }}>
-            {matches.map((match) => (
+            {matches.map((match, index) => (
               <div key={match.id} className="card" style={{
                 transition: 'box-shadow 0.2s ease',
                 cursor: 'pointer'
@@ -165,7 +165,7 @@ const Matches: React.FC = () => {
               >
                 <div className="card-header">
                   <h3 style={{ fontSize: '18px', fontWeight: 'bold', color: 'var(--text-primary)', margin: 0 }}>
-                    {getPlayerName(match.player1_id)} vs {getPlayerName(match.player2_id)}
+                    Match {index + 1}
                   </h3>
                   <span style={{
                     padding: '4px 12px',
