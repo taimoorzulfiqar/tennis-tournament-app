@@ -1,6 +1,7 @@
 import React from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
+import Logo from './Logo'
 
 interface LayoutProps {
   children: React.ReactNode
@@ -48,14 +49,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           maxWidth: '1200px',
           margin: '0 auto'
         }}>
-          <div className="logo">
-            <div className="logo-icon">
-              🎾
-            </div>
-            <div className="logo-text">
-              Expert Tennis Academy
-            </div>
-          </div>
+          <Logo size="medium" />
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
             <span style={{ fontSize: '14px' }}>
               Welcome, {user?.full_name || user?.email}

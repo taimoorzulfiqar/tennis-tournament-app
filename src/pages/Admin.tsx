@@ -106,20 +106,13 @@ const Admin: React.FC = () => {
   }
 
   const handleVerificationUpdate = (userId: string, currentStatus: string, userEmail: string) => {
-    let newStatus: 'pending' | 'approved' | 'rejected'
-    
+    // Only allow approving pending admins
     if (currentStatus === 'pending') {
-      newStatus = 'approved'
-    } else if (currentStatus === 'approved') {
-      newStatus = 'rejected'
+      if (confirm(`Are you sure you want to approve ${userEmail}?`)) {
+        updateVerificationMutation.mutate({ userId, status: 'approved' })
+      }
     } else {
-      newStatus = 'approved'
-    }
-
-    const action = newStatus === 'approved' ? 'approve' : newStatus === 'rejected' ? 'reject' : 'set to pending'
-    
-    if (confirm(`Are you sure you want to ${action} ${userEmail}?`)) {
-      updateVerificationMutation.mutate({ userId, status: newStatus })
+      alert('Approved admins can only be deleted, not rejected.')
     }
   }
 
@@ -277,14 +270,6 @@ const Admin: React.FC = () => {
                     >
                       ✅ Approve
                     </button>
-                    <button
-                      onClick={() => updateVerificationMutation.mutate({ userId: userItem.id, status: 'rejected' })}
-                      className="btn btn-secondary"
-                      style={{ padding: '8px 16px', fontSize: '12px' }}
-                      disabled={updateVerificationMutation.isPending}
-                    >
-                      ❌ Reject
-                    </button>
                   </div>
                 </div>
               ))}
@@ -349,16 +334,6 @@ const Admin: React.FC = () => {
                     </span>
                     {user?.role === 'master' && userItem.id !== user.id && (
                       <div style={{ display: 'flex', gap: '4px' }}>
-                        {userItem.role === 'admin' && userItem.verification_status !== 'pending' && (
-                          <button
-                            onClick={() => handleVerificationUpdate(userItem.id, userItem.verification_status, userItem.email)}
-                            className="btn btn-secondary"
-                            style={{ padding: '6px 10px', fontSize: '11px' }}
-                            disabled={updateVerificationMutation.isPending}
-                          >
-                            {userItem.verification_status === 'approved' ? '❌' : '✅'}
-                          </button>
-                        )}
                         <button
                           onClick={() => handleDeleteUser(userItem.id, userItem.email)}
                           className="btn btn-secondary"

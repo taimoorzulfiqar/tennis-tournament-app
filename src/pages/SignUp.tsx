@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
+import Logo from '../components/Logo'
 
 const SignUp: React.FC = () => {
   const [email, setEmail] = useState('')
@@ -42,13 +43,8 @@ const SignUp: React.FC = () => {
         maxWidth: '400px'
       }}>
         <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-          <div className="logo" style={{ marginBottom: '20px', justifyContent: 'center' }}>
-            <div className="logo-icon" style={{ width: '60px', height: '60px', fontSize: '30px' }}>
-              🎾
-            </div>
-            <div className="logo-text" style={{ fontSize: '24px' }}>
-              Expert Tennis Academy
-            </div>
+          <div style={{ marginBottom: '20px' }}>
+            <Logo size="large" />
           </div>
           <h1 style={{
             fontSize: '28px',

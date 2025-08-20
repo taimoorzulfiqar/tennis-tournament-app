@@ -3,6 +3,8 @@ import { useAuth } from './hooks/useAuth'
 import SignIn from './pages/SignIn'
 import SignUp from './pages/SignUp'
 import Dashboard from './pages/Dashboard'
+import CreateTournament from './pages/CreateTournament'
+import TournamentDetails from './pages/TournamentDetails'
 import Leaderboard from './pages/Leaderboard'
 import Matches from './pages/Matches'
 import Profile from './pages/Profile'
@@ -29,6 +31,8 @@ function App() {
   return (
     <Routes>
       <Route path="/" element={<Dashboard />} />
+      <Route path="/create-tournament" element={<CreateTournament />} />
+      <Route path="/tournament/:id" element={<TournamentDetails />} />
       <Route path="/leaderboard" element={<Leaderboard />} />
       <Route path="/matches" element={<Matches />} />
       <Route path="/profile" element={<Profile />} />

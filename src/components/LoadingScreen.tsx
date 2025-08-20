@@ -1,4 +1,5 @@
 import React from 'react'
+import Logo from './Logo'
 
 const LoadingScreen: React.FC = () => {
   return (
@@ -12,13 +13,8 @@ const LoadingScreen: React.FC = () => {
       fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
     }}>
       <div style={{ textAlign: 'center' }}>
-        <div className="logo" style={{ marginBottom: '32px', justifyContent: 'center' }}>
-          <div className="logo-icon" style={{ width: '60px', height: '60px', fontSize: '30px' }}>
-            🎾
-          </div>
-          <div className="logo-text" style={{ fontSize: '28px' }}>
-            Expert Tennis Academy
-          </div>
+        <div style={{ marginBottom: '32px' }}>
+          <Logo size="large" />
         </div>
         <div className="spinner" style={{ margin: '0 auto 20px' }}></div>
         <p style={{ margin: 0, opacity: 0.8, fontSize: '16px' }}>Loading...</p>
