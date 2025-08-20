@@ -29,7 +29,7 @@ const SignIn: React.FC = () => {
       alignItems: 'center',
       justifyContent: 'center',
       padding: '20px',
-      background: 'linear-gradient(135deg, #2E7D32 0%, #4CAF50 100%)'
+      background: 'linear-gradient(135deg, var(--dark-bg) 0%, #1a1a1a 100%)'
     }}>
       <div style={{
         background: 'white',
@@ -40,23 +40,18 @@ const SignIn: React.FC = () => {
         maxWidth: '400px'
       }}>
         <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-          <div style={{
-            width: '80px',
-            height: '80px',
-            borderRadius: '50%',
-            backgroundColor: '#E8F5E8',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            margin: '0 auto 20px',
-            fontSize: '40px'
-          }}>
-            🎾
+          <div className="logo" style={{ marginBottom: '20px', justifyContent: 'center' }}>
+            <div className="logo-icon" style={{ width: '60px', height: '60px', fontSize: '30px' }}>
+              🎾
+            </div>
+            <div className="logo-text" style={{ fontSize: '24px' }}>
+              Expert Tennis Academy
+            </div>
           </div>
           <h1 style={{
             fontSize: '28px',
             fontWeight: 'bold',
-            color: '#2E7D32',
+            color: 'var(--primary-color)',
             marginBottom: '8px'
           }}>
             Welcome Back
@@ -65,7 +60,7 @@ const SignIn: React.FC = () => {
             fontSize: '16px',
             color: '#666'
           }}>
-            Sign in to your tennis tournament account
+            Sign in to your tennis academy account
           </p>
         </div>
 
@@ -109,7 +104,7 @@ const SignIn: React.FC = () => {
             Don't have an account?
           </p>
           <Link to="/sign-up" style={{
-            color: '#2E7D32',
+            color: 'var(--primary-color)',
             textDecoration: 'none',
             fontWeight: '600'
           }}>

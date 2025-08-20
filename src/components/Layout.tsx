@@ -36,10 +36,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       {/* Header */}
       <header style={{
-        backgroundColor: '#2E7D32',
+        background: 'linear-gradient(135deg, var(--dark-bg) 0%, #1a1a1a 100%)',
         color: 'white',
         padding: '16px 24px',
-        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
+        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)'
       }}>
         <div style={{
           display: 'flex',
@@ -48,11 +48,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           maxWidth: '1200px',
           margin: '0 auto'
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <span style={{ fontSize: '24px' }}>🎾</span>
-            <h1 style={{ fontSize: '20px', fontWeight: 'bold', margin: 0 }}>
-              Tennis Tournament App
-            </h1>
+          <div className="logo">
+            <div className="logo-icon">
+              🎾
+            </div>
+            <div className="logo-text">
+              Expert Tennis Academy
+            </div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
             <span style={{ fontSize: '14px' }}>
@@ -93,8 +95,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 gap: '8px',
                 padding: '16px 20px',
                 textDecoration: 'none',
-                color: location.pathname === item.path ? '#2E7D32' : '#666',
-                borderBottom: location.pathname === item.path ? '3px solid #2E7D32' : '3px solid transparent',
+                color: location.pathname === item.path ? 'var(--primary-color)' : '#666',
+                borderBottom: location.pathname === item.path ? '3px solid var(--primary-color)' : '3px solid transparent',
                 fontWeight: location.pathname === item.path ? '600' : '400',
                 whiteSpace: 'nowrap'
               }}

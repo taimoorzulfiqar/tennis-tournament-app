@@ -41,8 +41,8 @@ const Dashboard: React.FC = () => {
     const now = new Date()
 
     if (endDate && now > endDate) return '#f44336' // Red for completed
-    if (now >= startDate) return '#4caf50' // Green for active
-    return '#ff9800' // Orange for upcoming
+    if (now >= startDate) return 'var(--primary-color)' // Green for active
+    return 'var(--accent-color)' // Gold for upcoming
   }
 
   const getStatusText = (tournament: Tournament) => {
@@ -70,8 +70,8 @@ const Dashboard: React.FC = () => {
     <Layout>
       <div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-          <h1 style={{ fontSize: '32px', fontWeight: 'bold', color: '#2E7D32', margin: 0 }}>
-            Tournaments
+          <h1 style={{ fontSize: '32px', fontWeight: 'bold', color: 'var(--primary-color)', margin: 0 }}>
+            Academy Tournaments
           </h1>
           {(user?.role === 'admin' || user?.role === 'master') && (
             <button
@@ -88,7 +88,7 @@ const Dashboard: React.FC = () => {
             {tournaments.map((tournament) => (
               <div key={tournament.id} className="card">
                 <div className="card-header">
-                  <h3 style={{ fontSize: '20px', fontWeight: 'bold', color: '#2E7D32', margin: 0 }}>
+                  <h3 style={{ fontSize: '20px', fontWeight: 'bold', color: 'var(--primary-color)', margin: 0 }}>
                     {tournament.name}
                   </h3>
                   <span style={{
@@ -135,7 +135,7 @@ const Dashboard: React.FC = () => {
             </h2>
             <p style={{ color: '#999', marginBottom: '24px' }}>
               {user?.role === 'admin' || user?.role === 'master' 
-                ? 'Create your first tournament to get started!'
+                ? 'Create your first academy tournament to get started!'
                 : 'Check back later for upcoming tournaments.'
               }
             </p>
@@ -174,7 +174,7 @@ const Dashboard: React.FC = () => {
             maxHeight: '90vh',
             overflowY: 'auto'
           }}>
-            <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '24px', color: '#2E7D32' }}>
+            <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '24px', color: 'var(--primary-color)' }}>
               Create New Tournament
             </h2>
 

@@ -1,20 +1,20 @@
-# Tennis Tournament App
+# Expert Tennis Academy
 
-A modern web application for organizing and managing tennis tournaments. Built with React, TypeScript, Vite, and Supabase.
+A modern web application for managing tennis academy tournaments and player development. Built with React, TypeScript, Vite, and Supabase.
 
 ## Features
 
 - **User Management**: Master, Admin, and Player roles with different permissions
-- **Tournament Management**: Create and manage tournaments with dates and descriptions
+- **Tournament Management**: Create and manage academy tournaments with dates and descriptions
 - **Match Tracking**: Schedule matches, track scores, and determine winners
 - **Leaderboards**: Real-time rankings based on games won
 - **Responsive Design**: Works on desktop, tablet, and mobile devices
-- **Modern UI**: Clean, tennis-themed interface with smooth animations
+- **Modern UI**: Clean, professional interface with Expert Tennis Academy branding
 
 ## Tech Stack
 
 - **Frontend**: React 18, TypeScript, Vite
-- **Styling**: CSS with custom tennis theme
+- **Styling**: CSS with Expert Tennis Academy theme (lime green and purple)
 - **State Management**: Zustand + React Query
 - **Backend**: Supabase (PostgreSQL, Auth, Row Level Security)
 - **Deployment**: Vercel
@@ -32,7 +32,7 @@ A modern web application for organizing and managing tennis tournaments. Built w
 1. Clone the repository:
 ```bash
 git clone <repository-url>
-cd tennis-tournament-app
+cd expert-tennis-academy
 ```
 
 2. Install dependencies:
