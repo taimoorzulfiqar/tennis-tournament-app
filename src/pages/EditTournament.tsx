@@ -15,6 +15,7 @@ interface Match {
   start_time: string
   player1_score: number
   player2_score: number
+  is_completed: boolean
 }
 
 const EditTournament: React.FC = () => {

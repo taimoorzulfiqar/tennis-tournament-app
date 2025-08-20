@@ -1,9 +1,15 @@
-import React from 'react'
+import React, { useState } from 'react'
 import Layout from '../components/Layout'
 import { useQuery } from '@tanstack/react-query'
 import { matchAPI, userAPI } from '../lib/api'
+import EditMatchModal from '../components/EditMatchModal'
+import { useAuth } from '../hooks/useAuth'
 
 const Matches: React.FC = () => {
+  const { user } = useAuth()
+  const [selectedMatch, setSelectedMatch] = useState<any>(null)
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+
   const { data: matches, isLoading: matchesLoading } = useQuery({
     queryKey: ['matches'],
     queryFn: () => matchAPI.getMatches(),
@@ -20,6 +26,16 @@ const Matches: React.FC = () => {
   const getPlayerName = (playerId: string) => {
     const player = players?.find(p => p.id === playerId)
     return player?.full_name || player?.email || 'Unknown Player'
+  }
+
+  const handleEditMatch = (match: any) => {
+    setSelectedMatch(match)
+    setIsEditModalOpen(true)
+  }
+
+  const handleCloseEditModal = () => {
+    setIsEditModalOpen(false)
+    setSelectedMatch(null)
   }
 
   if (matchesLoading || playersLoading) {
@@ -104,6 +120,18 @@ const Matches: React.FC = () => {
                     🏆 Winner: {getPlayerName(match.winner_id)}
                   </p>
                 )}
+
+                {(user?.role === 'admin' || user?.role === 'master') && (
+                  <div style={{ marginTop: '16px', textAlign: 'center' }}>
+                    <button
+                      onClick={() => handleEditMatch(match)}
+                      className="btn btn-secondary"
+                      style={{ padding: '8px 16px', fontSize: '14px' }}
+                    >
+                      ✏️ Edit Match
+                    </button>
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -119,6 +147,17 @@ const Matches: React.FC = () => {
           </div>
         )}
       </div>
+
+      {selectedMatch && (
+        <EditMatchModal
+          match={selectedMatch}
+          isOpen={isEditModalOpen}
+          onClose={handleCloseEditModal}
+          onSuccess={() => {
+            // The modal will handle cache invalidation
+          }}
+        />
+      )}
     </Layout>
   )
 }

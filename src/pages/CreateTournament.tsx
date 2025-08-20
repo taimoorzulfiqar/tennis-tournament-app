@@ -14,6 +14,7 @@ interface Match {
   start_time: string
   player1_score: number
   player2_score: number
+  is_completed: boolean
 }
 
 const CreateTournament: React.FC = () => {
@@ -35,7 +36,8 @@ const CreateTournament: React.FC = () => {
       court: '',
       start_time: '',
       player1_score: 0,
-      player2_score: 0
+      player2_score: 0,
+      is_completed: false
     }
   ])
 
@@ -79,6 +81,16 @@ const CreateTournament: React.FC = () => {
           player1_score: match.player1_score || 0,
           player2_score: match.player2_score || 0
         })
+
+        // If match is marked as completed, update its status
+        if (match.is_completed) {
+          // We need to get the created match and update its status
+          const createdMatches = await matchAPI.getMatches(createdTournament.id)
+          const lastCreatedMatch = createdMatches[createdMatches.length - 1]
+          if (lastCreatedMatch) {
+            await matchAPI.updateMatchStatus(lastCreatedMatch.id!, 'completed')
+          }
+        }
       }
       
       return createdTournament
@@ -125,7 +137,8 @@ const CreateTournament: React.FC = () => {
       court: '',
       start_time: '',
       player1_score: 0,
-      player2_score: 0
+      player2_score: 0,
+      is_completed: false
     }])
   }
 
@@ -365,6 +378,20 @@ const CreateTournament: React.FC = () => {
                       min="0"
                     />
                   </div>
+                </div>
+
+                <div style={{ marginTop: '16px' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                    <input
+                      type="checkbox"
+                      checked={match.is_completed}
+                      onChange={(e) => updateMatch(index, 'is_completed', e.target.checked)}
+                      style={{ width: '16px', height: '16px' }}
+                    />
+                    <span style={{ fontSize: '14px', color: '#666' }}>
+                      Mark this match as completed
+                    </span>
+                  </label>
                 </div>
               </div>
             ))}
