@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react'
 import { useUsers } from '../hooks/useUsers'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { matchAPI } from '../lib/api'
 import { User, Match } from '../types'
 import Layout from '../components/Layout'
@@ -18,6 +18,7 @@ interface PlayerStats {
 
 const Players: React.FC = () => {
   const { users, isLoading: usersLoading } = useUsers()
+  const queryClient = useQueryClient()
   const [searchTerm, setSearchTerm] = useState('')
   const [sortBy, setSortBy] = useState<'name' | 'matches' | 'wins' | 'winPercentage'>('name')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
@@ -26,10 +27,16 @@ const Players: React.FC = () => {
   const { data: matches = [], isLoading: matchesLoading } = useQuery({
     queryKey: ['matches'],
     queryFn: () => matchAPI.getMatches(),
+    refetchOnWindowFocus: true,
+    staleTime: 0, // Always consider data stale to ensure fresh data
   })
 
   // Calculate player stats
   const playerStats = useMemo((): PlayerStats[] => {
+    console.log('Calculating player stats...')
+    console.log('Users:', users)
+    console.log('Matches:', matches)
+    
     const statsMap = new Map<string, PlayerStats>()
 
     // Initialize stats for all players
@@ -50,7 +57,9 @@ const Players: React.FC = () => {
 
     // Calculate stats from matches
     matches.forEach(match => {
+      console.log('Processing match:', match)
       if (match.status === 'completed' && match.winner_id) {
+        console.log('Match is completed with winner:', match.winner_id)
         const player1Stats = statsMap.get(match.player1_id)
         const player2Stats = statsMap.get(match.player2_id)
 
@@ -89,7 +98,9 @@ const Players: React.FC = () => {
       }
     })
 
-    return Array.from(statsMap.values())
+    const result = Array.from(statsMap.values())
+    console.log('Calculated player stats:', result)
+    return result
   }, [users, matches])
 
   // Filter and sort players
@@ -154,6 +165,11 @@ const Players: React.FC = () => {
     return sortOrder === 'asc' ? '↑' : '↓'
   }
 
+  const handleRefresh = () => {
+    queryClient.invalidateQueries({ queryKey: ['matches'] })
+    queryClient.invalidateQueries({ queryKey: ['users'] })
+  }
+
   if (usersLoading || matchesLoading) {
     return (
       <Layout>
@@ -215,29 +231,45 @@ const Players: React.FC = () => {
                 }}
               />
             </div>
-            <div style={{
-              display: 'flex',
-              gap: '8px',
-              alignItems: 'center'
-            }}>
-              <span style={{ fontSize: '14px', color: '#666' }}>Sort by:</span>
-              <select
-                value={sortBy}
-                onChange={(e) => handleSort(e.target.value as typeof sortBy)}
-                style={{
-                  padding: '8px 12px',
-                  border: '1px solid #ddd',
-                  borderRadius: '6px',
-                  fontSize: '14px',
-                  outline: 'none'
-                }}
-              >
-                <option value="name">Name</option>
-                <option value="matches">Matches Played</option>
-                <option value="wins">Wins</option>
-                <option value="winPercentage">Win %</option>
-              </select>
-            </div>
+                         <div style={{
+               display: 'flex',
+               gap: '8px',
+               alignItems: 'center'
+             }}>
+               <span style={{ fontSize: '14px', color: '#666' }}>Sort by:</span>
+               <select
+                 value={sortBy}
+                 onChange={(e) => handleSort(e.target.value as typeof sortBy)}
+                 style={{
+                   padding: '8px 12px',
+                   border: '1px solid #ddd',
+                   borderRadius: '6px',
+                   fontSize: '14px',
+                   outline: 'none'
+                 }}
+               >
+                 <option value="name">Name</option>
+                 <option value="matches">Matches Played</option>
+                 <option value="wins">Wins</option>
+                 <option value="winPercentage">Win %</option>
+               </select>
+               <button
+                 onClick={handleRefresh}
+                 style={{
+                   padding: '8px 12px',
+                   border: '1px solid #ddd',
+                   borderRadius: '6px',
+                   fontSize: '14px',
+                   backgroundColor: '#f8f9fa',
+                   cursor: 'pointer',
+                   display: 'flex',
+                   alignItems: 'center',
+                   gap: '4px'
+                 }}
+               >
+                 🔄 Refresh
+               </button>
+             </div>
           </div>
 
           {/* Summary Stats */}
