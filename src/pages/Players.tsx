@@ -4,6 +4,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { matchAPI } from '../lib/api'
 import { User, Match } from '../types'
 import Layout from '../components/Layout'
+import { supabase } from '../lib/supabase'
 
 interface PlayerStats {
   player: User
@@ -55,13 +56,16 @@ const Players: React.FC = () => {
       }
     })
 
-    // Calculate stats from matches
-    matches.forEach(match => {
-      console.log('Processing match:', match)
-      if (match.status === 'completed' && match.winner_id) {
-        console.log('Match is completed with winner:', match.winner_id)
-        const player1Stats = statsMap.get(match.player1_id)
-        const player2Stats = statsMap.get(match.player2_id)
+         // Calculate stats from matches
+     matches.forEach(match => {
+       console.log('Processing match:', match)
+       console.log('Match scores - Player1:', match.player1_score, 'Player2:', match.player2_score)
+       console.log('Match status:', match.status, 'Winner ID:', match.winner_id)
+       
+       if (match.status === 'completed' && match.winner_id) {
+         console.log('Match is completed with winner:', match.winner_id)
+         const player1Stats = statsMap.get(match.player1_id)
+         const player2Stats = statsMap.get(match.player2_id)
 
         if (player1Stats) {
           player1Stats.matchesPlayed++
@@ -170,6 +174,80 @@ const Players: React.FC = () => {
     queryClient.invalidateQueries({ queryKey: ['users'] })
   }
 
+  // Function to manually fix matches without winner_id
+  const handleFixMatches = async () => {
+    try {
+      console.log('Fixing matches without winner_id...')
+      
+      // Get all completed matches without winner_id
+      const { data: matchesToFix, error } = await supabase
+        .from('matches')
+        .select('*')
+        .eq('status', 'completed')
+        .is('winner_id', null)
+      
+      if (error) {
+        console.error('Error fetching matches to fix:', error)
+        return
+      }
+      
+      console.log('Matches to fix:', matchesToFix)
+      
+      // Fix each match
+      for (const match of matchesToFix) {
+        const winnerId = match.player1_score > match.player2_score 
+          ? match.player1_id 
+          : match.player2_id
+        
+        const { error: updateError } = await supabase
+          .from('matches')
+          .update({ winner_id: winnerId })
+          .eq('id', match.id)
+        
+        if (updateError) {
+          console.error('Error fixing match:', match.id, updateError)
+        } else {
+          console.log('Fixed match:', match.id, 'winner:', winnerId)
+        }
+      }
+      
+      // Refresh data
+      handleRefresh()
+    } catch (error) {
+      console.error('Error fixing matches:', error)
+    }
+  }
+
+  // Function to show all matches in database for debugging
+  const handleShowAllMatches = async () => {
+    try {
+      console.log('Fetching all matches from database...')
+      
+      const { data: allMatches, error } = await supabase
+        .from('matches')
+        .select('*')
+        .order('created_at', { ascending: false })
+      
+      if (error) {
+        console.error('Error fetching all matches:', error)
+        return
+      }
+      
+      console.log('All matches in database:', allMatches)
+      
+      // Show completed matches separately
+      const completedMatches = allMatches.filter(m => m.status === 'completed')
+      console.log('Completed matches:', completedMatches)
+      
+      // Show matches without winner_id
+      const matchesWithoutWinner = allMatches.filter(m => m.status === 'completed' && !m.winner_id)
+      console.log('Completed matches without winner_id:', matchesWithoutWinner)
+      
+    } catch (error) {
+      console.error('Error showing all matches:', error)
+    }
+  }
+
   if (usersLoading || matchesLoading) {
     return (
       <Layout>
@@ -269,6 +347,40 @@ const Players: React.FC = () => {
                >
                  🔄 Refresh
                </button>
+                               <button
+                  onClick={handleFixMatches}
+                  style={{
+                    padding: '8px 12px',
+                    border: '1px solid #ddd',
+                    borderRadius: '6px',
+                    fontSize: '14px',
+                    backgroundColor: '#ff980020',
+                    color: '#ff9800',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}
+                >
+                  🔧 Fix Matches
+                </button>
+                <button
+                  onClick={handleShowAllMatches}
+                  style={{
+                    padding: '8px 12px',
+                    border: '1px solid #ddd',
+                    borderRadius: '6px',
+                    fontSize: '14px',
+                    backgroundColor: '#007bff20',
+                    color: '#007bff',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}
+                >
+                  📊 Show All Matches
+                </button>
              </div>
           </div>
 

@@ -54,12 +54,29 @@ const EditMatchModal: React.FC<EditMatchModalProps> = ({ match, isOpen, onClose,
         scheduled_time: new Date(formData.scheduled_time).toISOString()
       }
 
-      // Update match details
-      await matchAPI.updateMatch(match.id, updates)
+      // If status is being set to completed, use updateMatchScore to set winner_id
+      if (formData.status === 'completed') {
+        await matchAPI.updateMatchScore(match.id, {
+          player1_score: formData.player1_score,
+          player2_score: formData.player2_score
+        })
+        // Update other fields separately
+        await matchAPI.updateMatch(match.id, {
+          court: formData.court,
+          scheduled_time: new Date(formData.scheduled_time).toISOString(),
+          player1_id: match.player1_id,
+          player2_id: match.player2_id,
+          player1_score: formData.player1_score,
+          player2_score: formData.player2_score
+        })
+      } else {
+        // Update match details normally
+        await matchAPI.updateMatch(match.id, updates)
 
-      // Update status if changed
-      if (formData.status !== match.status) {
-        await matchAPI.updateMatchStatus(match.id, formData.status as 'scheduled' | 'in_progress' | 'completed')
+        // Update status if changed
+        if (formData.status !== match.status) {
+          await matchAPI.updateMatchStatus(match.id, formData.status as 'scheduled' | 'in_progress' | 'completed')
+        }
       }
     },
     onSuccess: () => {
