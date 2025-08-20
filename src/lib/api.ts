@@ -178,7 +178,7 @@ export const matchAPI = {
     let query = supabase
       .from('matches')
       .select('*')
-      .order('start_time', { ascending: true })
+      .order('scheduled_time', { ascending: true })
 
     if (tournamentId) {
       query = query.eq('tournament_id', tournamentId)

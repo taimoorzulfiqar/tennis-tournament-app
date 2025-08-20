@@ -65,6 +65,9 @@ const CreateTournament: React.FC = () => {
       
       // Then create all matches for the tournament
       for (const match of matches) {
+        // Ensure scheduled_time is properly formatted
+        const scheduledTime = new Date(match.start_time).toISOString()
+        
         await matchAPI.createMatch({
           tournament_id: createdTournament.id,
           player1_id: match.player1_id,
@@ -72,7 +75,7 @@ const CreateTournament: React.FC = () => {
           games_per_set: match.games_per_set || 6,
           sets_per_match: match.sets_per_match || 3,
           court: match.court,
-          scheduled_time: match.start_time,
+          scheduled_time: scheduledTime,
           player1_score: match.player1_score || 0,
           player2_score: match.player2_score || 0
         })

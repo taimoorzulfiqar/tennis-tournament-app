@@ -118,9 +118,15 @@ const EditTournament: React.FC = () => {
             matchUpdates.sets_per_match = match.sets_per_match
           }
           
+          // Ensure scheduled_time is properly formatted
+          matchUpdates.scheduled_time = new Date(match.start_time).toISOString()
+          
           await matchAPI.updateMatch(match.id, matchUpdates)
         } else {
           // Create new match
+          // Ensure scheduled_time is properly formatted
+          const scheduledTime = new Date(match.start_time).toISOString()
+          
           await matchAPI.createMatch({
             tournament_id: id!,
             player1_id: match.player1_id,
@@ -128,7 +134,7 @@ const EditTournament: React.FC = () => {
             games_per_set: match.games_per_set || 6,
             sets_per_match: match.sets_per_match || 3,
             court: match.court,
-            scheduled_time: match.start_time,
+            scheduled_time: scheduledTime,
             player1_score: match.player1_score,
             player2_score: match.player2_score
           })
